@@ -1,0 +1,175 @@
+[
+  {
+    "invoice_id": "INV-2026-001",
+    "vendor_name": "CloudOps Technologies Pvt Ltd",
+    "department": "Engineering",
+    "category": "Cloud Infrastructure",
+    "invoice_date": "2026-08-15",
+    "due_date": "2026-08-30",
+    "subtotal": 85000.0,
+    "tax_gst": 15300.0,
+    "total_amount": 100300.0,
+    "currency": "INR",
+    "status": "approved",
+    "requires_hitl": true,
+    "po_number": "PO-ENG-8812",
+    "items": [
+      {
+        "description": "AWS Production Cluster Managed Kubernetes Hosting",
+        "quantity": 1,
+        "unit_price": 85000.0,
+        "amount": 85000.0
+      }
+    ],
+    "decided_by_id": "usr_cfo_001",
+    "decided_by_name": "Vikramaditya Singhania",
+    "decision_comments": "Authorized by Vikramaditya Singhania (CFO)"
+  },
+  {
+    "invoice_id": "INV-2026-002",
+    "vendor_name": "Meta Ads & Social Media Direct",
+    "department": "Marketing",
+    "category": "Digital Ads",
+    "invoice_date": "2026-08-20",
+    "due_date": "2026-09-05",
+    "subtotal": 35000.0,
+    "tax_gst": 6300.0,
+    "total_amount": 41300.0,
+    "currency": "INR",
+    "status": "approved",
+    "requires_hitl": false,
+    "po_number": "PO-MKT-4419",
+    "items": [
+      {
+        "description": "Lead Generation Campaign Aug 2026",
+        "quantity": 1,
+        "unit_price": 35000.0,
+        "amount": 35000.0
+      }
+    ]
+  },
+  {
+    "invoice_id": "INV-2026-003",
+    "vendor_name": "Apex Legal Consultants LLP",
+    "department": "Operations",
+    "category": "Legal & Compliance",
+    "invoice_date": "2026-08-22",
+    "due_date": "2026-09-10",
+    "subtotal": 60000.0,
+    "tax_gst": 10800.0,
+    "total_amount": 70800.0,
+    "currency": "INR",
+    "status": "approved",
+    "requires_hitl": true,
+    "po_number": "PO-OPS-1102",
+    "items": [
+      {
+        "description": "Q3 Corporate Tax & Compliance Review",
+        "quantity": 1,
+        "unit_price": 60000.0,
+        "amount": 60000.0
+      }
+    ],
+    "decided_by_id": "usr_cfo_001",
+    "decided_by_name": "Vikramaditya Singhania",
+    "decision_comments": "Authorized by Vikramaditya Singhania (CFO)"
+  },
+  {
+    "vendor_name": "CloudOps Technologies Pvt Ltd",
+    "department": "Engineering",
+    "category": "Cloud Infrastructure",
+    "subtotal": 85000.0,
+    "tax_gst": 15300.0,
+    "total_amount": 100300.0,
+    "po_number": "PO-4183",
+    "description": "",
+    "items": [],
+    "status": "approved",
+    "requires_hitl": true,
+    "audit_flags": [
+      "Potential Duplicate: Invoice matches previous invoice INV-2026-001 for CloudOps Technologies Pvt Ltd with exact amount \u20b9100300.0.",
+      "HITL Required: Amount \u20b9100,300.00 exceeds autonomous threshold of \u20b950,000.00."
+    ],
+    "submitted_by_id": "usr_fm_002",
+    "submitted_by_name": "Rahul Sharma",
+    "submitted_by_role": "FINANCE_MANAGER",
+    "invoice_id": "INV-2026-2754",
+    "decided_by_id": "usr_cfo_001",
+    "decided_by_name": "Vikramaditya Singhania",
+    "decision_comments": "Authorized by Vikramaditya Singhania (CFO)"
+  },
+  {
+    "invoice_id": "INV-2026-004",
+    "vendor_name": "Amazon Web Services India",
+    "department": "Engineering",
+    "category": "Cloud Infrastructure",
+    "invoice_date": "2026-08-23",
+    "due_date": "2026-09-08",
+    "subtotal": 125000.0,
+    "tax_gst": 22500.0,
+    "total_amount": 147500.0,
+    "currency": "INR",
+    "status": "pending_approval",
+    "requires_hitl": true,
+    "po_number": "PO-ENG-9042",
+    "items": [
+      {
+        "description": "EC2 Compute Savings Plans Reservation (1 Year)",
+        "quantity": 1,
+        "unit_price": 125000.0,
+        "amount": 125000.0
+      }
+    ],
+    "submitted_by_id": "usr_dh_003",
+    "submitted_by_name": "Priya Verma",
+    "submitted_by_role": "DEPARTMENT_HEAD"
+  },
+  {
+    "invoice_id": "INV-2026-005",
+    "vendor_name": "Google India Pvt Ltd",
+    "department": "Marketing",
+    "category": "Digital Ads",
+    "invoice_date": "2026-08-23",
+    "due_date": "2026-09-07",
+    "subtotal": 75000.0,
+    "tax_gst": 13500.0,
+    "total_amount": 88500.0,
+    "currency": "INR",
+    "status": "pending_approval",
+    "requires_hitl": true,
+    "po_number": "PO-MKT-3318",
+    "items": [
+      {
+        "description": "Google Search & Performance Max Campaign (Aug)",
+        "quantity": 1,
+        "unit_price": 75000.0,
+        "amount": 75000.0
+      }
+    ],
+    "submitted_by_id": "usr_fm_002",
+    "submitted_by_name": "Rahul Sharma",
+    "submitted_by_role": "FINANCE_MANAGER"
+  },
+  {
+    "vendor_name": "CloudOps Technologies Pvt Ltd",
+    "department": "Engineering",
+    "category": "Cloud Infrastructure",
+    "subtotal": 85000.0,
+    "tax_gst": 15300.0,
+    "total_amount": 100300.0,
+    "po_number": "PO-9778",
+    "description": "",
+    "items": [],
+    "status": "pending_approval",
+    "requires_hitl": true,
+    "audit_flags": [
+      "Potential Duplicate: Invoice matches previous invoice INV-2026-001 for CloudOps Technologies Pvt Ltd with exact amount \u20b9100300.0.",
+      "Potential Duplicate: Invoice matches previous invoice INV-2026-2754 for CloudOps Technologies Pvt Ltd with exact amount \u20b9100300.0.",
+      "HITL Required: Amount \u20b9100,300.00 exceeds autonomous threshold of \u20b950,000.00."
+    ],
+    "submitted_by_id": "usr_cfo_001",
+    "submitted_by_name": "Vikramaditya Singhania",
+    "submitted_by_role": "CFO",
+    "invoice_id": "INV-2026-A769"
+  }
+]

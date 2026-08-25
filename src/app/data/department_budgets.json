@@ -1,0 +1,62 @@
+{
+  "fiscal_year": "2026-2027",
+  "currency": "INR",
+  "departments": {
+    "Engineering": {
+      "allocated_budget": 5260000.0,
+      "spent_amount": 2050600.0,
+      "pending_approvals": 0.0,
+      "manager": "Rahul Sharma",
+      "categories": {
+        "Cloud Infrastructure": 2500000.0,
+        "Software Subscriptions": 1000000.0,
+        "Hardware & Equipment": 1000000.0,
+        "Team & Training": 500000.0
+      }
+    },
+    "Marketing": {
+      "allocated_budget": 2990000.0,
+      "spent_amount": 1420000.0,
+      "pending_approvals": 75000.0,
+      "manager": "Priya Verma",
+      "categories": {
+        "Digital Ads": 1800000.0,
+        "Content & Production": 600000.0,
+        "Events & Sponsorships": 600000.0
+      }
+    },
+    "Sales": {
+      "allocated_budget": 2500000.0,
+      "spent_amount": 920000.0,
+      "pending_approvals": 45000.0,
+      "manager": "Amanpreet Singh",
+      "categories": {
+        "Client Entertainment & Travel": 1200000.0,
+        "CRM & Sales Tools": 800000.0,
+        "Incentives": 500000.0
+      }
+    },
+    "Operations": {
+      "allocated_budget": 1750000.0,
+      "spent_amount": 750800.0,
+      "pending_approvals": 0.0,
+      "manager": "Gurpreet Kaur",
+      "categories": {
+        "Logistics & Freight": 1000000.0,
+        "Office & Utilities": 600000.0,
+        "Legal & Compliance": 400000.0
+      }
+    },
+    "HR": {
+      "allocated_budget": 1500000.0,
+      "spent_amount": 410000.0,
+      "pending_approvals": 15000.0,
+      "manager": "Simran Johal",
+      "categories": {
+        "Recruitment": 700000.0,
+        "Employee Welfare": 500000.0,
+        "Health & Insurance": 300000.0
+      }
+    }
+  }
+}
