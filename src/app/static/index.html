@@ -1253,6 +1253,15 @@
                 <tbody id="taxReportingTableBody" class="divide-y divide-white/5 text-slate-300"></tbody>
               </table>
             </div>
+
+            <!-- Tax Load More Pagination Bar -->
+            <div id="taxLoadMoreContainer" class="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+              <span id="taxPaginationInfo" class="text-slate-400">Showing <strong class="text-white mono" id="taxVisibleCount">0</strong> of <strong class="text-white mono" id="taxTotalCount">0</strong> records</span>
+              <button id="btnLoadMoreTax" onclick="loadMoreTaxRecords()" class="btn-smooth bg-[#071426] hover:bg-[#0F1D32] text-blue-400 hover:text-blue-300 font-semibold px-4 py-2 rounded-xl border border-blue-500/30 text-xs flex items-center gap-1.5 transition">
+                <span>Load More Records</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1313,6 +1322,15 @@
                 </thead>
                 <tbody id="employeesTableBody" class="divide-y divide-white/5 text-slate-300"></tbody>
               </table>
+            </div>
+
+            <!-- Employee Load More Pagination Bar -->
+            <div id="employeesLoadMoreContainer" class="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+              <span id="empPaginationInfo" class="text-slate-400">Showing <strong class="text-white mono" id="empVisibleCount">0</strong> of <strong class="text-white mono" id="empTotalCount">0</strong> employees</span>
+              <button id="btnLoadMoreEmployees" onclick="loadMoreEmployees()" class="btn-smooth bg-[#071426] hover:bg-[#0F1D32] text-blue-400 hover:text-blue-300 font-semibold px-4 py-2 rounded-xl border border-blue-500/30 text-xs flex items-center gap-1.5 transition">
+                <span>Load More Employees</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -1472,6 +1490,15 @@
                 </thead>
                 <tbody id="transactionsTableBody" class="divide-y divide-white/5"></tbody>
               </table>
+            </div>
+
+            <!-- Transactions Load More Pagination Bar -->
+            <div id="transactionsLoadMoreContainer" class="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+              <span id="txnsPaginationInfo" class="text-slate-400">Showing <strong class="text-white mono" id="txnsVisibleCount">0</strong> of <strong class="text-white mono" id="txnsTotalCount">0</strong> transactions</span>
+              <button id="btnLoadMoreTxns" onclick="loadMoreTransactions()" class="btn-smooth bg-[#071426] hover:bg-[#0F1D32] text-blue-400 hover:text-blue-300 font-semibold px-4 py-2 rounded-xl border border-blue-500/30 text-xs flex items-center gap-1.5 transition">
+                <span>Load More Transactions</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -1699,6 +1726,15 @@
                   </thead>
                   <tbody id="invoicesTableBody" class="divide-y divide-white/5 text-slate-300"></tbody>
                 </table>
+              </div>
+
+              <!-- Invoices Load More Pagination Bar -->
+              <div id="invoicesLoadMoreContainer" class="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+                <span id="invPaginationInfo" class="text-slate-400">Showing <strong class="text-white mono" id="invVisibleCount">0</strong> of <strong class="text-white mono" id="invTotalCount">0</strong> invoices</span>
+                <button id="btnLoadMoreInvoices" onclick="loadMoreInvoices()" class="btn-smooth bg-[#071426] hover:bg-[#0F1D32] text-blue-400 hover:text-blue-300 font-semibold px-4 py-2 rounded-xl border border-blue-500/30 text-xs flex items-center gap-1.5 transition">
+                  <span>Load More Invoices</span>
+                  <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -2141,6 +2177,15 @@
                 </thead>
                 <tbody id="auditLogsTableBody" class="divide-y divide-white/5 text-slate-300"></tbody>
               </table>
+            </div>
+
+            <!-- Audit Logs Load More Pagination Bar -->
+            <div id="auditLoadMoreContainer" class="p-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+              <span id="auditPaginationInfo" class="text-slate-400">Showing <strong class="text-white mono" id="auditVisibleCount">0</strong> of <strong class="text-white mono" id="auditTotalCount">0</strong> audit entries</span>
+              <button id="btnLoadMoreAudit" onclick="loadMoreAuditLogs()" class="btn-smooth bg-[#071426] hover:bg-[#0F1D32] text-blue-400 hover:text-blue-300 font-semibold px-4 py-2 rounded-xl border border-blue-500/30 text-xs flex items-center gap-1.5 transition">
+                <span>Load More Logs</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -3827,60 +3872,84 @@
     }
 
     // =========================================================================
-    // 4. TAX & SALARY REPORTING (FORM 16)
+    // 4. TAX & SALARY REPORTING (FORM 16) WITH LOAD MORE PAGINATION
     // =========================================================================
+    let taxPagination = { allRecords: [], currentLimit: 15, pageSize: 15 };
+
     async function loadTaxReportingData() {
       try {
         const res = await apiFetch("/v1/dataset/form16");
         const data = await res.json();
         if (!data.success) return;
 
-        const f16List = data.form16 || [];
-        const fullyMatched = f16List.filter(r => r.status === "Matched").length;
-        const mismatchCount = f16List.filter(r => r.status !== "Matched").length;
+        taxPagination.allRecords = data.form16 || [];
+        taxPagination.currentLimit = taxPagination.pageSize;
 
-        document.getElementById("taxUploadedCount").innerText = `${f16List.length} Files`;
+        const fullyMatched = taxPagination.allRecords.filter(r => r.status === "Matched").length;
+        const mismatchCount = taxPagination.allRecords.filter(r => r.status !== "Matched").length;
+
+        document.getElementById("taxUploadedCount").innerText = `${taxPagination.allRecords.length} Files`;
         document.getElementById("taxPendingCount").innerText = `0 Pending`;
         document.getElementById("taxSalaryMismatchCount").innerText = `${mismatchCount} Discrepancies`;
         document.getElementById("taxReconciledCount").innerText = `${fullyMatched} Matched`;
 
-        const tbody = document.getElementById("taxReportingTableBody");
-        if (!tbody) return;
-        tbody.innerHTML = "";
-
-        f16List.forEach(r => {
-          const isMismatch = r.status !== "Matched";
-          let badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✓ MATCHED</span>`;
-          if (r.status === "Salary Mismatch") {
-            badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">🔴 SALARY MISMATCH</span>`;
-          } else if (r.status === "TDS Mismatch") {
-            badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">⚠️ TDS MISMATCH</span>`;
-          }
-
-          tbody.innerHTML += `
-            <tr class="hover:bg-white/5 transition-colors">
-              <td class="py-3 px-2 font-bold text-white">${r.name}</td>
-              <td class="py-3 px-2 mono text-slate-400">${r.department}</td>
-              <td class="py-3 px-2 mono text-white">₹${(r.reported_salary - (r.difference || 0)).toLocaleString()}</td>
-              <td class="py-3 px-2 mono text-white">₹${r.reported_salary.toLocaleString()}</td>
-              <td class="py-3 px-2 mono font-bold ${isMismatch ? 'text-rose-400' : 'text-slate-400'}">
-                ${isMismatch && r.difference > 0 ? '₹' + r.difference.toLocaleString() : '₹0.00'}
-              </td>
-              <td class="py-3 px-2 mono text-slate-300">₹${r.reported_tds.toLocaleString()}</td>
-              <td class="py-3 px-2">${badge}</td>
-              <td class="py-3 px-2 text-right">
-                <div class="flex items-center justify-end gap-1.5">
-                  <button onclick="resolveTaxRecordItem('${r.form16_id}')" class="btn-smooth text-[10px] font-bold bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg">Resolve</button>
-                  <button onclick="notifyFinanceTax('${r.form16_id}')" class="btn-smooth text-[10px] font-bold bg-[#071426] hover:bg-[#0F1D32] text-slate-300 px-2.5 py-1 rounded-lg border border-white/10">Alert Finance</button>
-                </div>
-              </td>
-            </tr>
-          `;
-        });
-        lucide.createIcons();
+        renderTaxReportingTable();
       } catch (err) {
         console.error("Tax reporting error:", err);
       }
+    }
+
+    function renderTaxReportingTable() {
+      const tbody = document.getElementById("taxReportingTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const total = taxPagination.allRecords.length;
+      const visible = Math.min(taxPagination.currentLimit, total);
+      const recordsToRender = taxPagination.allRecords.slice(0, visible);
+
+      recordsToRender.forEach(r => {
+        const isMismatch = r.status !== "Matched";
+        let badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✓ MATCHED</span>`;
+        if (r.status === "Salary Mismatch") {
+          badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">🔴 SALARY MISMATCH</span>`;
+        } else if (r.status === "TDS Mismatch") {
+          badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">⚠️ TDS MISMATCH</span>`;
+        }
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-white/5 transition-colors">
+            <td class="py-3 px-2 font-bold text-white">${r.name}</td>
+            <td class="py-3 px-2 mono text-slate-400">${r.department}</td>
+            <td class="py-3 px-2 mono text-white">₹${(r.reported_salary - (r.difference || 0)).toLocaleString()}</td>
+            <td class="py-3 px-2 mono text-white">₹${r.reported_salary.toLocaleString()}</td>
+            <td class="py-3 px-2 mono font-bold ${isMismatch ? 'text-rose-400' : 'text-slate-400'}">
+              ${isMismatch && r.difference > 0 ? '₹' + r.difference.toLocaleString() : '₹0.00'}
+            </td>
+            <td class="py-3 px-2 mono text-slate-300">₹${r.reported_tds.toLocaleString()}</td>
+            <td class="py-3 px-2">${badge}</td>
+            <td class="py-3 px-2 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="resolveTaxRecordItem('${r.form16_id}')" class="btn-smooth text-[10px] font-bold bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg">Resolve</button>
+                <button onclick="notifyFinanceTax('${r.form16_id}')" class="btn-smooth text-[10px] font-bold bg-[#071426] hover:bg-[#0F1D32] text-slate-300 px-2.5 py-1 rounded-lg border border-white/10">Alert Finance</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      const visEl = document.getElementById("taxVisibleCount");
+      const totEl = document.getElementById("taxTotalCount");
+      const btnEl = document.getElementById("btnLoadMoreTax");
+      if (visEl) visEl.innerText = visible;
+      if (totEl) totEl.innerText = total;
+      if (btnEl) btnEl.style.display = visible >= total ? "none" : "flex";
+      lucide.createIcons();
+    }
+
+    function loadMoreTaxRecords() {
+      taxPagination.currentLimit += taxPagination.pageSize;
+      renderTaxReportingTable();
     }
 
     async function resolveTaxRecordItem(empId) {
@@ -3910,8 +3979,10 @@
     }
 
     // =========================================================================
-    // 5. EMPLOYEE FINANCE & ALLOWANCES
+    // 5. EMPLOYEE FINANCE & ALLOWANCES WITH LOAD MORE PAGINATION
     // =========================================================================
+    let employeesPagination = { allEmployees: [], allAllowances: [], currentLimit: 15, pageSize: 15 };
+
     async function loadEmployeesData() {
       try {
         const [empRes, allowRes] = await Promise.all([
@@ -3921,54 +3992,98 @@
         const data = await empRes.json();
         const allowData = await allowRes.json();
 
-        const tbody = document.getElementById("employeesTableBody");
-        if (!tbody) return;
-        tbody.innerHTML = "";
+        employeesPagination.allEmployees = data.employees || [];
+        employeesPagination.allAllowances = allowData.allowances || [];
+        employeesPagination.currentLimit = employeesPagination.pageSize;
 
-        const allAllowances = allowData.allowances || [];
-        const empList = data.employees || [];
+        renderEmployeesTable();
 
-        empList.forEach(emp => {
-          const empAllow = allAllowances.filter(a => a.employee_id === emp.employee_id);
-          const travelA = empAllow.find(a => (a.allowance_type || '').toLowerCase() === 'travel') || {};
-          const travelSpent = travelA.used_amount || 0;
-          const travelLimit = travelA.monthly_limit || (emp.basic_salary * 0.1);
-          const isExceeded = travelA.status === 'Exceeded' || travelSpent > travelLimit;
+        // Allowance anomalies list
+        const aRes = await apiFetch("/v1/employees/anomalies/allowance");
+        const aData = await aRes.json();
+        const anoList = document.getElementById("allowanceAnomaliesList");
+        if (anoList && aData.anomalies) {
+          anoList.innerHTML = "";
+          aData.anomalies.forEach(a => {
+            anoList.innerHTML += `
+              <div class="p-2.5 rounded-xl bg-[#0B1729] border border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <span class="text-slate-200"><strong>${a.badge}:</strong> ${a.description}</span>
+                <button onclick="openEmployeeProfile('${a.employee_id}')" class="btn-smooth flex-shrink-0 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-semibold px-2.5 py-1 rounded-lg border border-amber-500/30">
+                  ${a.action_label}
+                </button>
+              </div>
+            `;
+          });
+        }
+      } catch (err) {
+        console.error("Employees error:", err);
+      }
+    }
 
-          const basic = emp.basic_salary || emp.monthly_basic || 65000;
-          const gross = Math.round(basic * 1.30);
-          const net = Math.round(gross - (basic * 0.12 + gross * 0.08));
+    function renderEmployeesTable() {
+      const tbody = document.getElementById("employeesTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
 
-          tbody.innerHTML += `
-            <tr class="hover:bg-white/5 transition-colors cursor-pointer" onclick="openEmployeeProfile('${emp.employee_id}')">
-              <td class="py-3 px-2">
-                <span class="font-bold text-white block">${emp.name}</span>
-                <span class="text-[11px] text-slate-400 mono">${emp.employee_id}</span>
-              </td>
-              <td class="py-3 px-2">
-                <span class="bg-[#071426] text-slate-300 border border-white/5 px-2 py-0.5 rounded font-medium">${emp.department}</span>
-                <span class="text-slate-400 block text-[11px] mt-0.5">${emp.designation}</span>
-              </td>
-              <td class="py-3 px-2 mono font-medium text-white">₹${basic.toLocaleString()}</td>
-              <td class="py-3 px-2 mono text-slate-300">
-                <span class="text-white font-bold">₹${gross.toLocaleString()}</span> / <span class="text-emerald-400">₹${net.toLocaleString()}</span>
-              </td>
-              <td class="py-3 px-2">
-                <span class="mono font-bold text-white">₹${travelSpent.toLocaleString()}</span> / <span class="mono text-slate-400">₹${travelLimit.toLocaleString()}</span>
-                ${isExceeded ? '<span class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">EXCEEDED</span>' : ''}
-              </td>
-              <td class="py-3 px-2">
-                <span class="font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded text-[11px] border border-emerald-500/20">ACTIVE (92%)</span>
-              </td>
-              <td class="py-3 px-2 text-right" onclick="event.stopPropagation()">
-                <div class="flex items-center justify-end gap-1.5">
-                  <button onclick="openEmployeeProfile('${emp.employee_id}')" class="btn-smooth text-[11px] font-semibold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-2.5 py-1 rounded-lg border border-blue-500/30">Profile</button>
-                  <button onclick="runAllowanceEvaluationModal('${emp.employee_id}', 'Travel')" class="btn-smooth text-[11px] font-semibold text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 px-2.5 py-1 rounded-lg border border-purple-500/30">Evaluate Cap</button>
-                </div>
-              </td>
-            </tr>
-          `;
-        });
+      const total = employeesPagination.allEmployees.length;
+      const visible = Math.min(employeesPagination.currentLimit, total);
+      const empsToRender = employeesPagination.allEmployees.slice(0, visible);
+
+      empsToRender.forEach(emp => {
+        const empAllow = employeesPagination.allAllowances.filter(a => a.employee_id === emp.employee_id);
+        const travelA = empAllow.find(a => (a.allowance_type || '').toLowerCase() === 'travel') || {};
+        const travelSpent = travelA.used_amount || 0;
+        const travelLimit = travelA.monthly_limit || (emp.basic_salary * 0.1);
+        const isExceeded = travelA.status === 'Exceeded' || travelSpent > travelLimit;
+
+        const basic = emp.basic_salary || emp.monthly_basic || 65000;
+        const gross = Math.round(basic * 1.30);
+        const net = Math.round(gross - (basic * 0.12 + gross * 0.08));
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-white/5 transition-colors cursor-pointer" onclick="openEmployeeProfile('${emp.employee_id}')">
+            <td class="py-3 px-2">
+              <span class="font-bold text-white block">${emp.name}</span>
+              <span class="text-[11px] text-slate-400 mono">${emp.employee_id}</span>
+            </td>
+            <td class="py-3 px-2">
+              <span class="bg-[#071426] text-slate-300 border border-white/5 px-2 py-0.5 rounded font-medium">${emp.department}</span>
+              <span class="text-slate-400 block text-[11px] mt-0.5">${emp.designation}</span>
+            </td>
+            <td class="py-3 px-2 mono font-medium text-white">₹${basic.toLocaleString()}</td>
+            <td class="py-3 px-2 mono text-slate-300">
+              <span class="text-white font-bold">₹${gross.toLocaleString()}</span> / <span class="text-emerald-400">₹${net.toLocaleString()}</span>
+            </td>
+            <td class="py-3 px-2">
+              <span class="mono font-bold text-white">₹${travelSpent.toLocaleString()}</span> / <span class="mono text-slate-400">₹${travelLimit.toLocaleString()}</span>
+              ${isExceeded ? '<span class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">EXCEEDED</span>' : ''}
+            </td>
+            <td class="py-3 px-2">
+              <span class="font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded text-[11px] border border-emerald-500/20">ACTIVE (92%)</span>
+            </td>
+            <td class="py-3 px-2 text-right" onclick="event.stopPropagation()">
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="openEmployeeProfile('${emp.employee_id}')" class="btn-smooth text-[11px] font-semibold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-2.5 py-1 rounded-lg border border-blue-500/30">Profile</button>
+                <button onclick="runAllowanceEvaluationModal('${emp.employee_id}', 'Travel')" class="btn-smooth text-[11px] font-semibold text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 px-2.5 py-1 rounded-lg border border-purple-500/30">Evaluate Cap</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      const visEl = document.getElementById("empVisibleCount");
+      const totEl = document.getElementById("empTotalCount");
+      const btnEl = document.getElementById("btnLoadMoreEmployees");
+      if (visEl) visEl.innerText = visible;
+      if (totEl) totEl.innerText = total;
+      if (btnEl) btnEl.style.display = visible >= total ? "none" : "flex";
+      lucide.createIcons();
+    }
+
+    function loadMoreEmployees() {
+      employeesPagination.currentLimit += employeesPagination.pageSize;
+      renderEmployeesTable();
+    }
 
         // Allowance anomalies list
         const aRes = await apiFetch("/v1/employees/anomalies/allowance");
@@ -4381,6 +4496,11 @@
       }
     }
 
+    // =========================================================================
+    // 7. RECONCILIATION WITH LOAD MORE PAGINATION
+    // =========================================================================
+    let txnsPagination = { allTxns: [], currentLimit: 25, pageSize: 25 };
+
     async function loadReconciliationData() {
       try {
         const [exRes, txnRes] = await Promise.all([
@@ -4411,41 +4531,65 @@
           });
         }
 
-        // Populate Live Transactions Ledger Table
-        const txnsTbody = document.getElementById("transactionsTableBody");
-        const txnsBadge = document.getElementById("txnsCountBadge");
-        const txns = txnData.transactions || [];
-        if (txnsBadge) txnsBadge.innerText = `${txns.length} Transactions (${currentDateSpan.label})`;
-        if (txnsTbody) {
-          txnsTbody.innerHTML = "";
-          txns.forEach(t => {
-            const isInflow = t.direction === 'Inflow';
-            const isCompleted = t.status === 'Completed';
-            const isException = t.status === 'Exception';
-            const statusClass = isCompleted ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : (isException ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20');
-            const dirClass = isInflow ? 'text-emerald-400' : 'text-rose-400';
+        txnsPagination.allTxns = txnData.transactions || [];
+        txnsPagination.currentLimit = txnsPagination.pageSize;
 
-            txnsTbody.innerHTML += `
-              <tr class="hover:bg-white/5 transition-colors">
-                <td class="py-2.5 px-3 font-mono font-bold text-white">${t.transaction_id}</td>
-                <td class="py-2.5 px-3 font-mono text-slate-400 text-xs">${t.date}</td>
-                <td class="py-2.5 px-3 text-slate-300">${t.department}</td>
-                <td class="py-2.5 px-3 font-medium text-slate-200">${t.type}</td>
-                <td class="py-2.5 px-3 font-mono text-slate-400 text-[11px]">${t.gateway_reference}</td>
-                <td class="py-2.5 px-3 font-bold ${dirClass}">
-                  <span class="flex items-center gap-1">
-                    <i data-lucide="${isInflow ? 'arrow-down-left' : 'arrow-up-right'}" class="w-3.5 h-3.5"></i>
-                    <span>${t.direction}</span>
-                  </span>
-                </td>
-                <td class="py-2.5 px-3 font-bold mono text-white">₹${t.amount.toLocaleString()}</td>
-                <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${statusClass}">${t.status.toUpperCase()}</span></td>
-              </tr>
-            `;
-          });
-        }
-        lucide.createIcons();
-      } catch (err) { console.error("Recon error:", err); }
+        const txnsBadge = document.getElementById("txnsCountBadge");
+        if (txnsBadge) txnsBadge.innerText = `${txnsPagination.allTxns.length} Transactions (${currentDateSpan.label})`;
+
+        renderTransactionsTable();
+      } catch (err) {
+        console.error("Recon error:", err);
+      }
+    }
+
+    function renderTransactionsTable() {
+      const txnsTbody = document.getElementById("transactionsTableBody");
+      if (!txnsTbody) return;
+      txnsTbody.innerHTML = "";
+
+      const total = txnsPagination.allTxns.length;
+      const visible = Math.min(txnsPagination.currentLimit, total);
+      const txnsToRender = txnsPagination.allTxns.slice(0, visible);
+
+      txnsToRender.forEach(t => {
+        const isInflow = t.direction === 'Inflow';
+        const isCompleted = t.status === 'Completed';
+        const isException = t.status === 'Exception';
+        const statusClass = isCompleted ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : (isException ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20');
+        const dirClass = isInflow ? 'text-emerald-400' : 'text-rose-400';
+
+        txnsTbody.innerHTML += `
+          <tr class="hover:bg-white/5 transition-colors">
+            <td class="py-2.5 px-3 font-mono font-bold text-white">${t.transaction_id}</td>
+            <td class="py-2.5 px-3 font-mono text-slate-400 text-xs">${t.date}</td>
+            <td class="py-2.5 px-3 text-slate-300">${t.department}</td>
+            <td class="py-2.5 px-3 font-medium text-slate-200">${t.type}</td>
+            <td class="py-2.5 px-3 font-mono text-slate-400 text-[11px]">${t.gateway_reference}</td>
+            <td class="py-2.5 px-3 font-bold ${dirClass}">
+              <span class="flex items-center gap-1">
+                <i data-lucide="${isInflow ? 'arrow-down-left' : 'arrow-up-right'}" class="w-3.5 h-3.5"></i>
+                <span>${t.direction}</span>
+              </span>
+            </td>
+            <td class="py-2.5 px-3 font-bold mono text-white">₹${t.amount.toLocaleString()}</td>
+            <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${statusClass}">${t.status.toUpperCase()}</span></td>
+          </tr>
+        `;
+      });
+
+      const visEl = document.getElementById("txnsVisibleCount");
+      const totEl = document.getElementById("txnsTotalCount");
+      const btnEl = document.getElementById("btnLoadMoreTxns");
+      if (visEl) visEl.innerText = visible;
+      if (totEl) totEl.innerText = total;
+      if (btnEl) btnEl.style.display = visible >= total ? "none" : "flex";
+      lucide.createIcons();
+    }
+
+    function loadMoreTransactions() {
+      txnsPagination.currentLimit += txnsPagination.pageSize;
+      renderTransactionsTable();
     }
 
     async function runReconciliationEngine() {
@@ -4507,6 +4651,11 @@
       } catch (err) { console.error("Cash flow error:", err); }
     }
 
+    // =========================================================================
+    // 10. INVOICES WITH LOAD MORE PAGINATION
+    // =========================================================================
+    let invoicesPagination = { allInvoices: [], currentLimit: 15, pageSize: 15 };
+
     async function loadInvoicesData() {
       try {
         const [invRes, sumRes] = await Promise.all([
@@ -4516,29 +4665,30 @@
         const data = await invRes.json();
         const sumData = await sumRes.json();
 
-        const tbody = document.getElementById("invoicesTableBody");
+        invoicesPagination.allInvoices = data.invoices || [];
+        invoicesPagination.currentLimit = invoicesPagination.pageSize;
+
+        renderInvoicesTable();
+
+        // Populate Dashboard recent 8 invoices table
         const dashTbody = document.getElementById("dashInvoicesTableBody");
-        if (tbody) tbody.innerHTML = "";
-        if (dashTbody) dashTbody.innerHTML = "";
+        if (dashTbody) {
+          dashTbody.innerHTML = "";
+          invoicesPagination.allInvoices.slice(0, 8).forEach(inv => {
+            const isPaid = (inv.status || '').toLowerCase() === 'paid';
+            const isApproved = (inv.status || '').toLowerCase() === 'approved';
+            const badgeClass = isPaid ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : (isApproved ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20');
 
-        const invoicesList = data.invoices || [];
-        invoicesList.forEach(inv => {
-          const isPaid = (inv.status || '').toLowerCase() === 'paid';
-          const isApproved = (inv.status || '').toLowerCase() === 'approved';
-          const badgeClass = isPaid ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : (isApproved ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20');
-
-          const row = `
-            <tr class="hover:bg-white/5 transition-colors">
-              <td class="py-2.5 px-2 font-bold text-white">${inv.vendor_name} <span class="text-slate-400 font-mono text-[11px]">(${inv.invoice_id})</span></td>
-              <td class="py-2.5 px-2 text-slate-300">${inv.department}</td>
-              <td class="py-2.5 px-2 text-slate-400 font-mono text-xs">${inv.date || '2026-08-15'}</td>
-              <td class="py-2.5 px-2 font-bold mono text-white">₹${(inv.total_amount || inv.amount || 0).toLocaleString()}</td>
-              <td class="py-2.5 px-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeClass}">${(inv.status || 'PENDING').toUpperCase()}</span></td>
-            </tr>
-          `;
-          if (tbody) tbody.innerHTML += row;
-          if (dashTbody) dashTbody.innerHTML += row;
-        });
+            dashTbody.innerHTML += `
+              <tr class="hover:bg-white/5 transition-colors">
+                <td class="py-2.5 px-2 font-bold text-white">${inv.vendor_name} <span class="text-slate-400 font-mono text-[11px]">(${inv.invoice_id})</span></td>
+                <td class="py-2.5 px-2 text-slate-300">${inv.department}</td>
+                <td class="py-2.5 px-2 font-bold mono text-white">₹${(inv.total_amount || inv.amount || 0).toLocaleString()}</td>
+                <td class="py-2.5 px-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeClass}">${(inv.status || 'PENDING').toUpperCase()}</span></td>
+              </tr>
+            `;
+          });
+        }
 
         // Update Dashboard KPI metrics dynamically based on chosen Date Span
         if (sumData.success && sumData.data?.metrics) {
@@ -4553,6 +4703,45 @@
           if (invVolEl) invVolEl.innerText = `₹${(m.total_invoice_volume || 0).toLocaleString()} (${m.invoice_count} Invoices)`;
         }
       } catch (err) { console.error("Invoices error:", err); }
+    }
+
+    function renderInvoicesTable() {
+      const tbody = document.getElementById("invoicesTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const total = invoicesPagination.allInvoices.length;
+      const visible = Math.min(invoicesPagination.currentLimit, total);
+      const invsToRender = invoicesPagination.allInvoices.slice(0, visible);
+
+      invsToRender.forEach(inv => {
+        const isPaid = (inv.status || '').toLowerCase() === 'paid';
+        const isApproved = (inv.status || '').toLowerCase() === 'approved';
+        const badgeClass = isPaid ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : (isApproved ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20');
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-white/5 transition-colors">
+            <td class="py-2.5 px-2 font-bold text-white">${inv.vendor_name} <span class="text-slate-400 font-mono text-[11px]">(${inv.invoice_id})</span></td>
+            <td class="py-2.5 px-2 text-slate-300">${inv.department}</td>
+            <td class="py-2.5 px-2 text-slate-400 font-mono text-xs">${inv.date || '2026-08-15'}</td>
+            <td class="py-2.5 px-2 font-bold mono text-white">₹${(inv.total_amount || inv.amount || 0).toLocaleString()}</td>
+            <td class="py-2.5 px-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeClass}">${(inv.status || 'PENDING').toUpperCase()}</span></td>
+          </tr>
+        `;
+      });
+
+      const visEl = document.getElementById("invVisibleCount");
+      const totEl = document.getElementById("invTotalCount");
+      const btnEl = document.getElementById("btnLoadMoreInvoices");
+      if (visEl) visEl.innerText = visible;
+      if (totEl) totEl.innerText = total;
+      if (btnEl) btnEl.style.display = visible >= total ? "none" : "flex";
+      lucide.createIcons();
+    }
+
+    function loadMoreInvoices() {
+      invoicesPagination.currentLimit += invoicesPagination.pageSize;
+      renderInvoicesTable();
     }
 
     async function loadApprovalsData() {
@@ -4640,27 +4829,58 @@
       } catch (err) { console.error("Vendors error:", err); }
     }
 
+    // =========================================================================
+    // 14. AUDIT LOGS WITH LOAD MORE PAGINATION
+    // =========================================================================
+    let auditPagination = { allLogs: [], currentLimit: 15, pageSize: 15 };
+
     async function loadAuditLogsData() {
       if (currentUser.role !== "CFO" && currentUser.role !== "AUDITOR") return;
       try {
         const res = await apiFetch("/v1/audit/logs");
         const data = await res.json();
-        const tbody = document.getElementById("auditLogsTableBody");
-        if (!tbody) return;
-        tbody.innerHTML = "";
-        (data.logs || []).forEach(log => {
-          tbody.innerHTML += `
-            <tr class="hover:bg-white/5 transition-colors">
-              <td class="py-3 px-2 text-slate-400 font-mono text-[11px]">${log.timestamp?.substring(0, 19).replace('T', ' ')}</td>
-              <td class="py-3 px-2 font-medium text-white">${log.user_name} <span class="text-slate-400">(${log.role})</span></td>
-              <td class="py-3 px-2"><span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded font-bold text-[10px]">${log.action}</span></td>
-              <td class="py-3 px-2 font-mono font-semibold text-slate-200">${log.entity_id}</td>
-              <td class="py-3 px-2 text-slate-300 text-xs">${log.details || ''}</td>
-              <td class="py-3 px-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-white/5 text-slate-300">${log.risk_level}</span></td>
-            </tr>
-          `;
-        });
-      } catch (err) { console.error("Audit log error:", err); }
+        auditPagination.allLogs = data.logs || [];
+        auditPagination.currentLimit = auditPagination.pageSize;
+        renderAuditLogsTable();
+      } catch (err) {
+        console.error("Audit log error:", err);
+      }
+    }
+
+    function renderAuditLogsTable() {
+      const tbody = document.getElementById("auditLogsTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const total = auditPagination.allLogs.length;
+      const visible = Math.min(auditPagination.currentLimit, total);
+      const logsToRender = auditPagination.allLogs.slice(0, visible);
+
+      logsToRender.forEach(log => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-white/5 transition-colors">
+            <td class="py-3 px-2 text-slate-400 font-mono text-[11px]">${log.timestamp?.substring(0, 19).replace('T', ' ')}</td>
+            <td class="py-3 px-2 font-medium text-white">${log.user_name} <span class="text-slate-400">(${log.role})</span></td>
+            <td class="py-3 px-2"><span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded font-bold text-[10px]">${log.action}</span></td>
+            <td class="py-3 px-2 font-mono font-semibold text-slate-200">${log.entity_id}</td>
+            <td class="py-3 px-2 text-slate-300 text-xs">${log.details || ''}</td>
+            <td class="py-3 px-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-white/5 text-slate-300">${log.risk_level}</span></td>
+          </tr>
+        `;
+      });
+
+      const visEl = document.getElementById("auditVisibleCount");
+      const totEl = document.getElementById("auditTotalCount");
+      const btnEl = document.getElementById("btnLoadMoreAudit");
+      if (visEl) visEl.innerText = visible;
+      if (totEl) totEl.innerText = total;
+      if (btnEl) btnEl.style.display = visible >= total ? "none" : "flex";
+      lucide.createIcons();
+    }
+
+    function loadMoreAuditLogs() {
+      auditPagination.currentLimit += auditPagination.pageSize;
+      renderAuditLogsTable();
     }
 
     // =========================================================================
