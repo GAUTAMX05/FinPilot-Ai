@@ -2820,8 +2820,16 @@
     }
 
     function showLoginScreen() {
-      document.getElementById("loginScreen").classList.remove("hidden");
-      document.getElementById("appContainer").classList.add("hidden");
+      const login = document.getElementById("loginScreen");
+      const app = document.getElementById("appContainer");
+      if (login) {
+        login.style.display = "flex";
+        login.classList.remove("hidden");
+      }
+      if (app) {
+        app.style.display = "none";
+        app.classList.add("hidden");
+      }
     }
 
     function fillDemoLogin(email) {
@@ -2846,8 +2854,12 @@
 
         currentUser = data.data.user;
         authToken = data.data.access_token;
-        localStorage.setItem("ai_finance_user", JSON.stringify(currentUser));
-        localStorage.setItem("ai_finance_token", authToken);
+        try {
+          localStorage.setItem("ai_finance_user", JSON.stringify(currentUser));
+          localStorage.setItem("ai_finance_token", authToken);
+        } catch (e) {
+          console.warn("localStorage not available:", e);
+        }
 
         showToast(`Welcome back, ${currentUser.name}! Signed in as ${currentUser.role}.`);
         renderWorkspaceForRole();
@@ -2863,8 +2875,10 @@
     function handleLogout() {
       currentUser = null;
       authToken = null;
-      localStorage.removeItem("ai_finance_user");
-      localStorage.removeItem("ai_finance_token");
+      try {
+        localStorage.removeItem("ai_finance_user");
+        localStorage.removeItem("ai_finance_token");
+      } catch (e) {}
       showLoginScreen();
       showToast("Signed out successfully.");
     }
@@ -2931,18 +2945,39 @@
     });
 
     function renderWorkspaceForRole() {
-      document.getElementById("loginScreen").classList.add("hidden");
-      document.getElementById("appContainer").classList.remove("hidden");
+      const login = document.getElementById("loginScreen");
+      const app = document.getElementById("appContainer");
+      if (login) {
+        login.style.display = "none";
+        login.classList.add("hidden");
+      }
+      if (app) {
+        app.style.display = "flex";
+        app.classList.remove("hidden");
+      }
 
-      document.getElementById("sidebarUserName").innerText = currentUser.name;
-      document.getElementById("sidebarUserRole").innerText = `${currentUser.role} 🔒`;
-      document.getElementById("sidebarAvatar").innerText = currentUser.name.split(' ').map(n=>n[0]).join('').substring(0,2);
-      document.getElementById("greetingHeader").innerText = `Good evening, ${currentUser.name.split(' ')[0]} 👋`;
+      if (currentUser) {
+        const uName = document.getElementById("sidebarUserName");
+        const uRole = document.getElementById("sidebarUserRole");
+        const uAvatar = document.getElementById("sidebarAvatar");
+        const uGreet = document.getElementById("greetingHeader");
 
-      renderSidebarNavigation();
-      refreshAllDashboardData();
-      configureChatPrompts();
-      lucide.createIcons();
+        if (uName) uName.innerText = currentUser.name || "Executive User";
+        if (uRole) uRole.innerText = `${currentUser.role || 'CFO'} 🔒`;
+        if (uAvatar) {
+          const initials = (currentUser.name || "FP").split(' ').map(n=>n[0]).join('').substring(0,2);
+          uAvatar.innerText = initials;
+        }
+        if (uGreet) {
+          const firstName = (currentUser.name || "User").split(' ')[0];
+          uGreet.innerText = `Good evening, ${firstName} 👋`;
+        }
+      }
+
+      try { renderSidebarNavigation(); } catch(e) { console.error("renderSidebarNavigation error:", e); }
+      try { configureChatPrompts(); } catch(e) { console.error("configureChatPrompts error:", e); }
+      try { refreshAllDashboardData(); } catch(e) { console.error("refreshAllDashboardData error:", e); }
+      try { lucide.createIcons(); } catch(e) {}
     }
 
     function renderSidebarNavigation() {
