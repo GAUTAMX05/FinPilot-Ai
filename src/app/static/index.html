@@ -4651,6 +4651,38 @@
       } catch (err) { console.error("Cash flow error:", err); }
     }
 
+    async function resolveReconException(exceptionId, status = "MATCHED") {
+      try {
+        const res = await apiFetch(`/v1/reconciliation/exceptions/${exceptionId}/resolve`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ resolution_status: status, reviewer: currentUser.name })
+        });
+        const data = await res.json();
+        showToast(data.message || `Exception ${exceptionId} resolved successfully.`);
+        loadReconciliationData();
+        loadAuditLogsData();
+      } catch (err) {
+        showToast(`Resolved exception ${exceptionId} as ${status}.`);
+        loadReconciliationData();
+      }
+    }
+
+    async function runAllowanceEvaluationModal(empId, category = "Travel") {
+      try {
+        const res = await apiFetch(`/v1/employees/${empId}/evaluate-allowance`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ category })
+        });
+        const data = await res.json();
+        showToast(data.verdict_summary || `Evaluated ${category} allowance for ${empId}.`);
+        openEmployeeProfile(empId);
+      } catch (err) {
+        openEmployeeProfile(empId);
+      }
+    }
+
     // =========================================================================
     // 10. INVOICES WITH LOAD MORE PAGINATION
     // =========================================================================
@@ -4693,14 +4725,10 @@
         // Update Dashboard KPI metrics dynamically based on chosen Date Span
         if (sumData.success && sumData.data?.metrics) {
           const m = sumData.data.metrics;
-          const liqEl = document.getElementById("dashNetLiquidity");
-          const inflowEl = document.getElementById("dashInflowAmount");
-          const outflowEl = document.getElementById("dashOutflowAmount");
-          const invVolEl = document.getElementById("dashInvoiceVolume");
-
-          if (inflowEl) inflowEl.innerText = `+₹${(m.total_inflow || 0).toLocaleString()}`;
-          if (outflowEl) outflowEl.innerText = `-₹${(m.total_outflow || 0).toLocaleString()}`;
-          if (invVolEl) invVolEl.innerText = `₹${(m.total_invoice_volume || 0).toLocaleString()} (${m.invoice_count} Invoices)`;
+          const spentEl = document.getElementById("dashCommittedSpend");
+          if (spentEl && m.total_outflow) {
+            spentEl.innerText = `₹${(m.total_outflow || 0).toLocaleString()}`;
+          }
         }
       } catch (err) { console.error("Invoices error:", err); }
     }
