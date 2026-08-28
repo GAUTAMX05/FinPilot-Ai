@@ -14,6 +14,7 @@ from src.app.api.endpoints import (
     payroll_router,
     notifications_router,
     simulation_router,
+    commerce_router,
 )
 
 api_router = APIRouter()
@@ -31,5 +32,6 @@ api_router.include_router(employee_finance_router, prefix="/employees", tags=["E
 api_router.include_router(payroll_router, prefix="/payroll", tags=["Payroll & Form 16 Tax Reconciler"])
 api_router.include_router(notifications_router, prefix="/notifications", tags=["Financial Notifications & Alerts"])
 api_router.include_router(simulation_router)
+api_router.include_router(commerce_router)
 
 __all__ = ["api_router"]

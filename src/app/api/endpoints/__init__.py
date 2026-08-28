@@ -12,6 +12,7 @@ from src.app.api.endpoints.employee_finance import router as employee_finance_ro
 from src.app.api.endpoints.payroll import router as payroll_router
 from src.app.api.endpoints.notifications import router as notifications_router
 from src.app.api.endpoints.simulation import router as simulation_router
+from src.app.api.endpoints.commerce import router as commerce_router
 
 __all__ = [
     "auth_router",
@@ -28,4 +29,5 @@ __all__ = [
     "payroll_router",
     "notifications_router",
     "simulation_router",
+    "commerce_router",
 ]

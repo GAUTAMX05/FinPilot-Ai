@@ -122,6 +122,39 @@ class FinancialNotificationService:
             }
         ]
 
+    def create_notification(
+        self,
+        category: str = "FINANCIAL",
+        severity: str = "CRITICAL",
+        title: str = "Financial Alert",
+        summary: str = "",
+        message: Optional[str] = None,
+        notification_type: Optional[str] = None,
+        entity_id: str = "",
+        department: str = "Engineering",
+        recommended_action: str = ""
+    ) -> Dict[str, Any]:
+        import uuid
+        notif = {
+            "id": f"NOTIF-{datetime.utcnow().strftime('%Y')}-{uuid.uuid4().hex[:4].upper()}",
+            "category": category,
+            "severity": severity,
+            "title": title,
+            "employee_id": entity_id,
+            "employee_name": f"{department} Controller",
+            "department": department,
+            "payroll_salary": 0.0,
+            "form16_salary": 0.0,
+            "difference": 0.0,
+            "summary": summary or message or title,
+            "status": "UNRESOLVED",
+            "created_at": datetime.utcnow().isoformat(),
+            "recommended_action": recommended_action or "Review policy exception.",
+            "actions": ["REVIEW", "RESOLVE"]
+        }
+        self._notifications.insert(0, notif)
+        return notif
+
     def get_notifications(
         self,
         category: Optional[str] = None,

@@ -184,6 +184,10 @@ class BudgetService:
                 return True
         return False
 
+    def record_expense(self, department: str, amount: float) -> bool:
+        """Directly records an executed expense/campaign disbursement against department spent_amount."""
+        return self.commit_expense(department=department, amount=amount, was_pending=False)
+
     def release_reservation(self, department: str, amount: float) -> bool:
         """Releases pending reservation upon rejection."""
         depts = self._budgets.get("departments", {})

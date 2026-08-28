@@ -1,0 +1,101 @@
+{
+  "merchant_info": {
+    "merchant_id": "MERCH-IN-2026-9081",
+    "name": "CloudNova Enterprise Solutions",
+    "category": "Enterprise Cloud, Developer Tools & AI Infrastructure",
+    "currency": "INR",
+    "default_gst_rate": 0.18,
+    "payment_gateway": "Razorpay Test Mode",
+    "autonomous_commerce_policy": {
+      "max_autonomous_discount_pct": 15.0,
+      "min_bulk_quantity_for_discount": 3,
+      "max_single_transaction_inr": 50000.0,
+      "require_hitl_above_inr": 50000.0
+    }
+  },
+  "products": [
+    {
+      "id": "PROD-API-01",
+      "sku": "CN-API-GATEWAY-PRO",
+      "name": "CloudNova Ultra API Gateway",
+      "category": "Cloud Infrastructure",
+      "description": "High-throughput, multi-region API Gateway with automated SSL, rate-limiting, and AI traffic shaping.",
+      "unit_price": 12500.0,
+      "stock_available": 150,
+      "tags": ["api", "gateway", "cloud", "security", "infrastructure"],
+      "compatible_upsells": ["PROD-VPC-02", "PROD-SUPP-04"],
+      "ai_negotiable": true,
+      "max_discount_pct": 12.0
+    },
+    {
+      "id": "PROD-VPC-02",
+      "sku": "CN-DEDICATED-VPC",
+      "name": "Dedicated Enterprise VPC Isolation",
+      "category": "Cloud Infrastructure",
+      "description": "Single-tenant virtual private cloud environment with hardware isolation and SOC2 compliance.",
+      "unit_price": 28000.0,
+      "stock_available": 45,
+      "tags": ["vpc", "security", "enterprise", "cloud"],
+      "compatible_upsells": ["PROD-SUPP-04", "PROD-MON-05"],
+      "ai_negotiable": true,
+      "max_discount_pct": 15.0
+    },
+    {
+      "id": "PROD-LLM-03",
+      "sku": "CN-LLM-ACCELERATOR",
+      "name": "AI Inference & LLM Cluster Accelerator",
+      "category": "AI & ML Tooling",
+      "description": "Sub-millisecond inference acceleration cluster with automated context caching and embedding storage.",
+      "unit_price": 35000.0,
+      "stock_available": 30,
+      "tags": ["ai", "llm", "inference", "gpu", "machine learning"],
+      "compatible_upsells": ["PROD-VPC-02", "PROD-SUPP-04"],
+      "ai_negotiable": true,
+      "max_discount_pct": 10.0
+    },
+    {
+      "id": "PROD-SUPP-04",
+      "sku": "CN-247-SUPPORT-PLAN",
+      "name": "24/7 Priority Mission-Critical Support",
+      "category": "Enterprise Services",
+      "description": "15-minute SLA response time with dedicated Solutions Architect and quarterly architectural audits.",
+      "unit_price": 9500.0,
+      "stock_available": 500,
+      "tags": ["support", "sla", "services", "sla"],
+      "compatible_upsells": ["PROD-API-01", "PROD-LLM-03"],
+      "ai_negotiable": true,
+      "max_discount_pct": 15.0
+    },
+    {
+      "id": "PROD-MON-05",
+      "sku": "CN-OBSERVABILITY-SUITE",
+      "name": "Autonomous Financial & Telemetry Suite",
+      "category": "DevOps & Monitoring",
+      "description": "Full-stack observability with automated cost-anomaly triggers and OpenTelemetry tracing.",
+      "unit_price": 14000.0,
+      "stock_available": 80,
+      "tags": ["monitoring", "observability", "devops", "telemetry"],
+      "compatible_upsells": ["PROD-API-01", "PROD-VPC-02"],
+      "ai_negotiable": true,
+      "max_discount_pct": 12.0
+    }
+  ],
+  "smart_bundle_rules": [
+    {
+      "rule_id": "BUNDLE-CLOUD-CORE",
+      "trigger_product_id": "PROD-API-01",
+      "upsell_product_id": "PROD-VPC-02",
+      "bundle_name": "Cloud Core Enterprise Bundle",
+      "special_bundle_discount_pct": 15.0,
+      "reason": "Customers deploying Ultra API Gateway achieve 4x performance isolation by pairing with Dedicated Enterprise VPC."
+    },
+    {
+      "rule_id": "BUNDLE-AI-ENTERPRISE",
+      "trigger_product_id": "PROD-LLM-03",
+      "upsell_product_id": "PROD-SUPP-04",
+      "bundle_name": "Mission-Critical AI SLA Bundle",
+      "special_bundle_discount_pct": 20.0,
+      "reason": "Pairing LLM Accelerator with 24/7 Priority Support guarantees zero production downtime during high-concurrency bursts."
+    }
+  ]
+}

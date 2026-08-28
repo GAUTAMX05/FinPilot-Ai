@@ -1,6 +1,10 @@
 # 🚀 FinPilot AI — Complete Architectural Walkthrough & System Guide
 
-**FinPilot AI** is an enterprise-grade **Financial Digital Twin & Autonomous Multi-Agent Decision Operating System**. Unlike conventional finance dashboards that merely report past transactions, FinPilot AI simulates forward-looking financial trajectories, detects causal anomalies, eliminates policy friction via self-calibration, and coordinates 7 specialized reasoning agents.
+**FinPilot AI** is an enterprise-grade **Financial Digital Twin, Merchant Growth & Autonomous Multi-Agent Decision Operating System**. Unlike conventional finance dashboards that merely report past transactions, FinPilot AI:
+1. **Grows Merchant Sales**: Conversational in-app checkout, smart bundle upsells, and autonomous marketing growth campaign orchestration.
+2. **Enables AI-to-AI Shopping**: Machine-readable product catalogs (`/v1/commerce/ai-manifest`), bounded negotiation, and autonomous Razorpay test-mode transactions.
+3. **Simulates Financial Futures**: 90-day forward Digital Twin simulations before executing capital outlays.
+4. **Guarantees Safety & Resilience**: Bounded spending tokens, HITL governance, audit lineage, and graceful recovery across 4 critical failure modes.
 
 ---
 
@@ -15,35 +19,71 @@
          │                                        │                                        │
          ▼                                        ▼                                        ▼
 ┌──────────────────┐                    ┌──────────────────┐                     ┌──────────────────┐
-│  FINANCIAL TWIN  │                    │   MULTI-AGENT    │                     │ SELF-CALIBRATING │
-│  90-Day Forward  │                    │   ORCHESTRATOR   │                     │  POLICY ENGINE   │
-│  State Simulator │                    │  7 Sub-Agents    │                     │ Friction Reducer │
+│  FINANCIAL TWIN  │                    │   MULTI-AGENT    │                     │ MERCHANT GROWTH  │
+│  90-Day Forward  │                    │   ORCHESTRATOR   │                     │  & AI COMMERCE   │
+│  State Simulator │                    │  7 Sub-Agents    │                     │  A2A Shopping    │
 └──────────────────┘                    └──────────────────┘                     └──────────────────┘
 ```
 
 ---
 
-## 1. 🧬 Financial Digital Twin Engine (`digital_twin_service.py`)
+## 1. 🛍️ Merchant Sales Growth & AI-to-AI Shopping (`merchant_commerce_service.py`)
+
+![Merchant Sales Growth & AI-to-AI Shopping Studio](docs/screenshots/09_merchant_ai_commerce.png)
+
+### A. Universal Agent-Readable Manifest (`/v1/commerce/ai-manifest`)
+Provides an OpenAPI / JSON-LD / Schema.org protocol endpoint that allows external autonomous buyer bots to discover:
+- Merchant identity, tax jurisdiction (18% GST), and payment rails (Razorpay Test Mode, UPI, Corporate Card).
+- Autonomous transaction policy bounds: Max bulk discount (15%), minimum quantity for discount (3 units), and transaction ceiling (₹50,000 without human approval).
+
+### B. Autonomous AI-to-AI Shopping & Bounded Negotiation (`/v1/commerce/ai-buy`)
+- **Spending Token Ceilings**: External AI buyers send an authorized `X-Spending-Token-Limit` header. Transactions exceeding this limit are blocked with zero ledger side-effects.
+- **Volume Negotiation**: Dynamically applies tiered volume discounts (8% for 3+ units, 12% for 5+ units, 15% for 10+ units) strictly within merchant policy bounds.
+- **Razorpay Rails**: Creates instant test-mode payment links and logs complete negotiation reasoning into the immutable audit trail.
+
+### C. Conversational In-App Checkout & Smart Upsells (`/v1/commerce/conversational-checkout`)
+- Natural language cart assistant: Parses customer purchase intents, manages dynamic carts, and computes statutory 18% GST.
+- **Smart Cross-Sell Engine**: Automatically detects cart contents and suggests synergistic product bundles (e.g. *API Gateway* $\rightarrow$ *Dedicated VPC* at 15% bundle discount).
+- 1-click Razorpay test payment link generation with order ID tracking.
+
+### D. Autonomous Growth Campaign Orchestrator (`/v1/commerce/campaigns/create`)
+- Synchronizes with live Marketing Department budget balances.
+- Deducts campaign spend from Marketing ledger, generates promotional Razorpay payment links, and projects ROAS (3.8x - 4.2x) and incremental revenues.
+
+---
+
+## 2. 🛡️ Failure Handling & Resilience Sandbox
+
+FinPilot AI explicitly demonstrates graceful error handling across 4 mission-critical financial failure modes:
+
+| Failure Mode | Simulated Condition | Graceful Recovery Strategy | System Status |
+|---|---|---|---|
+| **1. Gateway Timeout / Network Drop** | HTTP 504 Timeout on Razorpay API | Exponential backoff retry (1/3 after 250ms) using `X-Idempotency-Key` + asynchronous offline settlement record | `RECOVERED_SUCCESSFULLY` |
+| **2. Malformed / Invalid Payload** | Missing buyer ID, negative quantities, corrupt schema | Field-level schema diagnostics returned with corrective hints (zero ledger corruption) | `REJECTED_WITH_DIAGNOSTICS` |
+| **3. Budget Cap Breach** | Requested disbursement exceeds department available funds | Autonomous pre-disbursement freeze to prevent deficit + automated HITL escalation ticket | `SAFE_ABORT_AND_ESCALATED` |
+| **4. AI Token Overage** | Autonomous buyer exceeds authorized spending token ceiling | Transaction halted before payment creation + human override authorization URL dispatched | `PAUSED_FOR_HUMAN_OVERRIDE` |
+
+---
+
+## 3. 🧬 Financial Digital Twin Engine (`digital_twin_service.py`)
+
+![Financial Digital Twin Studio](docs/screenshots/02_digital_twin_studio.png)
 
 ### The Live State Model
-The Digital Twin maintains an isolated, simulate-able replica of corporate finances:
+The Digital Twin maintains an in-memory, simulate-able replica of corporate finances:
 - **Cash & Liquidity**: Live liquid reserves (₹8,435,000) and multi-horizon runway buffers.
 - **Department Allocations**: Real-time spending velocity across Engineering, Marketing, Sales, Operations, and HR.
-- **Payroll & Statutory Obligations**: 4 employee records with gross salary, statutory PF (12%), and TDS withholdings.
+- **Payroll & Statutory Obligations**: Employee records with gross salary, statutory PF (12%), and TDS withholdings.
 - **Invoice Commitments**: Pending and authorized invoices evaluated against line-item policy caps.
 - **Composite Decision Health Score**: 83.8 / 100 (*Budget Impact Control 90.7%, Policy Compliance Check 91.0%, Historical Variance Stability 68.0%, Approval Risk Factor 84.0%*).
 
 ### 90-Day Forward Simulation (`simulate_forward`)
 - Computes daily burn rates ($B_{\text{daily}} = \text{Annual Allocated} / 365$) and daily inflow rates ($I_{\text{daily}} = \text{Weekly Avg} / 7$).
-- Simulates step-by-step liquidity shifts over 90 days with support for parameter modifiers (spend velocity shifts, vendor payment delays, and headcount additions).
-
-### Branch Isolation (`simulate_action`)
-- Clones baseline in-memory state so what-if hypotheses never mutate production ledgers.
-- Outputs quantitative Before vs. After matrix ($\Delta$ Liquidity, $\Delta$ Runway Days, $\Delta$ Budget Utilization, $\Delta$ Decision Score) with automated verdict badges (`🟢 SAFE TO EXECUTE`, `🟡 REQUIRES GOVERNANCE`, `🔴 DEFICIT RISK DETECTED`).
+- Simulates step-by-step liquidity shifts over 90 days with interactive parameter sliders (spend velocity, deferred vendor payouts, headcount growth).
 
 ---
 
-## 2. 🤖 Multi-Agent Orchestrator Pipeline (`multi_agent_orchestrator.py`)
+## 4. 🤖 Multi-Agent Orchestrator Pipeline (`multi_agent_orchestrator.py`)
 
 FinPilot AI routes financial reasoning through 7 specialized agents with deterministic hand-offs:
 
@@ -59,110 +99,49 @@ graph TD
     NarratorAgent --> AuditLog[(Immutable Audit Log)]
 ```
 
-### Specialized Sub-Agent Roles:
-1. **`IntentAgent`**: Classifies query intent (`COUNTERFACTUAL_SIMULATION`, `EXPENSE_AFFORDABILITY`, `CAUSAL_INVESTIGATION`, `BUDGET_RUN_RATE`, `AUDIT_COMPLIANCE`, `POLICY_CALIBRATION`) and enforces RBAC boundaries.
-2. **`RetrievalAgent`**: Fetches verified records across ledgers with data lineage tracking.
-3. **`AnalysisAgent`**: Computes quantitative burn rates, runaways, and mathematical GST tax consistency.
-4. **`RiskAgent`**: Evaluates 4 composite risk factors (*Budget Impact, Compliance, Variance, Approval Risk*).
-5. **`SimulationAgent`**: Executes 90-day simulations against the Digital Twin.
-6. **`CausalAgent`**: Pinpoints root causes by correlating variances against nearby signals (vendor additions, submitter clustering, billing cycle shifts).
-7. **`NarratorAgent`**: Formulates 5-step Decision Engine synthesis (*What Happened $\rightarrow$ Why It Matters $\rightarrow$ What Should Be Done $\rightarrow$ Who Needs to Act $\rightarrow$ What Happens Next*) with role-tailored depth.
+### The 7 Autonomous Agents
+1. **`IntentAgent`**: Classifies query intent and enforces RBAC permission bounds.
+2. **`RetrievalAgent`**: Fetches verified data points from budgets, invoices, payroll, and Digital Twin.
+3. **`AnalysisAgent`**: Executes deterministic Python math (run-rates, 18% GST, time-elapsed vs spend).
+4. **`RiskAgent`**: Computes 4-factor risk scoring (Budget Impact, Policy Compliance, Historical Variance, Approval Threshold).
+5. **`SimulationAgent`**: Forks in-memory Digital Twin branch to evaluate 90-day forward impact.
+6. **`CausalAgent`**: Uncovers hidden correlations against operational signals (submitter clustering, vendor changes).
+7. **`NarratorAgent`**: Synthesizes the 5-part enterprise decision narrative (*What Happened $\rightarrow$ Why It Matters $\rightarrow$ What Should Be Done $\rightarrow$ Who Needs to Act $\rightarrow$ What Happens Next*).
 
 ---
 
-## 3. ⚖️ Role-Aware Explainability & Access Control (RBAC)
+## 5. 🏢 Corporate Decision Map & Control Center
 
-FinPilot AI enforces strict enterprise security boundaries across 4 distinct roles:
-
-| Role | Access Scope | Reasoning / Explanation Depth |
-|---|---|---|
-| **👑 CFO (Chief Financial Officer)** | Enterprise-wide (All Departments, Cash, Payroll, Tax, Audit, Policy) | Strategic 5-step synthesis, 90-day cash curve deltas, policy calibration controls |
-| **💼 Finance Manager** | Enterprise Budgets, Invoices, Reconciliation, Approvals Queue | Operational metrics, runway projections, vendor analysis, invoice approval actions |
-| **🛠️ Department Head** | Scoped strictly to own department (e.g. Engineering) | Localized budget burn rate, team expense affordabilities, allowance reviews |
-| **🔍 Auditor** | Read-only across all financial ledgers, tax reconciliations, and logs | Multi-agent lineage traces, intermediate agent execution steps, deterministic rule scores |
+![Company Decision Map](docs/screenshots/04_company_decision_map.png)
+![Executive Control Center](docs/screenshots/03_executive_control_center.png)
 
 ---
 
-## 4. 🧠 Causal Anomaly Detection Engine
+## 6. 🔒 Enterprise RBAC Matrix
 
-Instead of flagging financial variances in isolation, FinPilot AI correlates flagged items against operational signals:
-
-- **Case 1: Engineering Cloud Infrastructure Overrun**
-  - *Primary Cause*: Unbudgeted Q2 Production Kubernetes Expansion (94% confidence).
-  - *Correlated Signals*: 3 new CloudOps Technologies invoices in 14 days amounting to ₹200,600; AWS savings plan renewal variance (+18%); Submitter clustering (80% from same team lead).
-  - *Recommended Fix*: Reallocate ₹250,000 from Operations surplus.
-
-- **Case 2: Salary & Form 16 Reporting Mismatch**
-  - *Primary Cause*: Unclassified reimbursement arrears omitted from quarterly Annexure B.
-  - *Correlated Signals*: 2 records with discrepancy (EMP-1042: ₹35,000 diff; EMP-101: ₹96,000 diff).
-  - *Recommended Fix*: Update Form 16 Part B before quarterly tax filing.
+| Capability / Resource | CFO | Finance Manager | Department Head | Auditor |
+|---|:---:|:---:|:---:|:---:|
+| **Universal Commerce & A2A Store** | ✅ | ✅ | ✅ (Catalog) | 👁️ (Audit) |
+| **Financial Digital Twin (90-Day What-If)** | ✅ Full Access | ✅ Read & Simulate | ❌ Scoped | 👁️ Read-Only |
+| **Autonomous Marketing Campaigns** | ✅ Full Sign-off | ✅ Create & Launch | ❌ | 👁️ Read-Only |
+| **HITL Approvals ($\ge$ ₹50,000)** | ✅ Final Approval | ✅ Review & Recommend | ❌ | 👁️ Read-Only |
+| **Form 16 Tax Reconciler** | ✅ Authorize | ✅ Reconcile & Upload | ❌ | 👁️ Audit Mismatches |
+| **Audit Log Compliance Inspection** | ✅ Full Access | ❌ | ❌ | ✅ Full Access |
 
 ---
 
-## 5. 🔄 Self-Calibrating Policy Engine (`policy_calibration_service.py`)
-
-FinPilot AI learns from human reviewer overrides to eliminate false alarms:
-1. **Friction Detection**: Tracks human decisions on AI-flagged items. When human reviewers override AI flags at $\ge 70\%$ (e.g. 8 of 10 travel claims approved), friction is detected.
-2. **Calibration Proposals**: Generates structured proposals (e.g. `CALIB-PROP-001` to raise Senior Engineer travel allowance limit from ₹15,000 to ₹25,000).
-3. **1-Click Execution**: CFO approves with 1 click; policies are updated in real-time and recorded in the audit trail.
-
----
-
-## 6. 💻 Fintech UI & What-If Simulation Studio
-
-The dark Razorpay-inspired UI features 14 specialized tabs:
-1. **Financial Control Center**: Real-time position cards, decision alerts, dynamic time-series chart, and quick operations.
-2. **Digital Twin & What-If Studio**: Interactive sliders (*Spend Velocity, Vendor Payment Delay, Headcount Growth*), Before vs. After comparison cards, dual-line Chart.js trajectory curve, causal explorer, and policy calibration proposals.
-3. **Company Decision Map**: Hierarchical visual graph from Enterprise Root $\rightarrow$ Budgets & Cash $\rightarrow$ Departments $\rightarrow$ Spending Risk $\rightarrow$ Actions.
-4. **Tax & Form 16 Reconciliation**: Cross-checks payroll registers against uploaded Form 16 Part A/B and 26AS TDS credits.
-5. **Employee Finance & Allowances**: Salary computation engine, travel allowance caps, and appraisal revisions.
-6. **Financial Copilot**: Natural language reasoning chat with voice controller and quick prompt chips.
-7. **Two-Stage Hybrid Reconciliation**: Deterministic fast path and exception resolution.
-8. **Cash Flow Forecast**: 7-day, 30-day, 90-day, and fiscal year liquidity horizons.
-9. **Department Budgets & Runway**: Live allocations, committed spend, and year-end predictions.
-10. **Invoice Intelligence & Simulator**: Expense affordability simulator and 18% GST tax auditor.
-11. **Approvals Queue**: Human-in-the-Loop governance for transactions $\ge$ ₹50,000.
-12. **Vendor Intelligence Radar**: Vendor spend concentration and anomaly frequency.
-13. **Financial Watchtower Radar**: Real-time anomaly telemetry.
-14. **Immutable Audit Trail**: Chronological compliance log of all actions, revisions, and multi-agent reasoning traces.
-
----
-
-## 7. 🧪 Test Suite & Quality Verification
-
-FinPilot AI includes comprehensive automated test coverage passing with 100% success:
+## 7. 🧪 Automated Test Verification (100% Pass Rate)
 
 ```bash
-# 1. Digital Twin & Multi-Agent Test Suite
+# 1. Commerce, AI-to-AI Shopping & Failure Resilience Suite
+python tests/test_commerce_and_ai_shopping.py
+
+# 2. Financial Digital Twin & Multi-Agent Tests
 python tests/test_digital_twin_and_agents.py
 
-# 2. Decision Operating System Upgrade Suite
+# 3. Decision Operating System Suite
 python tests/test_decision_engine_upgrade.py
 
-# 3. AI Reasoning & Natural Language Chat Suite
+# 4. Multi-Agent Reasoning Pipeline Suite
 python tests/test_ai_chat_pipeline.py
 ```
-
----
-
-## 🚀 Quickstart Guide
-
-### 1. Clone & Setup
-```bash
-git clone https://github.com/GAUTAMX05/FinPilot-Ai.git
-cd FinPilot-Ai
-```
-
-### 2. Configure Environment
-```bash
-cp .env.example .env
-# Set OPENAI_API_KEY and RAZORPAY credentials in .env
-```
-
-### 3. Launch Server
-```bash
-python run_server.py
-```
-- **Web UI**: `http://127.0.0.1:8000/`
-- **Swagger Docs**: `http://127.0.0.1:8000/docs`
-- **Health Check**: `http://127.0.0.1:8000/health`

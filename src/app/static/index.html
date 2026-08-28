@@ -1693,6 +1693,326 @@
         </div>
 
         <!-- ================================================================= -->
+        <!-- TAB 13B: MERCHANT GROWTH & AI-TO-AI COMMERCE STUDIO -->
+        <!-- ================================================================= -->
+        <div id="view-commerce" class="tab-view hidden space-y-6">
+          
+          <!-- Header Strip -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0B1729] p-5 rounded-3xl border border-white/10 shadow-card">
+            <div>
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-glow-blue">
+                  <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h2 class="text-base font-bold text-white flex items-center gap-2">
+                    <span>Merchant Sales Growth & AI-to-AI Shopping Studio</span>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">AGENT COMMERCE PROTOCOL</span>
+                  </h2>
+                  <p class="text-xs text-slate-400 mt-0.5">Agent-readable product catalog, autonomous AI buyer negotiation, conversational in-app checkout, and growth campaigns via Razorpay test rails.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <a href="/v1/commerce/ai-manifest" target="_blank" class="btn-smooth text-xs font-semibold bg-[#071426] hover:bg-[#0F1D32] border border-white/10 px-3 py-2 rounded-xl flex items-center gap-1.5 text-blue-400">
+                <i data-lucide="code" class="w-3.5 h-3.5"></i>
+                <span>JSON-LD Manifest</span>
+              </a>
+              <button onclick="loadCommerceData()" class="btn-smooth text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-glow-blue">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Refresh Commerce</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Metric Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-[#0B1729] rounded-2xl p-4 border border-white/10 space-y-1">
+              <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Merchant Catalog SKUs</span>
+              <div class="text-xl font-extrabold text-white" id="commerceTotalSkus">5 Active SKUs</div>
+              <span class="text-[10px] text-emerald-400 font-medium">● 100% Agent-Readable Schema</span>
+            </div>
+            <div class="bg-[#0B1729] rounded-2xl p-4 border border-white/10 space-y-1">
+              <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Active Growth Campaigns</span>
+              <div class="text-xl font-extrabold text-white" id="commerceActiveCampaigns">1 Campaign</div>
+              <span class="text-[10px] text-blue-400 font-medium">Avg Projected ROAS: 3.8x</span>
+            </div>
+            <div class="bg-[#0B1729] rounded-2xl p-4 border border-white/10 space-y-1">
+              <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Autonomous Bulk Discount Cap</span>
+              <div class="text-xl font-extrabold text-white">Up to 15.0%</div>
+              <span class="text-[10px] text-purple-400 font-medium">Bounded Policy Enforcement</span>
+            </div>
+            <div class="bg-[#0B1729] rounded-2xl p-4 border border-white/10 space-y-1">
+              <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Resilience & Failure Modes</span>
+              <div class="text-xl font-extrabold text-emerald-400">4 / 4 Tested</div>
+              <span class="text-[10px] text-slate-400 font-medium">Auto-Recovery & Idempotency</span>
+            </div>
+          </div>
+
+          <!-- 4 Interactive Commerce Feature Panels -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- PANEL 1: AI-TO-AI AUTONOMOUS SHOPPING SIMULATOR -->
+            <div class="bg-[#0B1729] rounded-3xl p-6 border border-white/10 shadow-card space-y-5 flex flex-col justify-between">
+              <div class="space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                  <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center text-xs font-bold">A2A</div>
+                    <h3 class="text-sm font-bold text-white">1. AI-to-AI Autonomous Shopping Simulator</h3>
+                  </div>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">MACHINE-TO-MACHINE</span>
+                </div>
+
+                <p class="text-xs text-slate-400">Simulate an external Autonomous Buyer Agent querying the catalog, negotiating bulk volume discounts within merchant bounds, verifying spending token limits, and executing a Razorpay checkout.</p>
+
+                <!-- Configuration Controls -->
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <label class="block text-slate-400 font-semibold mb-1">Buyer Agent Identifier</label>
+                    <input type="text" id="a2aBuyerId" value="AGENT-PROCURE-BOT-42" class="w-full bg-[#071426] border border-white/10 rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-purple-500" />
+                  </div>
+                  <div>
+                    <label class="block text-slate-400 font-semibold mb-1">Spending Token Cap (₹)</label>
+                    <input type="number" id="a2aTokenLimit" value="100000" class="w-full bg-[#071426] border border-white/10 rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-purple-500" />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <label class="block text-slate-400 font-semibold mb-1">Select Product SKU</label>
+                    <select id="a2aProductSelect" class="w-full bg-[#071426] border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-purple-500"></select>
+                  </div>
+                  <div>
+                    <label class="block text-slate-400 font-semibold mb-1">Order Quantity (Units)</label>
+                    <input type="number" id="a2aQuantity" value="5" min="1" max="50" class="w-full bg-[#071426] border border-white/10 rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-purple-500" />
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 text-xs text-slate-300">
+                  <input type="checkbox" id="a2aNegotiateToggle" checked class="w-4 h-4 rounded bg-[#071426] border-white/20 text-purple-600 focus:ring-0" />
+                  <label for="a2aNegotiateToggle" class="cursor-pointer">Enable Autonomous Volume Discount Negotiation (Policy Cap: 15%)</label>
+                </div>
+
+                <button onclick="executeAIBuyerSimulation()" class="btn-smooth w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2.5 rounded-xl transition text-xs shadow-glow-purple flex items-center justify-center gap-2">
+                  <i data-lucide="bot" class="w-4 h-4"></i>
+                  <span>Execute Autonomous AI-to-AI Purchase</span>
+                </button>
+              </div>
+
+              <!-- Real-Time A2A Result Display -->
+              <div id="a2aResultContainer" class="hidden mt-4 p-4 rounded-2xl bg-[#071426] border border-purple-500/20 space-y-3 text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-white text-xs" id="a2aResultTxnId">TXN-A2A-1029</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" id="a2aResultStatus">SUCCESS</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-300">
+                  <div>Negotiated Discount: <strong class="text-purple-400" id="a2aResultDiscount">12.0%</strong></div>
+                  <div>GST (18%): <strong class="text-white" id="a2aResultGst">₹9,900.00</strong></div>
+                  <div>Net Payable: <strong class="text-emerald-400 text-xs" id="a2aResultTotal">₹64,900.00</strong></div>
+                  <div>Safety Bound: <strong class="text-blue-400" id="a2aResultSafety">Within Token Cap</strong></div>
+                </div>
+                <p class="text-[11px] text-slate-400 italic" id="a2aResultRationale"></p>
+                <div class="pt-2 border-t border-white/5 flex items-center justify-between">
+                  <span class="text-[10px] text-slate-400">Razorpay Test Rail:</span>
+                  <a id="a2aResultPaymentUrl" href="#" target="_blank" class="text-blue-400 hover:underline font-bold text-[11px] flex items-center gap-1">
+                    <span>Open Payment Link</span>
+                    <i data-lucide="external-link" class="w-3 h-3"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- PANEL 2: CONVERSATIONAL IN-APP CHECKOUT & SMART UPSELL -->
+            <div class="bg-[#0B1729] rounded-3xl p-6 border border-white/10 shadow-card space-y-4 flex flex-col justify-between">
+              <div class="space-y-3">
+                <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                  <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold">🛒</div>
+                    <h3 class="text-sm font-bold text-white">2. Conversational In-App Checkout & Upsells</h3>
+                  </div>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">LIVE CART & UPSELL</span>
+                </div>
+
+                <!-- Chat conversation scroll area -->
+                <div id="commerceChatMessages" class="h-44 overflow-y-auto space-y-2 p-3 bg-[#071426] rounded-2xl border border-white/5 text-xs text-slate-200">
+                  <div class="bg-[#0B1729] p-2.5 rounded-xl border border-white/5">
+                    👋 <strong>CloudNova Assistant:</strong> Welcome! Type a message like <em>"I want to buy the Ultra API Gateway"</em> or select from quick prompts below.
+                  </div>
+                </div>
+
+                <!-- Quick prompt chips -->
+                <div class="flex flex-wrap gap-1.5 text-[11px]">
+                  <button onclick="sendQuickCommerceMsg('I want to buy Ultra API Gateway')" class="px-2 py-1 rounded-lg bg-white/5 hover:bg-blue-600/20 text-slate-300 border border-white/5 transition">"Buy API Gateway"</button>
+                  <button onclick="sendQuickCommerceMsg('Yes, add the recommended bundle')" class="px-2 py-1 rounded-lg bg-white/5 hover:bg-blue-600/20 text-slate-300 border border-white/5 transition">"Add Upsell Bundle"</button>
+                  <button onclick="sendQuickCommerceMsg('Confirm and proceed to pay now')" class="px-2 py-1 rounded-lg bg-white/5 hover:bg-emerald-600/20 text-emerald-300 border border-white/5 transition">"Checkout Now"</button>
+                </div>
+
+                <!-- Input form -->
+                <form onsubmit="handleCommerceChatSubmit(event)" class="flex items-center gap-2">
+                  <input type="text" id="commerceChatInput" placeholder="e.g. Add 2 units of Dedicated VPC..." class="flex-1 bg-[#071426] border border-white/10 rounded-xl px-3.5 py-2 text-white text-xs focus:outline-none focus:border-blue-500" />
+                  <button type="submit" class="btn-smooth bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-xl shadow-glow-blue flex items-center justify-center">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                  </button>
+                </form>
+              </div>
+
+              <!-- Dynamic Cart & Upsell Sticky Strip -->
+              <div id="commerceCartStrip" class="p-3 rounded-2xl bg-[#071426] border border-white/10 space-y-2 text-xs">
+                <div class="flex items-center justify-between font-semibold">
+                  <span class="text-slate-300">Cart Total (incl. 18% GST):</span>
+                  <span class="text-emerald-400 font-bold" id="commerceCartTotalDisplay">₹0.00 INR</span>
+                </div>
+                <div id="commerceUpsellBanner" class="hidden p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-[11px] text-purple-300 flex items-center justify-between">
+                  <span id="commerceUpsellText">Save 15% with Cloud Core Bundle</span>
+                  <button onclick="applyUpsellFromWidget()" class="px-2 py-0.5 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold text-[10px]">Add + Save</button>
+                </div>
+                <button onclick="proceedConversationalCheckout()" id="commerceCheckoutBtn" class="btn-smooth w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl transition text-xs shadow-glow-blue flex items-center justify-center gap-1.5">
+                  <i data-lucide="credit-card" class="w-3.5 h-3.5"></i>
+                  <span>Generate Razorpay Test Payment Link</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- PANEL 3: AUTONOMOUS GROWTH CAMPAIGN ORCHESTRATOR -->
+            <div class="bg-[#0B1729] rounded-3xl p-6 border border-white/10 shadow-card space-y-4">
+              <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">📈</div>
+                  <h3 class="text-sm font-bold text-white">3. Autonomous Marketing Growth Campaigns</h3>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">BUDGET SYNCHRONIZED</span>
+              </div>
+
+              <p class="text-xs text-slate-400">Launch automated promotional campaigns tied to real-time Marketing department budgets, discounted Razorpay payment links, and projected ROAS metrics.</p>
+
+              <!-- Campaign Launcher Form -->
+              <div class="space-y-2.5 text-xs">
+                <div>
+                  <label class="block text-slate-400 font-semibold mb-1">Campaign Title</label>
+                  <input type="text" id="campName" value="Diwali AI Infrastructure Flash Surge" class="w-full bg-[#071426] border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500" />
+                </div>
+                <div class="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label class="block text-slate-400 font-semibold mb-1">Target Segment</label>
+                    <input type="text" id="campTarget" value="Fintech CTOs & Growth Startups" class="w-full bg-[#071426] border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500" />
+                  </div>
+                  <div>
+                    <label class="block text-slate-400 font-semibold mb-1">Promo Discount %</label>
+                    <input type="number" id="campDiscount" value="15" min="5" max="30" class="w-full bg-[#071426] border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500" />
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-slate-400 font-semibold mb-1">Allocated Marketing Spend (₹)</label>
+                  <input type="number" id="campBudget" value="50000" class="w-full bg-[#071426] border border-white/10 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500" />
+                </div>
+
+                <button onclick="launchGrowthCampaign()" class="btn-smooth w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl transition text-xs shadow-glow-blue flex items-center justify-center gap-2">
+                  <i data-lucide="zap" class="w-4 h-4"></i>
+                  <span>Launch Autonomous Campaign & Generate Promo Link</span>
+                </button>
+              </div>
+
+              <!-- Active Campaigns List -->
+              <div class="pt-3 border-t border-white/10 space-y-2">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Active Growth Campaigns</span>
+                <div id="activeCampaignsList" class="space-y-2 text-xs"></div>
+              </div>
+            </div>
+
+            <!-- PANEL 4: FAILURE RESILIENCE & EDGE-CASE SANDBOX -->
+            <div class="bg-[#0B1729] rounded-3xl p-6 border border-white/10 shadow-card space-y-4">
+              <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center text-xs font-bold">🛡️</div>
+                  <h3 class="text-sm font-bold text-white">4. Failure Handling & Resilience Sandbox</h3>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">JUDGING REQUIREMENT</span>
+              </div>
+
+              <p class="text-xs text-slate-400">Explicitly test and demonstrate how FinPilot AI gracefully recovers from 4 mission-critical financial failure modes without ledger side-effects.</p>
+
+              <!-- 4 Failure Trigger Buttons -->
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <button onclick="triggerFailureSimulation('API_GATEWAY_TIMEOUT')" class="btn-smooth p-3 rounded-2xl bg-[#071426] hover:bg-white/5 border border-white/10 text-left space-y-1">
+                  <div class="font-bold text-rose-400 flex items-center gap-1.5">
+                    <i data-lucide="wifi-off" class="w-3.5 h-3.5"></i>
+                    <span>1. Gateway Drop / Timeout</span>
+                  </div>
+                  <p class="text-[10px] text-slate-400">Idempotent retry with exponential backoff & offline fallback.</p>
+                </button>
+
+                <button onclick="triggerFailureSimulation('INVALID_PAYLOAD')" class="btn-smooth p-3 rounded-2xl bg-[#071426] hover:bg-white/5 border border-white/10 text-left space-y-1">
+                  <div class="font-bold text-amber-400 flex items-center gap-1.5">
+                    <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                    <span>2. Malformed Payload</span>
+                  </div>
+                  <p class="text-[10px] text-slate-400">Field-level schema diagnostics & safe rejection.</p>
+                </button>
+
+                <button onclick="triggerFailureSimulation('BUDGET_CAP_BREACH')" class="btn-smooth p-3 rounded-2xl bg-[#071426] hover:bg-white/5 border border-white/10 text-left space-y-1">
+                  <div class="font-bold text-orange-400 flex items-center gap-1.5">
+                    <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+                    <span>3. Budget Cap Hit</span>
+                  </div>
+                  <p class="text-[10px] text-slate-400">Pre-disbursement freeze & automated HITL escalation ticket.</p>
+                </button>
+
+                <button onclick="triggerFailureSimulation('TOKEN_SPENDING_OVERAGE')" class="btn-smooth p-3 rounded-2xl bg-[#071426] hover:bg-white/5 border border-white/10 text-left space-y-1">
+                  <div class="font-bold text-purple-400 flex items-center gap-1.5">
+                    <i data-lucide="key" class="w-3.5 h-3.5"></i>
+                    <span>4. AI Token Overage</span>
+                  </div>
+                  <p class="text-[10px] text-slate-400">Token limit breach prevention & human override link.</p>
+                </button>
+              </div>
+
+              <!-- Live Failure Recovery Log Window -->
+              <div id="failureLogContainer" class="mt-3 p-3.5 rounded-2xl bg-[#071426] border border-white/10 space-y-2 text-xs font-mono">
+                <div class="flex items-center justify-between text-[11px] font-sans font-semibold text-slate-300">
+                  <span>Resilience Telemetry Monitor</span>
+                  <span class="text-slate-500 text-[10px]" id="failureLogTime">Ready</span>
+                </div>
+                <div id="failureLogContent" class="text-[11px] text-slate-400 space-y-1">
+                  Click any failure mode above to witness real-time diagnostic recovery and audit logging.
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Product Catalog Table -->
+          <div class="bg-[#0B1729] rounded-3xl p-6 border border-white/10 shadow-card space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-bold text-white">Merchant Product Catalog (Agent-Discoverable)</h3>
+                <p class="text-xs text-slate-400">All products feature standardized pricing, 18% GST calculation, and autonomous negotiation discount bounds.</p>
+              </div>
+              <span class="text-xs font-mono text-slate-400" id="catalogItemCount">5 Products</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="text-slate-400 uppercase tracking-wider font-semibold border-b border-white/5">
+                    <th class="py-3 px-2">SKU / ID</th>
+                    <th class="py-3 px-2">Product Name</th>
+                    <th class="py-3 px-2">Category</th>
+                    <th class="py-3 px-2">Unit Price (INR)</th>
+                    <th class="py-3 px-2">GST (18%)</th>
+                    <th class="py-3 px-2">Stock</th>
+                    <th class="py-3 px-2">AI Max Discount</th>
+                    <th class="py-3 px-2">Upsell Synergies</th>
+                  </tr>
+                </thead>
+                <tbody id="commerceCatalogTableBody" class="divide-y divide-white/5 text-slate-300 font-mono"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================================================================= -->
         <!-- TAB 14: IMMUTABLE AUDIT TRAIL (CFO & AUDITOR) -->
         <!-- ================================================================= -->
         <div id="view-audit" class="tab-view hidden space-y-6">
@@ -2151,12 +2471,31 @@
     }
 
     function checkAuthSession() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const autoRole = urlParams.get("autologin");
+      const targetTab = urlParams.get("tab");
+
+      if (autoRole) {
+        let email = "cfo@aifinance.local";
+        if (autoRole === "fm" || autoRole === "financemanager") email = "finance.manager@aifinance.local";
+        else if (autoRole === "head" || autoRole === "depthead") email = "engineering.head@aifinance.local";
+        else if (autoRole === "auditor") email = "auditor@aifinance.local";
+        fillDemoLogin(email);
+        if (targetTab) {
+          setTimeout(() => switchTab(targetTab), 500);
+        }
+        return;
+      }
+
       const savedUser = localStorage.getItem("ai_finance_user");
       const savedToken = localStorage.getItem("ai_finance_token");
       if (savedUser && savedToken) {
         currentUser = JSON.parse(savedUser);
         authToken = savedToken;
         renderWorkspaceForRole();
+        if (targetTab) {
+          setTimeout(() => switchTab(targetTab), 500);
+        }
       } else {
         showLoginScreen();
       }
@@ -2253,6 +2592,7 @@
         {
           heading: "FINANCIAL OPERATIONS",
           items: [
+            { id: "commerce", label: "AI Commerce & Growth", icon: "shopping-bag" },
             { id: "budgets", label: "Department Budgets", icon: "pie-chart" },
             { id: "invoices", label: "Invoice Intelligence", icon: "scan" },
             { id: "reconciliation", label: "Reconciliation", icon: "scale" },
@@ -2329,6 +2669,7 @@
         vendors: "Vendor Spend & Risk Review Radar",
         allowances: "Employee Finance & Allowance Governance",
         taxreporting: "Tax & Salary Reporting (Form 16 Reconciliation)",
+        commerce: "Merchant Sales Growth & AI-to-AI Shopping Studio",
         audit: "Immutable Financial Audit Trail",
       };
       const titleEl = document.getElementById("topbarPageTitle");
@@ -2343,6 +2684,8 @@
         loadDigitalTwinData();
       } else if (tabId === "decisionmap") {
         loadDecisionMapData();
+      } else if (tabId === "commerce") {
+        loadCommerceData();
       } else if (tabId === "watchtower") {
         loadWatchtowerAlerts();
       } else if (tabId === "budgets") {
@@ -3630,6 +3973,320 @@
           `;
         });
       } catch (err) { console.error("Audit log error:", err); }
+    }
+
+    // =========================================================================
+    // MERCHANT SALES GROWTH & AI-TO-AI COMMERCE STUDIO LOGIC (NEW)
+    // =========================================================================
+    let currentCommerceCart = [];
+    let currentCatalogProducts = [];
+
+    async function loadCommerceData() {
+      try {
+        const [catRes, campRes] = await Promise.all([
+          apiFetch("/v1/commerce/catalog"),
+          apiFetch("/v1/commerce/campaigns")
+        ]);
+        const catData = await catRes.json();
+        const campData = await campRes.json();
+
+        currentCatalogProducts = catData.products || [];
+        
+        // Update SKU count
+        const skuEl = document.getElementById("commerceTotalSkus");
+        if (skuEl) skuEl.innerText = `${currentCatalogProducts.length} Active SKUs`;
+        const catCountEl = document.getElementById("catalogItemCount");
+        if (catCountEl) catCountEl.innerText = `${currentCatalogProducts.length} Products`;
+
+        // Populate SKU dropdown in A2A Panel
+        const prodSelect = document.getElementById("a2aProductSelect");
+        if (prodSelect) {
+          prodSelect.innerHTML = "";
+          currentCatalogProducts.forEach(p => {
+            const opt = document.createElement("option");
+            opt.value = p.id;
+            opt.innerText = `${p.name} (₹${p.unit_price.toLocaleString()})`;
+            prodSelect.appendChild(opt);
+          });
+        }
+
+        // Render Catalog Table
+        const tbody = document.getElementById("commerceCatalogTableBody");
+        if (tbody) {
+          tbody.innerHTML = "";
+          currentCatalogProducts.forEach(p => {
+            const gst = Math.round(p.unit_price * 0.18);
+            tbody.innerHTML += `
+              <tr class="hover:bg-white/5 transition-colors">
+                <td class="py-3 px-2 text-slate-400 font-bold text-[11px]">${p.sku || p.id}</td>
+                <td class="py-3 px-2 text-white font-semibold">${p.name}</td>
+                <td class="py-3 px-2 text-slate-300 font-sans text-xs">${p.category}</td>
+                <td class="py-3 px-2 text-emerald-400 font-bold">₹${p.unit_price.toLocaleString()}</td>
+                <td class="py-3 px-2 text-slate-300">₹${gst.toLocaleString()}</td>
+                <td class="py-3 px-2 text-blue-400 font-bold">${p.stock_available} units</td>
+                <td class="py-3 px-2 text-purple-400 font-bold">${p.max_discount_pct || 15}%</td>
+                <td class="py-3 px-2 text-slate-400 font-sans text-[11px]">${(p.compatible_upsells || []).join(', ') || 'None'}</td>
+              </tr>
+            `;
+          });
+        }
+
+        // Render Active Campaigns
+        const camps = campData.campaigns || [];
+        const campCountEl = document.getElementById("commerceActiveCampaigns");
+        if (campCountEl) campCountEl.innerText = `${camps.length} Campaign${camps.length === 1 ? '' : 's'}`;
+        
+        const campListEl = document.getElementById("activeCampaignsList");
+        if (campListEl) {
+          campListEl.innerHTML = "";
+          camps.forEach(c => {
+            campListEl.innerHTML += `
+              <div class="p-3 rounded-2xl bg-[#071426] border border-white/5 space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-white text-xs">${c.name}</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${c.discount_pct}% OFF</span>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-400">
+                  <span>Spend: ₹${c.allocated_budget.toLocaleString()}</span>
+                  <span>Proj. ROAS: <strong class="text-blue-400">${c.projected_roas}</strong></span>
+                  <span>Proj. Rev: <strong class="text-emerald-400">₹${(c.incremental_revenue_projected || 0).toLocaleString()}</strong></span>
+                </div>
+                <div class="pt-1 flex items-center justify-between text-[10px]">
+                  <span class="text-slate-500">Target: ${c.target_audience}</span>
+                  <a href="${c.razorpay_promo_link}" target="_blank" class="text-blue-400 hover:underline font-bold">Promo Link →</a>
+                </div>
+              </div>
+            `;
+          });
+        }
+
+        showToast("Commerce catalog and growth campaigns loaded.");
+        lucide.createIcons();
+      } catch (err) {
+        console.error("Commerce load error:", err);
+      }
+    }
+
+    async function executeAIBuyerSimulation() {
+      const buyerId = document.getElementById("a2aBuyerId")?.value || "AGENT-PROCURE-BOT-42";
+      const tokenLimit = parseFloat(document.getElementById("a2aTokenLimit")?.value || "100000");
+      const prodId = document.getElementById("a2aProductSelect")?.value;
+      const qty = parseInt(document.getElementById("a2aQuantity")?.value || "1");
+      const negotiate = document.getElementById("a2aNegotiateToggle")?.checked;
+
+      if (!prodId) {
+        showToast("Please select a product SKU.", true);
+        return;
+      }
+
+      try {
+        const res = await apiFetch("/v1/commerce/ai-buy", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Buyer-Agent-ID": buyerId,
+            "X-Spending-Token-Limit": tokenLimit.toString()
+          },
+          body: JSON.stringify({
+            buyer_agent_id: buyerId,
+            spending_token_limit_inr: tokenLimit,
+            items: [{ product_id: prodId, quantity: qty }],
+            negotiation_requested: negotiate
+          })
+        });
+
+        const data = await res.json();
+        const container = document.getElementById("a2aResultContainer");
+        if (!container) return;
+        container.classList.remove("hidden");
+
+        if (data.success) {
+          document.getElementById("a2aResultTxnId").innerText = data.transaction_id;
+          document.getElementById("a2aResultStatus").innerText = data.safety_and_governance?.governance_status || "SUCCESS";
+          document.getElementById("a2aResultDiscount").innerText = `${data.negotiation_summary?.discount_percentage || 0}% (₹${(data.negotiation_summary?.discount_amount || 0).toLocaleString()})`;
+          document.getElementById("a2aResultGst").innerText = `₹${(data.financial_breakdown?.gst_amount || 0).toLocaleString()}`;
+          document.getElementById("a2aResultTotal").innerText = `₹${(data.financial_breakdown?.total_payable || 0).toLocaleString()} INR`;
+          document.getElementById("a2aResultSafety").innerText = data.safety_and_governance?.within_spending_bound ? "Verified < Token Cap" : "Token Cap Breached";
+          document.getElementById("a2aResultRationale").innerText = data.negotiation_summary?.negotiation_rationale || "";
+          
+          const payUrl = document.getElementById("a2aResultPaymentUrl");
+          if (payUrl) payUrl.href = data.payment_execution?.payment_url || "#";
+
+          showToast("AI-to-AI purchase transaction successfully completed!");
+        } else {
+          document.getElementById("a2aResultTxnId").innerText = data.transaction_id || "BLOCKED";
+          document.getElementById("a2aResultStatus").className = "px-2 py-0.5 rounded text-[10px] font-extrabold bg-rose-500/10 text-rose-400 border border-rose-500/20";
+          document.getElementById("a2aResultStatus").innerText = data.error_code || "FAILED";
+          document.getElementById("a2aResultRationale").innerText = data.detail || "";
+          showToast(data.detail || "AI purchase blocked by safety boundary.", true);
+        }
+        lucide.createIcons();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function sendConversationalMessage(msgText, executeCheckout = false) {
+      if (!msgText || !msgText.trim()) return;
+
+      const chatBox = document.getElementById("commerceChatMessages");
+      if (chatBox) {
+        chatBox.innerHTML += `
+          <div class="bg-blue-600/20 p-2.5 rounded-xl border border-blue-500/30 text-right">
+            <strong>You:</strong> ${msgText}
+          </div>
+        `;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      try {
+        const res = await apiFetch("/v1/commerce/conversational-checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: msgText,
+            cart: currentCommerceCart,
+            execute_checkout: executeCheckout
+          })
+        });
+
+        const data = await res.json();
+        currentCommerceCart = data.cart || [];
+
+        // Append assistant response
+        if (chatBox) {
+          chatBox.innerHTML += `
+            <div class="bg-[#0B1729] p-2.5 rounded-xl border border-white/5 space-y-1">
+              <div>${data.assistant_response.replace(/\\n/g, '<br/>')}</div>
+            </div>
+          `;
+          chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Update Cart Strip
+        const totalDisp = document.getElementById("commerceCartTotalDisplay");
+        if (totalDisp) totalDisp.innerText = `₹${(data.cart_summary?.total_amount || 0).toLocaleString()} INR`;
+
+        // Check Upsell Recommendation
+        const upsellBanner = document.getElementById("commerceUpsellBanner");
+        const upsellText = document.getElementById("commerceUpsellText");
+        if (data.upsell_recommendations?.has_upsell && upsellBanner && upsellText) {
+          const rec = data.upsell_recommendations.recommendations[0];
+          upsellText.innerText = `Bundle Offer: Add ${rec.upsell_product_name} & save ₹${rec.customer_savings.toLocaleString()} (${rec.bundle_discount_pct}% OFF)`;
+          upsellBanner.classList.remove("hidden");
+        } else if (upsellBanner) {
+          upsellBanner.classList.add("hidden");
+        }
+
+        lucide.createIcons();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    function sendQuickCommerceMsg(text) {
+      const input = document.getElementById("commerceChatInput");
+      if (input) input.value = text;
+      sendConversationalMessage(text);
+    }
+
+    function handleCommerceChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById("commerceChatInput");
+      if (input && input.value) {
+        const val = input.value;
+        input.value = "";
+        sendConversationalMessage(val);
+      }
+    }
+
+    function applyUpsellFromWidget() {
+      sendConversationalMessage("Yes, add the recommended bundle to my cart");
+    }
+
+    function proceedConversationalCheckout() {
+      sendConversationalMessage("Confirm and proceed to pay now", true);
+    }
+
+    async function launchGrowthCampaign() {
+      const name = document.getElementById("campName")?.value;
+      const target = document.getElementById("campTarget")?.value;
+      const discount = parseFloat(document.getElementById("campDiscount")?.value || "15");
+      const budget = parseFloat(document.getElementById("campBudget")?.value || "50000");
+
+      if (!name) {
+        showToast("Please enter a campaign name.", true);
+        return;
+      }
+
+      try {
+        const res = await apiFetch("/v1/commerce/campaigns/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: name,
+            target_audience: target,
+            discount_pct: discount,
+            allocated_marketing_budget: budget,
+            product_ids: ["PROD-API-01", "PROD-LLM-03"]
+          })
+        });
+
+        const data = await res.json();
+        showToast(`Campaign '${name}' launched successfully with projected ROAS ${data.campaign?.projected_roas}!`);
+        loadCommerceData();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function triggerFailureSimulation(failureType) {
+      const logTime = document.getElementById("failureLogTime");
+      const logContent = document.getElementById("failureLogContent");
+      if (logTime) logTime.innerText = new Date().toLocaleTimeString();
+
+      try {
+        const res = await apiFetch("/v1/commerce/simulate-failure", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            failure_type: failureType,
+            custom_payload: {
+              buyer_agent_id: "AGENT-EXTERNAL-BOT-9",
+              amount: 99999999.0,
+              token_limit: 25000.0,
+              department: "Engineering"
+            }
+          })
+        });
+
+        const data = await res.json();
+        if (logContent) {
+          let stepsHtml = "";
+          if (data.recovery_steps) {
+            stepsHtml = data.recovery_steps.map(s => `<div class="text-slate-300">↳ [Step ${s.step}] <strong class="text-blue-400">${s.status}:</strong> ${s.action}</div>`).join("");
+          } else if (data.diagnostic_hints) {
+            stepsHtml = data.diagnostic_hints.map(h => `<div class="text-amber-300">↳ [Diagnostic]: ${h}</div>`).join("");
+          } else if (data.hitl_escalation_ticket) {
+            stepsHtml = `<div class="text-orange-400">↳ [Deficit Prevented]: ₹${(data.deficit_prevented || 0).toLocaleString()} | Ticket: <strong>${data.hitl_escalation_ticket}</strong></div>`;
+          } else if (data.human_override_authorization_url) {
+            stepsHtml = `<div class="text-purple-400">↳ [Overage Block]: Requested ₹${(data.requested_amount || 0).toLocaleString()} > Token ₹${(data.token_limit || 0).toLocaleString()}<br/><a href="${data.human_override_authorization_url}" class="underline text-blue-400">Open Human Override Authorization →</a></div>`;
+          }
+
+          logContent.innerHTML = `
+            <div class="pb-1 border-b border-white/10 flex items-center justify-between font-bold text-white">
+              <span class="text-emerald-400">● ${data.failure_description}</span>
+              <span class="text-xs text-slate-400">${data.final_status}</span>
+            </div>
+            <div class="text-[10px] text-slate-400">Strategy: <strong class="text-white">${data.recovery_strategy}</strong></div>
+            <div class="pt-1 space-y-1 font-mono text-[10px]">${stepsHtml}</div>
+          `;
+        }
+        showToast(`Tested ${failureType}: Gracefully recovered.`);
+        lucide.createIcons();
+      } catch (err) {
+        showToast(err.message, true);
+      }
     }
 
     async function loadWatchtowerAlerts() {
