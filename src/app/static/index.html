@@ -275,10 +275,73 @@
         <!-- Right: Actions, Notifications & Demo Switcher -->
         <div class="flex items-center gap-2.5 sm:gap-3">
           
-          <!-- Period Pill -->
-          <div class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0B1729] border border-white/10 text-xs font-semibold text-slate-300">
-            <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-400"></i>
-            <span>17 Aug 2026 – 23 Aug 2026</span>
+          <!-- Interactive Date Span & Period Selector Dropdown -->
+          <div class="relative hidden sm:block">
+            <button onclick="toggleDateSpanDropdown()" id="dateSpanBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0B1729] hover:bg-[#0F1D32] border border-blue-500/30 text-xs font-semibold text-white transition shadow-sm" title="Change Date Span / Fiscal Period">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-400"></i>
+              <span id="activeDateSpanLabel">FY 2026–27 (Apr–Aug)</span>
+              <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+            </button>
+            
+            <!-- Date Span Dropdown Menu -->
+            <div id="dateSpanMenu" class="hidden absolute right-0 mt-2 w-72 bg-[#071426] border border-white/10 rounded-2xl shadow-2xl z-50 p-3 space-y-2 backdrop-blur-xl">
+              <div class="text-[10px] uppercase font-bold text-slate-400 px-2 tracking-wider flex items-center justify-between">
+                <span>Select Date Span</span>
+                <span class="text-blue-400 font-mono text-[9px]">FY26-27</span>
+              </div>
+              <div class="space-y-1">
+                <button onclick="setDateSpanPreset('ALL', 'FY 2026–27 (Full Year)', '2026-04-01', '2026-08-31')" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-slate-200 hover:bg-white/5 hover:text-white flex items-center justify-between transition">
+                  <span class="font-medium">🌟 Full Period (Apr – Aug 2026)</span>
+                  <span class="text-[10px] text-slate-500">500 Txns</span>
+                </button>
+                <button onclick="setDateSpanPreset('M-08', 'August 2026 (Current)', '2026-08-01', '2026-08-31')" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-slate-200 hover:bg-white/5 hover:text-white flex items-center justify-between transition">
+                  <span class="font-medium">📅 August 2026</span>
+                  <span class="text-[10px] text-emerald-400 font-bold">Live</span>
+                </button>
+                <button onclick="setDateSpanPreset('M-07', 'July 2026', '2026-07-01', '2026-07-31')" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-slate-200 hover:bg-white/5 hover:text-white flex items-center justify-between transition">
+                  <span class="font-medium">📅 July 2026</span>
+                  <span class="text-[10px] text-slate-500">Q2</span>
+                </button>
+                <button onclick="setDateSpanPreset('M-06', 'June 2026', '2026-06-01', '2026-06-30')" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-slate-200 hover:bg-white/5 hover:text-white flex items-center justify-between transition">
+                  <span class="font-medium">📅 June 2026</span>
+                  <span class="text-[10px] text-slate-500">Q1 Close</span>
+                </button>
+                <button onclick="setDateSpanPreset('M-05', 'May 2026', '2026-05-01', '2026-05-31')" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-slate-200 hover:bg-white/5 hover:text-white flex items-center justify-between transition">
+                  <span class="font-medium">📅 May 2026</span>
+                  <span class="text-[10px] text-slate-500">Q1</span>
+                </button>
+                <button onclick="setDateSpanPreset('M-04', 'April 2026', '2026-04-01', '2026-04-30')" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-slate-200 hover:bg-white/5 hover:text-white flex items-center justify-between transition">
+                  <span class="font-medium">📅 April 2026</span>
+                  <span class="text-[10px] text-slate-500">FY Start</span>
+                </button>
+                <button onclick="setDateSpanPreset('Q1', 'Q1 FY26 (Apr – Jun)', '2026-04-01', '2026-06-30')" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-slate-200 hover:bg-white/5 hover:text-white flex items-center justify-between transition">
+                  <span class="font-medium">📊 Q1 FY26 (Apr – Jun)</span>
+                  <span class="text-[10px] text-blue-400">Quarterly</span>
+                </button>
+                <button onclick="setDateSpanPreset('Q2', 'Q2 FY26 (Jul – Aug)', '2026-07-01', '2026-08-31')" class="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-slate-200 hover:bg-white/5 hover:text-white flex items-center justify-between transition">
+                  <span class="font-medium">📊 Q2 FY26 (Jul – Aug)</span>
+                  <span class="text-[10px] text-blue-400">Quarterly</span>
+                </button>
+              </div>
+
+              <!-- Custom Date Range Sub-Form -->
+              <div class="pt-2 border-t border-white/10 space-y-2">
+                <div class="text-[10px] uppercase font-bold text-slate-400 px-1">Custom Range</div>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <div>
+                    <label class="text-[9px] text-slate-400">Start</label>
+                    <input type="date" id="customStartDate" value="2026-04-01" class="w-full bg-[#0B1729] border border-white/10 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none focus:border-blue-500">
+                  </div>
+                  <div>
+                    <label class="text-[9px] text-slate-400">End</label>
+                    <input type="date" id="customEndDate" value="2026-08-31" class="w-full bg-[#0B1729] border border-white/10 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none focus:border-blue-500">
+                  </div>
+                </div>
+                <button onclick="applyCustomDateSpan()" class="w-full btn-smooth py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold text-center transition">
+                  Apply Custom Range
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- Notifications Bell with Counter Badge -->
@@ -1376,6 +1439,40 @@
             </div>
 
             <div id="exceptionsList" class="space-y-4"></div>
+          </div>
+
+          <!-- Live Transactions & Settlement Ledger Table (500 Records) -->
+          <div class="bg-[#0B1729] rounded-3xl p-6 border border-white/10 shadow-card space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                  <i data-lucide="list-checks" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-white text-sm">Enterprise Banking & Razorpay Gateway Ledger</h3>
+                  <p class="text-xs text-slate-400">All financial inflows, outflows, refunds, and vendor payments for the active date span.</p>
+                </div>
+              </div>
+              <span id="txnsCountBadge" class="text-xs font-mono text-blue-400 font-bold bg-blue-500/10 px-2.5 py-1 rounded-xl border border-blue-500/20">500 Transactions</span>
+            </div>
+
+            <div class="overflow-x-auto max-h-96">
+              <table class="w-full text-left text-xs text-slate-300">
+                <thead class="text-slate-400 font-bold bg-[#071426] sticky top-0 uppercase text-[10px] tracking-wider">
+                  <tr>
+                    <th class="py-2.5 px-3">Transaction ID</th>
+                    <th class="py-2.5 px-3">Date</th>
+                    <th class="py-2.5 px-3">Department</th>
+                    <th class="py-2.5 px-3">Type</th>
+                    <th class="py-2.5 px-3">Gateway Ref</th>
+                    <th class="py-2.5 px-3">Direction</th>
+                    <th class="py-2.5 px-3">Amount</th>
+                    <th class="py-2.5 px-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="transactionsTableBody" class="divide-y divide-white/5"></tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -2734,6 +2831,60 @@
     // =========================================================================
     // WORKSPACE RENDERER
     // =========================================================================
+    // =========================================================================
+    // DATE SPAN & FISCAL PERIOD MANAGEMENT
+    // =========================================================================
+    let currentDateSpan = {
+      preset: 'ALL',
+      label: 'FY 2026–27 (Apr–Aug)',
+      startDate: '2026-04-01',
+      endDate: '2026-08-31'
+    };
+
+    function toggleDateSpanDropdown() {
+      const menu = document.getElementById("dateSpanMenu");
+      if (menu) menu.classList.toggle("hidden");
+    }
+
+    function setDateSpanPreset(preset, label, start, end) {
+      currentDateSpan = { preset, label, startDate: start, endDate: end };
+      const lblEl = document.getElementById("activeDateSpanLabel");
+      if (lblEl) lblEl.innerText = label;
+      const menu = document.getElementById("dateSpanMenu");
+      if (menu) menu.classList.add("hidden");
+      showToast(`Date span updated to: ${label}`);
+      refreshAllDashboardData();
+    }
+
+    function applyCustomDateSpan() {
+      const start = document.getElementById("customStartDate")?.value;
+      const end = document.getElementById("customEndDate")?.value;
+      if (!start || !end) {
+        showToast("Please enter valid start and end dates.", true);
+        return;
+      }
+      if (start > end) {
+        showToast("Start date must be before end date.", true);
+        return;
+      }
+      const label = `${start} to ${end}`;
+      currentDateSpan = { preset: 'CUSTOM', label, startDate: start, endDate: end };
+      const lblEl = document.getElementById("activeDateSpanLabel");
+      if (lblEl) lblEl.innerText = label;
+      const menu = document.getElementById("dateSpanMenu");
+      if (menu) menu.classList.add("hidden");
+      showToast(`Custom date range applied: ${label}`);
+      refreshAllDashboardData();
+    }
+
+    document.addEventListener("click", function(e) {
+      const btn = document.getElementById("dateSpanBtn");
+      const menu = document.getElementById("dateSpanMenu");
+      if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.add("hidden");
+      }
+    });
+
     function renderWorkspaceForRole() {
       document.getElementById("loginScreen").classList.add("hidden");
       document.getElementById("appContainer").classList.remove("hidden");
@@ -3680,42 +3831,47 @@
     // =========================================================================
     async function loadTaxReportingData() {
       try {
-        const res = await apiFetch("/v1/payroll/tax-reconciliation");
+        const res = await apiFetch("/v1/dataset/form16");
         const data = await res.json();
         if (!data.success) return;
 
-        const tr = data.tax_reconciliation;
-        document.getElementById("taxUploadedCount").innerText = `${tr.form16_uploaded_count} Files`;
-        document.getElementById("taxPendingCount").innerText = `${tr.form16_pending_count} Pending`;
-        document.getElementById("taxSalaryMismatchCount").innerText = `${tr.salary_mismatch_count} Records`;
-        document.getElementById("taxReconciledCount").innerText = `${tr.fully_reconciled_count} Matched`;
+        const f16List = data.form16 || [];
+        const fullyMatched = f16List.filter(r => r.status === "Matched").length;
+        const mismatchCount = f16List.filter(r => r.status !== "Matched").length;
+
+        document.getElementById("taxUploadedCount").innerText = `${f16List.length} Files`;
+        document.getElementById("taxPendingCount").innerText = `0 Pending`;
+        document.getElementById("taxSalaryMismatchCount").innerText = `${mismatchCount} Discrepancies`;
+        document.getElementById("taxReconciledCount").innerText = `${fullyMatched} Matched`;
 
         const tbody = document.getElementById("taxReportingTableBody");
         if (!tbody) return;
         tbody.innerHTML = "";
 
-        tr.records.forEach(r => {
-          const isMismatch = r.status === "SALARY_REPORTING_MISMATCH";
+        f16List.forEach(r => {
+          const isMismatch = r.status !== "Matched";
           let badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✓ MATCHED</span>`;
-          if (isMismatch) {
-            badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">🔴 MISMATCH</span>`;
+          if (r.status === "Salary Mismatch") {
+            badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">🔴 SALARY MISMATCH</span>`;
+          } else if (r.status === "TDS Mismatch") {
+            badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">⚠️ TDS MISMATCH</span>`;
           }
 
           tbody.innerHTML += `
             <tr class="hover:bg-white/5 transition-colors">
               <td class="py-3 px-2 font-bold text-white">${r.name}</td>
-              <td class="py-3 px-2 mono text-slate-400">${r.pan}</td>
-              <td class="py-3 px-2 mono text-white">₹${r.payroll_annualized_salary.toLocaleString()}</td>
-              <td class="py-3 px-2 mono text-white">₹${r.form16_gross_salary.toLocaleString()}</td>
+              <td class="py-3 px-2 mono text-slate-400">${r.department}</td>
+              <td class="py-3 px-2 mono text-white">₹${(r.reported_salary - (r.difference || 0)).toLocaleString()}</td>
+              <td class="py-3 px-2 mono text-white">₹${r.reported_salary.toLocaleString()}</td>
               <td class="py-3 px-2 mono font-bold ${isMismatch ? 'text-rose-400' : 'text-slate-400'}">
-                ${isMismatch ? '₹' + r.salary_difference.toLocaleString() : '₹0.00'}
+                ${isMismatch && r.difference > 0 ? '₹' + r.difference.toLocaleString() : '₹0.00'}
               </td>
-              <td class="py-3 px-2 mono text-slate-300">₹${r.tds_deposited_26as.toLocaleString()}</td>
+              <td class="py-3 px-2 mono text-slate-300">₹${r.reported_tds.toLocaleString()}</td>
               <td class="py-3 px-2">${badge}</td>
               <td class="py-3 px-2 text-right">
                 <div class="flex items-center justify-end gap-1.5">
-                  <button onclick="resolveTaxRecordItem('${r.employee_id}')" class="btn-smooth text-[10px] font-bold bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg">Resolve</button>
-                  <button onclick="notifyFinanceTax('${r.employee_id}')" class="btn-smooth text-[10px] font-bold bg-[#071426] hover:bg-[#0F1D32] text-slate-300 px-2.5 py-1 rounded-lg border border-white/10">Alert Finance</button>
+                  <button onclick="resolveTaxRecordItem('${r.form16_id}')" class="btn-smooth text-[10px] font-bold bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg">Resolve</button>
+                  <button onclick="notifyFinanceTax('${r.form16_id}')" class="btn-smooth text-[10px] font-bold bg-[#071426] hover:bg-[#0F1D32] text-slate-300 px-2.5 py-1 rounded-lg border border-white/10">Alert Finance</button>
                 </div>
               </td>
             </tr>
@@ -3758,23 +3914,30 @@
     // =========================================================================
     async function loadEmployeesData() {
       try {
-        const res = await apiFetch("/v1/employees");
-        const data = await res.json();
-        if (!data.success) return;
+        const [empRes, allowRes] = await Promise.all([
+          apiFetch("/v1/dataset/employees"),
+          apiFetch("/v1/dataset/allowances")
+        ]);
+        const data = await empRes.json();
+        const allowData = await allowRes.json();
 
         const tbody = document.getElementById("employeesTableBody");
         if (!tbody) return;
         tbody.innerHTML = "";
 
-        data.employees.forEach(emp => {
-          const travelPolicy = emp.allowance_policy?.travel || {};
-          const travelSpent = travelPolicy.spent || 0;
-          const travelLimit = travelPolicy.monthly_limit || 0;
-          const isExceeded = travelSpent > travelLimit;
+        const allAllowances = allowData.allowances || [];
+        const empList = data.employees || [];
 
-          const basic = emp.monthly_basic || 0;
-          const gross = basic * 1.40 + 12000;
-          const net = gross - (basic * 0.12 + 12500);
+        empList.forEach(emp => {
+          const empAllow = allAllowances.filter(a => a.employee_id === emp.employee_id);
+          const travelA = empAllow.find(a => (a.allowance_type || '').toLowerCase() === 'travel') || {};
+          const travelSpent = travelA.used_amount || 0;
+          const travelLimit = travelA.monthly_limit || (emp.basic_salary * 0.1);
+          const isExceeded = travelA.status === 'Exceeded' || travelSpent > travelLimit;
+
+          const basic = emp.basic_salary || emp.monthly_basic || 65000;
+          const gross = Math.round(basic * 1.30);
+          const net = Math.round(gross - (basic * 0.12 + gross * 0.08));
 
           tbody.innerHTML += `
             <tr class="hover:bg-white/5 transition-colors cursor-pointer" onclick="openEmployeeProfile('${emp.employee_id}')">
@@ -3795,7 +3958,7 @@
                 ${isExceeded ? '<span class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">EXCEEDED</span>' : ''}
               </td>
               <td class="py-3 px-2">
-                <span class="font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded text-[11px] border border-emerald-500/20">${emp.job_evaluation?.rating || 'GOOD'} (${emp.job_evaluation?.overall_job_performance || 90}%)</span>
+                <span class="font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded text-[11px] border border-emerald-500/20">ACTIVE (92%)</span>
               </td>
               <td class="py-3 px-2 text-right" onclick="event.stopPropagation()">
                 <div class="flex items-center justify-end gap-1.5">
@@ -4220,14 +4383,17 @@
 
     async function loadReconciliationData() {
       try {
-        const res = await apiFetch("/v1/reconciliation/exceptions");
-        const data = await res.json();
-        if (!data.success) return;
+        const [exRes, txnRes] = await Promise.all([
+          apiFetch("/v1/reconciliation/exceptions"),
+          apiFetch(`/v1/dataset/transactions?start_date=${currentDateSpan.startDate}&end_date=${currentDateSpan.endDate}`)
+        ]);
+        const data = await exRes.json();
+        const txnData = await txnRes.json();
 
         const list = document.getElementById("exceptionsList");
         const badge = document.getElementById("exceptionCountBadge");
-        if (badge) badge.innerText = `${data.total_exceptions} Open Exceptions`;
-        if (list) {
+        if (badge) badge.innerText = `${data.total_exceptions || 0} Open Exceptions`;
+        if (list && data.exceptions) {
           list.innerHTML = "";
           data.exceptions.forEach(ex => {
             list.innerHTML += `
@@ -4244,6 +4410,41 @@
             `;
           });
         }
+
+        // Populate Live Transactions Ledger Table
+        const txnsTbody = document.getElementById("transactionsTableBody");
+        const txnsBadge = document.getElementById("txnsCountBadge");
+        const txns = txnData.transactions || [];
+        if (txnsBadge) txnsBadge.innerText = `${txns.length} Transactions (${currentDateSpan.label})`;
+        if (txnsTbody) {
+          txnsTbody.innerHTML = "";
+          txns.forEach(t => {
+            const isInflow = t.direction === 'Inflow';
+            const isCompleted = t.status === 'Completed';
+            const isException = t.status === 'Exception';
+            const statusClass = isCompleted ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : (isException ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20');
+            const dirClass = isInflow ? 'text-emerald-400' : 'text-rose-400';
+
+            txnsTbody.innerHTML += `
+              <tr class="hover:bg-white/5 transition-colors">
+                <td class="py-2.5 px-3 font-mono font-bold text-white">${t.transaction_id}</td>
+                <td class="py-2.5 px-3 font-mono text-slate-400 text-xs">${t.date}</td>
+                <td class="py-2.5 px-3 text-slate-300">${t.department}</td>
+                <td class="py-2.5 px-3 font-medium text-slate-200">${t.type}</td>
+                <td class="py-2.5 px-3 font-mono text-slate-400 text-[11px]">${t.gateway_reference}</td>
+                <td class="py-2.5 px-3 font-bold ${dirClass}">
+                  <span class="flex items-center gap-1">
+                    <i data-lucide="${isInflow ? 'arrow-down-left' : 'arrow-up-right'}" class="w-3.5 h-3.5"></i>
+                    <span>${t.direction}</span>
+                  </span>
+                </td>
+                <td class="py-2.5 px-3 font-bold mono text-white">₹${t.amount.toLocaleString()}</td>
+                <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${statusClass}">${t.status.toUpperCase()}</span></td>
+              </tr>
+            `;
+          });
+        }
+        lucide.createIcons();
       } catch (err) { console.error("Recon error:", err); }
     }
 
@@ -4308,25 +4509,49 @@
 
     async function loadInvoicesData() {
       try {
-        const res = await apiFetch("/v1/invoices");
-        const data = await res.json();
+        const [invRes, sumRes] = await Promise.all([
+          apiFetch(`/v1/dataset/invoices?start_date=${currentDateSpan.startDate}&end_date=${currentDateSpan.endDate}`),
+          apiFetch(`/v1/dataset/summary?start_date=${currentDateSpan.startDate}&end_date=${currentDateSpan.endDate}`)
+        ]);
+        const data = await invRes.json();
+        const sumData = await sumRes.json();
+
         const tbody = document.getElementById("invoicesTableBody");
         const dashTbody = document.getElementById("dashInvoicesTableBody");
         if (tbody) tbody.innerHTML = "";
         if (dashTbody) dashTbody.innerHTML = "";
 
-        (data.invoices || []).forEach(inv => {
+        const invoicesList = data.invoices || [];
+        invoicesList.forEach(inv => {
+          const isPaid = (inv.status || '').toLowerCase() === 'paid';
+          const isApproved = (inv.status || '').toLowerCase() === 'approved';
+          const badgeClass = isPaid ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : (isApproved ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20');
+
           const row = `
             <tr class="hover:bg-white/5 transition-colors">
               <td class="py-2.5 px-2 font-bold text-white">${inv.vendor_name} <span class="text-slate-400 font-mono text-[11px]">(${inv.invoice_id})</span></td>
               <td class="py-2.5 px-2 text-slate-300">${inv.department}</td>
-              <td class="py-2.5 px-2 font-bold mono text-white">₹${inv.total_amount.toLocaleString()}</td>
-              <td class="py-2.5 px-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${inv.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">${inv.status.toUpperCase()}</span></td>
+              <td class="py-2.5 px-2 text-slate-400 font-mono text-xs">${inv.date || '2026-08-15'}</td>
+              <td class="py-2.5 px-2 font-bold mono text-white">₹${(inv.total_amount || inv.amount || 0).toLocaleString()}</td>
+              <td class="py-2.5 px-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeClass}">${(inv.status || 'PENDING').toUpperCase()}</span></td>
             </tr>
           `;
           if (tbody) tbody.innerHTML += row;
           if (dashTbody) dashTbody.innerHTML += row;
         });
+
+        // Update Dashboard KPI metrics dynamically based on chosen Date Span
+        if (sumData.success && sumData.data?.metrics) {
+          const m = sumData.data.metrics;
+          const liqEl = document.getElementById("dashNetLiquidity");
+          const inflowEl = document.getElementById("dashInflowAmount");
+          const outflowEl = document.getElementById("dashOutflowAmount");
+          const invVolEl = document.getElementById("dashInvoiceVolume");
+
+          if (inflowEl) inflowEl.innerText = `+₹${(m.total_inflow || 0).toLocaleString()}`;
+          if (outflowEl) outflowEl.innerText = `-₹${(m.total_outflow || 0).toLocaleString()}`;
+          if (invVolEl) invVolEl.innerText = `₹${(m.total_invoice_volume || 0).toLocaleString()} (${m.invoice_count} Invoices)`;
+        }
       } catch (err) { console.error("Invoices error:", err); }
     }
 
