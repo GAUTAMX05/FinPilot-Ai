@@ -1,3 +1,5 @@
+import os
+import json
 import logging
 from typing import Dict, List, Any, Optional
 from datetime import datetime
@@ -17,7 +19,7 @@ class EmployeeFinancialControlService:
         self._employees = self._init_employees()
 
     def _init_employees(self) -> List[Dict[str, Any]]:
-        return [
+        initial_list = [
             {
                 "employee_id": "EMP-101",
                 "name": "Rahul Sharma",
@@ -249,6 +251,114 @@ class EmployeeFinancialControlService:
             }
         ]
 
+        # Dynamically load and enrich all 100 employees from the enterprise dataset
+        try:
+            dataset_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                "data",
+                "enterprise_dataset.json",
+            )
+            if os.path.exists(dataset_path):
+                with open(dataset_path, "r", encoding="utf-8") as f:
+                    ds = json.load(f)
+
+                ds_emps = ds.get("employees", [])
+                ds_allowances = ds.get("allowances", [])
+                existing_ids = {e["employee_id"].replace("-", "").lower() for e in initial_list}
+
+                for de in ds_emps:
+                    emp_id = de.get("employee_id")
+                    if not emp_id or emp_id.replace("-", "").lower() in existing_ids:
+                        continue
+
+                    basic = float(de.get("basic_salary") or de.get("monthly_basic") or 60000.0)
+                    ctc = float(de.get("annual_ctc") or (basic * 14))
+
+                    # Find all allowances for this employee from dataset
+                    emp_allows = [a for a in ds_allowances if a.get("employee_id") == emp_id]
+                    policy = {
+                        "travel": {"monthly_limit": round(basic * 0.10, 2), "spent": 0.0, "annual_limit": round(basic * 1.2, 2)},
+                        "food": {"monthly_limit": round(basic * 0.05, 2), "spent": 0.0, "annual_limit": round(basic * 0.6, 2)},
+                        "fuel": {"monthly_limit": round(basic * 0.04, 2), "spent": 0.0, "annual_limit": round(basic * 0.48, 2)},
+                        "internet": {"monthly_limit": 2000.0, "spent": 1499.0, "annual_limit": 24000.0},
+                        "mobile": {"monthly_limit": 1500.0, "spent": 999.0, "annual_limit": 18000.0},
+                        "learning": {"monthly_limit": 5000.0, "spent": 0.0, "annual_limit": 60000.0},
+                        "wellness": {"monthly_limit": 3000.0, "spent": 1500.0, "annual_limit": 36000.0},
+                        "wfh": {"monthly_limit": 4000.0, "spent": 2000.0, "annual_limit": 48000.0},
+                    }
+
+                    for ea in emp_allows:
+                        atype = (ea.get("allowance_type") or "other").lower()
+                        mlim = float(ea.get("monthly_limit") or (basic * 0.10))
+                        spent = float(ea.get("used_amount") or 0.0)
+                        policy[atype] = {
+                            "monthly_limit": mlim,
+                            "spent": spent,
+                            "annual_limit": mlim * 12
+                        }
+
+                    travel_spent = policy["travel"]["spent"]
+                    travel_limit = policy["travel"]["monthly_limit"]
+
+                    initial_list.append({
+                        "employee_id": emp_id,
+                        "name": de.get("name", "Employee"),
+                        "email": de.get("email", f"{emp_id.lower()}@aifinance.local"),
+                        "phone": de.get("phone", "+91 98765 00000"),
+                        "department": de.get("department", "Engineering"),
+                        "designation": de.get("designation", "Software Engineer"),
+                        "salary_band": de.get("salary_band", f"₹{round(ctc/100000, 1)} LPA"),
+                        "annual_ctc": ctc,
+                        "monthly_basic": basic,
+                        "hra": round(basic * 0.40, 2),
+                        "special_allowance": round(basic * 0.15, 2),
+                        "bonus_variable": round(basic * 0.05, 2),
+                        "pf_deduction": round(basic * 0.12, 2),
+                        "tds_deduction": round(basic * 0.10, 2),
+                        "other_deductions": 0.0,
+                        "joining_date": de.get("joining_date", "2024-01-15"),
+                        "employment_type": de.get("employment_type", "Full-Time"),
+                        "status": de.get("status", "ACTIVE"),
+                        "manager": de.get("manager", "Vikramaditya S."),
+                        "location": de.get("location", "Bangalore HQ"),
+                        "monthly_allowance_limit": round(basic * 0.20, 2),
+                        "annual_allowance_limit": round(basic * 2.4, 2),
+                        "allowance_policy": policy,
+                        "claims": [
+                            {
+                                "claim_id": f"CLM-{emp_id}-01",
+                                "category": "Travel",
+                                "amount": round(travel_spent, 2),
+                                "date": "2026-08-15",
+                                "description": "Monthly Travel Reimbursement Claim",
+                                "status": "APPROVED" if travel_spent <= travel_limit else "FLAGGED_REVIEW"
+                            }
+                        ] if travel_spent > 0 else [],
+                        "salary_history": [
+                            {
+                                "effective_date": "2025-04-01",
+                                "previous_salary": round(basic * 0.90, 2),
+                                "new_salary": basic,
+                                "increase_pct": 11.1,
+                                "reason": "Annual Merit Increment",
+                                "approved_by": "Vikramaditya S. (CFO)"
+                            }
+                        ],
+                        "job_evaluation": {
+                            "goal_completion_pct": 92.0,
+                            "milestones_delivered": "4 / 4 Deliverables",
+                            "code_quality_and_reliability": 90.0,
+                            "timeliness": 91.0,
+                            "expense_policy_discipline": 88.0,
+                            "overall_job_performance": 90.0,
+                            "rating": "MEETS_EXPECTATIONS"
+                        }
+                    })
+        except Exception as e:
+            logger.error(f"Failed to load dataset employees in employee_finance_service: {e}")
+
+        return initial_list
+
     # =========================================================================
     # EMPLOYEE RETRIEVAL & CRUD OPERATIONS
     # =========================================================================
@@ -271,24 +381,26 @@ class EmployeeFinancialControlService:
         user_department: Optional[str] = None,
     ) -> Optional[Dict[str, Any]]:
         """Retrieves a single employee record with computed salary breakdown."""
+        target_norm = employee_id.replace("-", "").strip().lower()
         for emp in self._employees:
-            if emp["employee_id"].lower() == employee_id.lower():
+            emp_norm = emp["employee_id"].replace("-", "").strip().lower()
+            if emp_norm == target_norm or emp["employee_id"].lower() == employee_id.lower():
                 if user_role == "DEPARTMENT_HEAD" and user_department:
                     if emp["department"].lower() != user_department.lower():
                         raise PermissionError(f"Access denied to employee in {emp['department']} department.")
                 
                 # Compute mathematical salary figures deterministically
-                b = emp.get("monthly_basic", 0.0)
+                b = emp.get("monthly_basic") or emp.get("basic_salary") or 50000.0
                 hra = emp.get("hra", b * 0.40)
-                spec = emp.get("special_allowance", 0.0)
-                bonus = emp.get("bonus_variable", 0.0)
+                spec = emp.get("special_allowance", b * 0.15)
+                bonus = emp.get("bonus_variable", b * 0.05)
                 
                 # Active monthly allowances
                 allowance_spent = sum(cat.get("spent", 0.0) for cat in emp.get("allowance_policy", {}).values())
                 
                 gross_salary = b + hra + spec + bonus
                 pf = emp.get("pf_deduction", b * 0.12)
-                tds = emp.get("tds_deduction", 0.0)
+                tds = emp.get("tds_deduction", b * 0.10)
                 other = emp.get("other_deductions", 0.0)
                 total_deductions = pf + tds + other
                 net_salary = max(0.0, gross_salary - total_deductions)
