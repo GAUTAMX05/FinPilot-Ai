@@ -196,4 +196,4 @@ python tests/test_ai_chat_pipeline.py
 
 ## 📖 In-Depth System Documentation
 - [WALKTHROUGH.md](WALKTHROUGH.md) — Comprehensive architectural breakdown, simulation math, and API schemas.
-- [PITCH_DECK_GUIDE.md](PITCH_DECK_GUIDE.md) — Complete 5-minute executive pitch guide and judge Q&A cheat sheet.
+
