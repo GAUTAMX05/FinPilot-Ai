@@ -30,3 +30,6 @@ Thumbs.db
 *.log
 scratch/
 .system_generated/
+*chrome_*user_data/
+chrome_user_data/
+chrome_test_user_data/
