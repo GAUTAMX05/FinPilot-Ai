@@ -33,3 +33,7 @@ scratch/
 *chrome_*user_data/
 chrome_user_data/
 chrome_test_user_data/
+
+tests/chrome_compose_test_data/
+
+tests/chrome_copilot_test_data/

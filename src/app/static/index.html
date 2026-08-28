@@ -4891,7 +4891,9 @@
     }
     function closeReportModal() { document.getElementById("reportModal").classList.add("hidden"); }
 
-    // Voice & Chat Handlers
+    // =========================================================================
+    // 8. FINANCIAL DECISION COPILOT LOGIC & MULTI-AGENT HANDLERS
+    // =========================================================================
     function configureChatPrompts() {
       const chips = document.getElementById("chatPromptChips");
       if (chips) {
@@ -4899,8 +4901,9 @@
         chips.innerHTML += `
           <button onclick="sendQuickPrompt('What if Engineering spending rate stays the same for 60 more days?')" class="btn-smooth flex-shrink-0 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 px-3 py-1 rounded-xl border border-blue-500/30">What-If: Eng Burn</button>
           <button onclick="sendQuickPrompt('What if we delay vendor payments by 2 weeks — does it fix our cash position?')" class="btn-smooth flex-shrink-0 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 px-3 py-1 rounded-xl border border-amber-500/30">What-If: 14D Delay</button>
-          <button onclick="sendQuickPrompt('What if we hire 3 senior engineers in Q3?')" class="btn-smooth flex-shrink-0 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 px-3 py-1 rounded-xl border border-purple-500/30">What-If: Hires</button>
-          <button onclick="sendQuickPrompt('Why is Engineering overspending on cloud? Correlate root causes.')" class="btn-smooth flex-shrink-0 bg-[#0B1729] hover:bg-blue-600/20 text-slate-300 px-3 py-1 rounded-xl border border-white/10">Causal Root Cause</button>
+          <button onclick="sendQuickPrompt('What if we hire 3 senior engineers in Q3 at ₹90,000 monthly basic?')" class="btn-smooth flex-shrink-0 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 px-3 py-1 rounded-xl border border-purple-500/30">What-If: Hires</button>
+          <button onclick="sendQuickPrompt('Why is Engineering overspending on cloud? Pinpoint causal root cause.')" class="btn-smooth flex-shrink-0 bg-[#0B1729] hover:bg-blue-600/20 text-slate-300 px-3 py-1 rounded-xl border border-white/10">Causal Root Cause</button>
+          <button onclick="sendQuickPrompt('Assess company liquidity runway and statutory compliance health')" class="btn-smooth flex-shrink-0 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 px-3 py-1 rounded-xl border border-emerald-500/30">Liquidity & Runway</button>
         `;
       }
     }
@@ -4932,20 +4935,50 @@
     }
 
     function sendQuickPrompt(promptText) {
-      document.getElementById("chatInput").value = promptText;
-      document.getElementById("chatForm").dispatchEvent(new Event("submit"));
       switchTab('chat');
+      const input = document.getElementById("chatInput");
+      if (input) {
+        input.value = promptText;
+        setTimeout(() => {
+          document.getElementById("chatForm")?.dispatchEvent(new Event("submit"));
+        }, 100);
+      }
     }
-    function clearChat() { document.getElementById("chatMessages").innerHTML = ""; }
+
+    function clearChat() { 
+      const container = document.getElementById("chatMessages");
+      if (container) container.innerHTML = "";
+      const hitl = document.getElementById("hitlPromptContainer");
+      if (hitl) hitl.classList.add("hidden");
+    }
 
     async function handleChatSubmit(e) {
       e.preventDefault();
       const input = document.getElementById("chatInput");
+      const sendBtn = document.getElementById("sendBtn");
       const query = input.value.trim();
       if (!query) return;
 
       input.value = "";
       appendMessage("user", query);
+
+      // Add thinking indicator bubble
+      const thinkingDiv = document.createElement("div");
+      thinkingDiv.id = "chatThinkingIndicator";
+      thinkingDiv.className = "flex gap-3.5 items-start animate-pulse";
+      thinkingDiv.innerHTML = `
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white flex-shrink-0 flex items-center justify-center text-xs font-bold">FP</div>
+        <div class="bg-[#0B1729] border border-blue-500/30 text-blue-300 rounded-3xl rounded-tl-none p-4 max-w-xl text-xs flex items-center gap-2">
+          <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+          <span>FinPilot Multi-Agent Orchestrator is synthesizing telemetry & forward simulations...</span>
+        </div>
+      `;
+      const container = document.getElementById("chatMessages");
+      container.appendChild(thinkingDiv);
+      container.scrollTop = container.scrollHeight;
+      lucide.createIcons();
+
+      if (sendBtn) sendBtn.disabled = true;
 
       try {
         const res = await apiFetch("/v1/agent/chat", {
@@ -4954,26 +4987,80 @@
           body: JSON.stringify({ message: query, thread_id: currentThreadId })
         });
         const data = await res.json();
-        appendMessage("assistant", data.response || "Assessment complete.");
+
+        // Remove thinking indicator
+        const tEl = document.getElementById("chatThinkingIndicator");
+        if (tEl) tEl.remove();
+
+        if (data.status === "pending_approval") {
+          const hitl = document.getElementById("hitlPromptContainer");
+          const hitlText = document.getElementById("hitlPromptText");
+          if (hitl) hitl.classList.remove("hidden");
+          if (hitlText) hitlText.innerText = data.response || "High-value financial action requires your executive authorization.";
+        } else {
+          const hitl = document.getElementById("hitlPromptContainer");
+          if (hitl) hitl.classList.add("hidden");
+        }
+
+        appendMessage("assistant", data.response || "Multi-agent assessment completed.");
+
       } catch (err) {
-        appendMessage("assistant", `Encountered error: ${err.message}`);
+        const tEl = document.getElementById("chatThinkingIndicator");
+        if (tEl) tEl.remove();
+        appendMessage("assistant", `⚠️ Encountered error communicating with Copilot: ${err.message}`);
+      } finally {
+        if (sendBtn) sendBtn.disabled = false;
+      }
+    }
+
+    async function submitApprovalDecision(approve) {
+      const hitl = document.getElementById("hitlPromptContainer");
+      if (hitl) hitl.classList.add("hidden");
+
+      appendMessage("user", approve ? "✅ Authorize this high-value disbursement" : "❌ Reject this disbursement request");
+
+      try {
+        const res = await apiFetch("/v1/agent/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ approve, thread_id: currentThreadId, message: "" })
+        });
+        const data = await res.json();
+        appendMessage("assistant", data.response || `Action recorded: ${approve ? 'AUTHORIZED' : 'REJECTED'}.`);
+        loadApprovalsData();
+        loadAuditLogsData();
+      } catch (err) {
+        appendMessage("assistant", `Error processing authorization: ${err.message}`);
       }
     }
 
     function appendMessage(role, text) {
       const container = document.getElementById("chatMessages");
+      if (!container) return;
       const msgDiv = document.createElement("div");
       const isUser = role === "user";
       msgDiv.className = `flex gap-3.5 items-start ${isUser ? 'justify-end' : ''}`;
-      const parsedMarkdown = typeof marked !== 'undefined' ? marked.parse(text) : text;
+      
+      let formattedText = text;
+      if (typeof marked !== 'undefined') {
+        try {
+          formattedText = marked.parse(text);
+        } catch (e) {
+          formattedText = text.replace(/\n/g, '<br/>');
+        }
+      } else {
+        formattedText = text.replace(/\n/g, '<br/>');
+      }
+
       msgDiv.innerHTML = isUser ? `
-        <div class="bg-blue-600 text-white rounded-3xl rounded-tr-none p-4 max-w-xl text-xs sm:text-sm whitespace-pre-wrap">${text}</div>
+        <div class="bg-blue-600 text-white rounded-3xl rounded-tr-none p-4 max-w-xl text-xs sm:text-sm whitespace-pre-wrap leading-relaxed shadow-glow-blue">${text}</div>
       ` : `
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white flex-shrink-0 flex items-center justify-center text-xs font-bold">DE</div>
-        <div class="bg-[#0B1729] border border-white/10 text-slate-200 rounded-3xl rounded-tl-none p-5 max-w-2xl text-xs sm:text-sm prose-ai">${parsedMarkdown}</div>
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white flex-shrink-0 flex items-center justify-center text-xs font-bold shadow-glow-blue">FP</div>
+        <div class="bg-[#0B1729] border border-white/10 text-slate-200 rounded-3xl rounded-tl-none p-5 max-w-2xl text-xs sm:text-sm prose-ai space-y-2 leading-relaxed">${formattedText}</div>
       `;
       container.appendChild(msgDiv);
       container.scrollTop = container.scrollHeight;
+      lucide.createIcons();
     }
   </script>
 </body>
