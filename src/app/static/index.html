@@ -2054,35 +2054,53 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 3. SLIDE-OVER NOTIFICATIONS DRAWER -->
+  <!-- 3. SLIDE-OVER NOTIFICATIONS & INTERNAL COMMUNICATION DRAWER -->
   <!-- ===================================================================== -->
   <div id="notificationsDrawer" class="hidden fixed inset-0 z-50 overflow-hidden bg-black/60 backdrop-blur-sm">
     <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
-      <div class="w-screen max-w-md bg-[#0B1729] border-l border-white/10 shadow-modal flex flex-col justify-between">
+      <div class="w-screen max-w-lg bg-[#0B1729] border-l border-white/10 shadow-modal flex flex-col justify-between">
         
         <!-- Drawer Header -->
         <div class="p-5 border-b border-white/10 bg-[#071426] flex items-center justify-between">
           <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center">
-              <i data-lucide="bell" class="w-4 h-4"></i>
+            <div class="w-9 h-9 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center border border-blue-500/30">
+              <i data-lucide="bell" class="w-4.5 h-4.5"></i>
             </div>
             <div>
-              <h3 class="font-bold text-white text-sm">Financial Notifications & Exceptions</h3>
-              <span class="text-[11px] text-slate-400" id="drawerNotifCount">3 Active Issues</span>
+              <div class="flex items-center gap-2">
+                <h3 class="font-bold text-white text-sm">Notifications & Direct Requests</h3>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-400 border border-blue-500/30" id="drawerNotifCount">0 Unread</span>
+              </div>
+              <span class="text-[11px] text-slate-400" id="drawerUserScopedLabel">Inbox for Active User</span>
             </div>
           </div>
-          <button onclick="toggleNotificationsDrawer()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
+          <div class="flex items-center gap-2">
+            <button onclick="openComposeNotificationModal()" class="btn-smooth flex items-center gap-1 bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-glow-blue">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              <span>New Request</span>
+            </button>
+            <button onclick="toggleNotificationsDrawer()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="px-5 py-2.5 bg-[#071224] border-b border-white/5">
+          <div class="relative">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-3 top-2.5"></i>
+            <input type="text" id="notifSearchInput" oninput="handleNotifSearchInput(this.value)" placeholder="Search requests, invoices, subjects..." class="w-full bg-[#0B1729] border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          </div>
         </div>
 
         <!-- Filter Tabs -->
-        <div class="px-5 py-2.5 bg-[#081324] border-b border-white/5 flex items-center gap-1.5 overflow-x-auto text-[11px] font-semibold">
+        <div class="px-5 py-2 bg-[#081324] border-b border-white/5 flex items-center gap-1.5 overflow-x-auto text-[11px] font-semibold no-scrollbar">
           <button onclick="filterNotifications('ALL')" class="notif-tab-btn px-2.5 py-1 rounded-lg bg-blue-600 text-white" id="notifTabALL">All</button>
+          <button onclick="filterNotifications('APPROVALS')" class="notif-tab-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white" id="notifTabAPPROVALS">Approvals</button>
+          <button onclick="filterNotifications('BUDGET')" class="notif-tab-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white" id="notifTabBUDGET">Budgets</button>
+          <button onclick="filterNotifications('INVOICE')" class="notif-tab-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white" id="notifTabINVOICE">Invoices</button>
           <button onclick="filterNotifications('PAYROLL')" class="notif-tab-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white" id="notifTabPAYROLL">Payroll</button>
           <button onclick="filterNotifications('COMPLIANCE')" class="notif-tab-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white" id="notifTabCOMPLIANCE">Compliance</button>
-          <button onclick="filterNotifications('FINANCIAL')" class="notif-tab-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white" id="notifTabFINANCIAL">Financial</button>
-          <button onclick="filterNotifications('EMPLOYEE')" class="notif-tab-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white" id="notifTabEMPLOYEE">Employee</button>
         </div>
 
         <!-- Notification Cards List -->
@@ -2090,11 +2108,170 @@
 
         <!-- Drawer Footer -->
         <div class="p-4 border-t border-white/10 bg-[#071426] flex items-center justify-between text-xs font-semibold">
-          <button onclick="markAllNotificationsRead()" class="text-slate-400 hover:text-white">Mark all as read</button>
-          <button onclick="clearAllNotifications()" class="text-rose-400 hover:text-rose-300">Clear notifications</button>
+          <button onclick="markAllNotificationsRead()" class="text-slate-400 hover:text-white flex items-center gap-1">
+            <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
+            <span>Mark all as read</span>
+          </button>
+          <button onclick="clearAllNotifications()" class="text-rose-400 hover:text-rose-300 flex items-center gap-1">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>Clear inbox</span>
+          </button>
         </div>
 
       </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TWO-WAY REQUEST & CONVERSATION THREAD MODAL -->
+  <!-- ===================================================================== -->
+  <div id="notifThreadModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-[#0F1D32] rounded-3xl p-6 max-w-xl w-full border border-white/10 shadow-modal space-y-4 max-h-[90vh] flex flex-col justify-between">
+      
+      <!-- Thread Header -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold" id="threadPriorityBadge">HIGH</span>
+            <span class="text-xs text-slate-400 mono" id="threadEntityBadge">EXPENSE: EXP-1021</span>
+            <span class="text-[10px] text-emerald-400 font-semibold hidden" id="threadResolvedStatus">✓ Resolved</span>
+          </div>
+          <h3 class="font-bold text-white text-base" id="threadSubject">Engineering Cloud Spending</h3>
+          <div class="text-[11px] text-slate-400 flex items-center gap-2">
+            <span id="threadSenderRecip">From: Vikramaditya Singhania (CFO) → Rahul Verma (Finance Manager)</span>
+          </div>
+        </div>
+        <button onclick="closeNotificationThreadModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Thread Message History -->
+      <div class="flex-1 overflow-y-auto space-y-3 p-3 rounded-2xl bg-[#071426] border border-white/5 max-h-[350px]" id="threadMessagesContainer">
+        <!-- Live thread bubbles rendered dynamically -->
+      </div>
+
+      <!-- Reply Box Form -->
+      <form id="threadReplyForm" onsubmit="handleThreadReplySubmit(event)" class="space-y-3 pt-2 border-t border-white/10">
+        <div class="flex gap-2">
+          <input type="text" id="threadReplyInput" placeholder="Type your reply to this financial request..." required class="flex-1 bg-[#0B1729] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          <button type="submit" class="btn-smooth bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-glow-blue">
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            <span>Reply</span>
+          </button>
+        </div>
+        
+        <!-- Action Quick-Bar -->
+        <div class="flex items-center justify-between pt-1 text-xs">
+          <button type="button" id="threadNavActionBtn" onclick="navigateToThreadEntity()" class="btn-smooth flex items-center gap-1 text-blue-400 hover:text-blue-300 font-semibold">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            <span id="threadNavActionLabel">Open Linked Record</span>
+          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="escalateActiveThreadToCFO()" id="threadEscalateBtn" class="btn-smooth text-[11px] font-bold text-amber-400 hover:text-amber-300 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20">
+              Escalate to CFO
+            </button>
+            <button type="button" onclick="resolveActiveThread()" id="threadResolveBtn" class="btn-smooth text-[11px] font-bold text-emerald-400 hover:text-emerald-300 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+              Mark Resolved
+            </button>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- COMPOSE INTERNAL REQUEST / NOTIFICATION MODAL -->
+  <!-- ===================================================================== -->
+  <div id="composeNotifModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-[#0F1D32] rounded-3xl p-6 max-w-lg w-full border border-white/10 shadow-modal space-y-4">
+      
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center border border-blue-500/30">
+            <i data-lucide="send" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-sm">Send Internal Request / Notification</h3>
+            <span class="text-[11px] text-slate-400">Direct, targeted communication to authorized recipient</span>
+          </div>
+        </div>
+        <button onclick="closeComposeNotificationModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="composeNotifForm" onsubmit="handleComposeSubmit(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Target Recipient User <span class="text-rose-400">*</span></label>
+          <select id="composeRecipient" required class="w-full bg-[#0B1729] border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+            <!-- Populated dynamically from /v1/notifications/directory -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">Request Type</label>
+            <select id="composeType" class="w-full bg-[#0B1729] border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+              <option value="APPROVAL_REQUEST">Approval Request</option>
+              <option value="BUDGET_REQUEST">Budget Request</option>
+              <option value="BUDGET_WARNING">Budget Warning</option>
+              <option value="INVOICE_REVIEW">Invoice Review</option>
+              <option value="INVOICE_ANOMALY">Invoice Anomaly</option>
+              <option value="DECISION_REQUEST">Decision Request</option>
+              <option value="ESCALATION">Escalation</option>
+              <option value="DIRECT_MESSAGE">Direct Question / Message</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">Priority</label>
+            <select id="composePriority" class="w-full bg-[#0B1729] border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+              <option value="MEDIUM">Medium</option>
+              <option value="HIGH">High (Executive Attention)</option>
+              <option value="CRITICAL">Critical (Blocking Issue)</option>
+              <option value="LOW">Low (Informational)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">Entity Type</label>
+            <select id="composeEntityType" class="w-full bg-[#0B1729] border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+              <option value="EXPENSE">Expense Claim</option>
+              <option value="INVOICE">Invoice</option>
+              <option value="BUDGET">Department Budget</option>
+              <option value="PAYROLL">Payroll / Tax</option>
+              <option value="ALLOWANCE">Allowance</option>
+              <option value="COMMUNICATION">General Communication</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">Entity ID (Optional)</label>
+            <input type="text" id="composeEntityId" placeholder="e.g. EXP-1021, INV-2026-001" class="w-full bg-[#0B1729] border border-white/10 rounded-xl px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Subject / Title <span class="text-rose-400">*</span></label>
+          <input type="text" id="composeTitle" required placeholder="Brief subject line" class="w-full bg-[#0B1729] border border-white/10 rounded-xl px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Message Content <span class="text-rose-400">*</span></label>
+          <textarea id="composeMessage" required rows="3" placeholder="Provide context, financial justification, or specific instructions..." class="w-full bg-[#0B1729] border border-white/10 rounded-xl px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500"></textarea>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2.5">
+          <button type="button" onclick="closeComposeNotificationModal()" class="btn-smooth text-slate-400 hover:text-white px-4 py-2 rounded-xl text-xs font-semibold">Cancel</button>
+          <button type="submit" class="btn-smooth bg-blue-600 hover:bg-blue-500 text-white font-semibold px-5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-glow-blue">
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            <span>Send Request</span>
+          </button>
+        </div>
+      </form>
+
     </div>
   </div>
 
@@ -2981,64 +3158,135 @@
     }
 
     // =========================================================================
-    // 2. NOTIFICATIONS DRAWER LOGIC
+    // 2. ROLE-BASED NOTIFICATIONS & INTERNAL COMMUNICATION LOGIC
     // =========================================================================
+    let activeNotifCategory = "ALL";
+    let activeNotifSearch = "";
+    let activeThreadNotif = null;
+    let cachedNotifications = [];
+
     function toggleNotificationsDrawer() {
       const drawer = document.getElementById("notificationsDrawer");
       drawer.classList.toggle("hidden");
       if (!drawer.classList.contains("hidden")) {
-        loadNotificationsData();
+        const userScopedLabel = document.getElementById("drawerUserScopedLabel");
+        if (userScopedLabel && currentUser) {
+          userScopedLabel.innerText = `Inbox for ${currentUser.name} (${currentUser.role}${currentUser.department ? ' - ' + currentUser.department : ''})`;
+        }
+        loadNotificationsData(activeNotifCategory, activeNotifSearch);
       }
       lucide.createIcons();
     }
 
-    async function loadNotificationsData(category = "ALL") {
+    let notifSearchTimeout = null;
+    function handleNotifSearchInput(val) {
+      clearTimeout(notifSearchTimeout);
+      notifSearchTimeout = setTimeout(() => {
+        activeNotifSearch = val.trim();
+        loadNotificationsData(activeNotifCategory, activeNotifSearch);
+      }, 250);
+    }
+
+    async function loadNotificationsData(category = "ALL", search = "") {
       try {
-        const res = await apiFetch(`/v1/notifications?category=${category}`);
+        activeNotifCategory = category;
+        const queryParams = new URLSearchParams();
+        if (category && category !== "ALL") queryParams.set("category", category);
+        if (search) queryParams.set("search", search);
+
+        const res = await apiFetch(`/v1/notifications?${queryParams.toString()}`);
         const data = await res.json();
         if (!data.success) return;
+
+        cachedNotifications = data.notifications || [];
 
         const badge = document.getElementById("notifBadge");
         const drawerCount = document.getElementById("drawerNotifCount");
         const openExCount = document.getElementById("dashOpenExceptionsCount");
 
-        if (data.unresolved_count > 0) {
-          badge.innerText = data.unresolved_count;
+        if (data.unread_count > 0) {
+          badge.innerText = data.unread_count;
           badge.classList.remove("hidden");
         } else {
           badge.classList.add("hidden");
         }
 
-        if (drawerCount) drawerCount.innerText = `${data.unresolved_count} Unresolved Issues`;
+        if (drawerCount) drawerCount.innerText = `${data.unread_count} Unread (${data.unresolved_count} Open)`;
         if (openExCount) openExCount.innerText = `${data.unresolved_count} Action Items`;
 
         const list = document.getElementById("notificationsDrawerList");
         if (!list) return;
         list.innerHTML = "";
 
-        data.notifications.forEach(n => {
-          let severityBadge = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
-          if (n.severity === "CRITICAL") severityBadge = "bg-rose-500/10 text-rose-400 border border-rose-500/20";
-          else if (n.severity === "REVIEW") severityBadge = "bg-purple-500/10 text-purple-400 border border-purple-500/20";
+        if (cachedNotifications.length === 0) {
+          list.innerHTML = `
+            <div class="py-12 text-center text-slate-500 space-y-2">
+              <i data-lucide="inbox" class="w-8 h-8 mx-auto opacity-40"></i>
+              <div class="text-xs font-semibold">No notifications for your account.</div>
+              <div class="text-[11px] text-slate-600">All financial tasks and direct requests are clear.</div>
+            </div>
+          `;
+          lucide.createIcons();
+          return;
+        }
+
+        cachedNotifications.forEach(n => {
+          let priorityClass = "bg-blue-500/10 text-blue-400 border border-blue-500/20";
+          if (n.priority === "CRITICAL") priorityClass = "bg-rose-500/10 text-rose-400 border border-rose-500/20";
+          else if (n.priority === "HIGH") priorityClass = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
+          else if (n.priority === "LOW") priorityClass = "bg-slate-500/10 text-slate-400 border border-slate-500/20";
 
           const isResolved = n.status === "RESOLVED";
+          const isEscalated = n.status === "ESCALATED";
+          const isUnread = !n.isRead;
+          const threadCount = (n.thread || []).length;
+          const targetTab = n.actionTab || "dashboard";
 
           list.innerHTML += `
-            <div class="p-4 rounded-2xl bg-[#071426] border border-white/5 space-y-2.5">
+            <div class="p-4 rounded-2xl bg-[#071426] border ${isUnread ? 'border-blue-500/40 shadow-glow-blue' : 'border-white/5'} space-y-2.5 transition-all hover:border-white/20">
               <div class="flex items-center justify-between">
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${severityBadge}">${n.severity}</span>
-                <span class="text-[10px] text-slate-500 mono">${n.created_at?.substring(11, 16)}</span>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${priorityClass}">${n.priority || n.severity}</span>
+                  ${isEscalated ? '<span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-purple-500/20 text-purple-400 border border-purple-500/30">ESCALATED</span>' : ''}
+                  ${isUnread ? '<span class="w-2 h-2 rounded-full bg-blue-500"></span>' : ''}
+                </div>
+                <span class="text-[10px] text-slate-500 mono">${n.createdAt ? n.createdAt.substring(11, 16) : ''}</span>
               </div>
-              <h4 class="font-bold text-white text-xs">${n.title}</h4>
-              <p class="text-[11px] text-slate-300 leading-relaxed">${n.summary}</p>
-              <div class="p-2 rounded-xl bg-[#0B1729] text-[10px] text-blue-300 font-medium">
-                <strong>Recommended Action:</strong> ${n.recommended_action}
+
+              <div>
+                <div class="text-[10px] text-slate-400 flex items-center gap-1.5 font-medium">
+                  <span>From: <strong class="text-white">${n.senderName}</strong></span>
+                  <span class="px-1.5 py-0.2 rounded bg-white/5 text-[9px] text-slate-400">${n.senderRole}</span>
+                  ${n.department ? `<span class="text-[9px] text-blue-400 font-semibold">• ${n.department}</span>` : ''}
+                </div>
+                <h4 class="font-bold text-white text-xs mt-1">${n.title}</h4>
               </div>
-              <div class="pt-2 flex justify-end gap-2 border-t border-white/5">
-                ${isResolved ? '<span class="text-[10px] font-bold text-emerald-400">✓ Resolved</span>' : `
-                  <button onclick="resolveNotificationItem('${n.id}')" class="btn-smooth text-[10px] font-bold bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg">Mark Resolved</button>
-                  <button onclick="notifyFinanceTeam('${n.id}')" class="btn-smooth text-[10px] font-bold bg-[#0B1729] hover:bg-[#0F1D32] text-slate-300 px-2.5 py-1 rounded-lg border border-white/10">Notify Finance</button>
-                `}
+
+              <p class="text-[11px] text-slate-300 leading-relaxed">${n.message || n.summary}</p>
+
+              ${n.entityId ? `
+                <div class="flex items-center gap-2 text-[10px] text-slate-400 bg-[#0B1729] px-2.5 py-1 rounded-xl border border-white/5">
+                  <span class="text-blue-400 font-semibold">${n.entityType || 'ENTITY'}:</span>
+                  <span class="mono font-bold text-white">${n.entityId}</span>
+                </div>
+              ` : ''}
+
+              <div class="pt-2 flex items-center justify-between border-t border-white/5 text-xs font-semibold">
+                <div class="flex items-center gap-2">
+                  <button onclick="navigateToEntity('${targetTab}', '${n.entityId}')" class="btn-smooth text-[10px] font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1">
+                    <i data-lucide="external-link" class="w-3 h-3"></i>
+                    <span>Open Record</span>
+                  </button>
+                  <button onclick="openNotificationThread('${n.id}')" class="btn-smooth text-[10px] font-bold text-slate-300 hover:text-white flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-lg border border-white/10">
+                    <i data-lucide="message-square" class="w-3 h-3"></i>
+                    <span>Thread (${threadCount})</span>
+                  </button>
+                </div>
+                <div>
+                  ${isResolved ? '<span class="text-[10px] font-bold text-emerald-400">✓ Resolved</span>' : `
+                    <button onclick="resolveNotificationItem('${n.id}')" class="btn-smooth text-[10px] font-bold bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg">Resolve</button>
+                  `}
+                </div>
               </div>
             </div>
           `;
@@ -3055,7 +3303,223 @@
       });
       const activeBtn = document.getElementById(`notifTab${cat}`);
       if (activeBtn) activeBtn.className = "notif-tab-btn px-2.5 py-1 rounded-lg bg-blue-600 text-white";
-      loadNotificationsData(cat);
+      loadNotificationsData(cat, activeNotifSearch);
+    }
+
+    function navigateToEntity(tabName, entityId) {
+      if (tabName) {
+        switchTab(tabName);
+        toggleNotificationsDrawer();
+        showToast(`Navigated to ${tabName.toUpperCase()} record (${entityId || 'details'}).`);
+      }
+    }
+
+    function navigateToThreadEntity() {
+      if (activeThreadNotif) {
+        const tab = activeThreadNotif.actionTab || "dashboard";
+        closeNotificationThreadModal();
+        toggleNotificationsDrawer();
+        switchTab(tab);
+        showToast(`Navigated to ${tab.toUpperCase()} for ${activeThreadNotif.entityId || 'review'}.`);
+      }
+    }
+
+    async function openNotificationThread(notifId) {
+      const notif = cachedNotifications.find(n => n.id === notifId);
+      if (!notif) return;
+      activeThreadNotif = notif;
+
+      document.getElementById("threadSubject").innerText = notif.title;
+      document.getElementById("threadEntityBadge").innerText = `${notif.entityType || 'ENTITY'}: ${notif.entityId || 'N/A'}`;
+      document.getElementById("threadPriorityBadge").innerText = notif.priority || notif.severity || "MEDIUM";
+      document.getElementById("threadPriorityBadge").className = `px-2 py-0.5 rounded text-[10px] font-bold ${
+        notif.priority === 'CRITICAL' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
+        notif.priority === 'HIGH' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+      }`;
+
+      document.getElementById("threadSenderRecip").innerText = `From: ${notif.senderName} (${notif.senderRole}) → Recipient: ${notif.recipientRole}`;
+      
+      const resolvedStatus = document.getElementById("threadResolvedStatus");
+      const resolveBtn = document.getElementById("threadResolveBtn");
+      const escalateBtn = document.getElementById("threadEscalateBtn");
+
+      if (notif.status === "RESOLVED") {
+        resolvedStatus.classList.remove("hidden");
+        resolveBtn.classList.add("hidden");
+        escalateBtn.classList.add("hidden");
+      } else {
+        resolvedStatus.classList.add("hidden");
+        resolveBtn.classList.remove("hidden");
+        escalateBtn.classList.remove("hidden");
+      }
+
+      renderThreadMessages(notif.thread || []);
+      document.getElementById("notifThreadModal").classList.remove("hidden");
+
+      // Mark single read
+      apiFetch(`/v1/notifications/${notifId}/read`, { method: "POST" });
+      notif.isRead = true;
+      loadNotificationsData(activeNotifCategory, activeNotifSearch);
+      lucide.createIcons();
+    }
+
+    function renderThreadMessages(thread) {
+      const container = document.getElementById("threadMessagesContainer");
+      container.innerHTML = "";
+
+      if (thread.length === 0) {
+        container.innerHTML = `<div class="text-xs text-slate-500 text-center py-6">No messages in this thread yet. Type a reply below.</div>`;
+        return;
+      }
+
+      thread.forEach(msg => {
+        const isMe = currentUser && msg.senderUserId === currentUser.id;
+        container.innerHTML += `
+          <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} space-y-1">
+            <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
+              <span class="font-bold ${isMe ? 'text-blue-400' : 'text-slate-300'}">${msg.senderName} (${msg.senderRole})</span>
+              <span class="mono">${msg.timestamp ? msg.timestamp.substring(11, 16) : ''}</span>
+            </div>
+            <div class="p-3 rounded-2xl text-xs max-w-[85%] ${isMe ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-[#0B1729] text-slate-200 border border-white/10 rounded-tl-none'} leading-relaxed whitespace-pre-wrap">
+              ${msg.message}
+            </div>
+          </div>
+        `;
+      });
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function closeNotificationThreadModal() {
+      document.getElementById("notifThreadModal").classList.add("hidden");
+      activeThreadNotif = null;
+    }
+
+    async function handleThreadReplySubmit(e) {
+      e.preventDefault();
+      if (!activeThreadNotif) return;
+      const input = document.getElementById("threadReplyInput");
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      try {
+        const res = await apiFetch(`/v1/notifications/${activeThreadNotif.id}/reply`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.detail || "Failed to post reply.");
+
+        input.value = "";
+        activeThreadNotif.thread = data.thread;
+        renderThreadMessages(data.thread);
+        showToast("Reply sent to request thread.");
+        loadNotificationsData(activeNotifCategory, activeNotifSearch);
+        loadAuditLogsData();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function escalateActiveThreadToCFO() {
+      if (!activeThreadNotif) return;
+      const reason = prompt("Enter reason for CFO escalation:", "Requires executive sign-off and policy exception.");
+      if (!reason) return;
+
+      try {
+        const res = await apiFetch(`/v1/notifications/${activeThreadNotif.id}/escalate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ escalation_reason: reason })
+        });
+        const data = await res.json();
+        showToast(data.message);
+        activeThreadNotif.status = "ESCALATED";
+        activeThreadNotif.thread = data.notification.thread;
+        renderThreadMessages(activeThreadNotif.thread);
+        loadNotificationsData(activeNotifCategory, activeNotifSearch);
+        loadAuditLogsData();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function resolveActiveThread() {
+      if (!activeThreadNotif) return;
+      const note = prompt("Enter resolution notes:", `Verified and approved by ${currentUser.name}`);
+      if (note === null) return;
+
+      try {
+        const res = await apiFetch(`/v1/notifications/${activeThreadNotif.id}/resolve`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ resolution_note: note })
+        });
+        const data = await res.json();
+        showToast(data.message);
+        activeThreadNotif.status = "RESOLVED";
+        document.getElementById("threadResolvedStatus").classList.remove("hidden");
+        document.getElementById("threadResolveBtn").classList.add("hidden");
+        renderThreadMessages(data.notification.thread);
+        loadNotificationsData(activeNotifCategory, activeNotifSearch);
+        loadAuditLogsData();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function openComposeNotificationModal() {
+      try {
+        const res = await apiFetch("/v1/notifications/directory");
+        const data = await res.json();
+        if (!data.success) throw new Error("Could not load recipient directory.");
+
+        const select = document.getElementById("composeRecipient");
+        select.innerHTML = "";
+        data.directory.forEach(u => {
+          select.innerHTML += `<option value="${u.id}">${u.name} — ${u.role}${u.department ? ' (' + u.department + ')' : ''}</option>`;
+        });
+
+        document.getElementById("composeNotifModal").classList.remove("hidden");
+        lucide.createIcons();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    function closeComposeNotificationModal() {
+      document.getElementById("composeNotifModal").classList.add("hidden");
+    }
+
+    async function handleComposeSubmit(e) {
+      e.preventDefault();
+      const payload = {
+        recipient_user_id: document.getElementById("composeRecipient").value,
+        type: document.getElementById("composeType").value,
+        priority: document.getElementById("composePriority").value,
+        entity_type: document.getElementById("composeEntityType").value,
+        entity_id: document.getElementById("composeEntityId").value,
+        title: document.getElementById("composeTitle").value,
+        message: document.getElementById("composeMessage").value,
+      };
+
+      try {
+        const res = await apiFetch("/v1/notifications/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.detail || "Failed to dispatch request.");
+
+        showToast(data.message);
+        closeComposeNotificationModal();
+        document.getElementById("composeNotifForm").reset();
+        loadNotificationsData(activeNotifCategory, activeNotifSearch);
+        loadAuditLogsData();
+      } catch (err) {
+        showToast(err.message, true);
+      }
     }
 
     async function resolveNotificationItem(notifId) {
@@ -3067,7 +3531,7 @@
         });
         const data = await res.json();
         showToast(data.message);
-        loadNotificationsData();
+        loadNotificationsData(activeNotifCategory, activeNotifSearch);
         loadAuditLogsData();
       } catch (err) {
         showToast(err.message, true);
@@ -3079,7 +3543,7 @@
         const res = await apiFetch(`/v1/notifications/${notifId}/notify-finance`, { method: "POST" });
         const data = await res.json();
         showToast(data.message);
-        loadNotificationsData();
+        loadNotificationsData(activeNotifCategory, activeNotifSearch);
       } catch (err) {
         showToast(err.message, true);
       }
@@ -3088,13 +3552,13 @@
     async function markAllNotificationsRead() {
       await apiFetch("/v1/notifications/mark-all-read", { method: "POST" });
       showToast("All notifications marked as read.");
-      loadNotificationsData();
+      loadNotificationsData(activeNotifCategory, activeNotifSearch);
     }
 
     async function clearAllNotifications() {
       await apiFetch("/v1/notifications/clear", { method: "POST" });
       showToast("Notifications cleared.");
-      loadNotificationsData();
+      loadNotificationsData(activeNotifCategory, activeNotifSearch);
     }
 
     // =========================================================================

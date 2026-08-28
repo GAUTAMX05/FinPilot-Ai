@@ -5,6 +5,7 @@
 2. **Enables AI-to-AI Shopping**: Machine-readable product catalogs (`/v1/commerce/ai-manifest`), bounded negotiation, and autonomous Razorpay test-mode transactions.
 3. **Simulates Financial Futures**: 90-day forward Digital Twin simulations before executing capital outlays.
 4. **Guarantees Safety & Resilience**: Bounded spending tokens, HITL governance, audit lineage, and graceful recovery across 4 critical failure modes.
+5. **Enforces Strict Role-Based Internal Communication**: Zero-leakage notification and request system delivering messages strictly to explicit `recipientUserId` targets with two-way conversation threading.
 
 ---
 
@@ -15,14 +16,14 @@
                      │                 FINPILOT AI OPERATING SYSTEM             │
                      └────────────────────────────┬────────────────────────────┘
                                                   │
-         ┌────────────────────────────────────────┼────────────────────────────────────────┐
-         │                                        │                                        │
-         ▼                                        ▼                                        ▼
-┌──────────────────┐                    ┌──────────────────┐                     ┌──────────────────┐
-│  FINANCIAL TWIN  │                    │   MULTI-AGENT    │                     │ MERCHANT GROWTH  │
-│  90-Day Forward  │                    │   ORCHESTRATOR   │                     │  & AI COMMERCE   │
-│  State Simulator │                    │  7 Sub-Agents    │                     │  A2A Shopping    │
-└──────────────────┘                    └──────────────────┘                     └──────────────────┘
+         ┌───────────────────┬────────────────────┼────────────────────┬───────────────────┐
+         │                   │                    │                    │                   │
+         ▼                   ▼                    ▼                    ▼                   ▼
+┌──────────────────┐┌──────────────────┐┌──────────────────┐┌──────────────────┐┌──────────────────┐
+│  FINANCIAL TWIN  ││   MULTI-AGENT    ││ MERCHANT GROWTH  ││  ROLE ROUTING &  ││ 4-TIER FAILURE   │
+│  90-Day Forward  ││   ORCHESTRATOR   ││  & AI COMMERCE   ││  NOTIFICATIONS   ││   RESILIENCE     │
+│  State Simulator ││  7 Sub-Agents    ││  A2A Shopping    ││  2-Way Threads   ││  Safe Recovery   │
+└──────────────────┘└──────────────────┘└──────────────────┘└──────────────────┘└──────────────────┘
 ```
 
 ---
@@ -65,7 +66,26 @@ FinPilot AI explicitly demonstrates graceful error handling across 4 mission-cri
 
 ---
 
-## 3. 🧬 Financial Digital Twin Engine (`digital_twin_service.py`)
+## 3. 📨 Role-Based User-Targeted Notification & Internal Communication System (`notification_service.py`)
+
+### A. Core Architecture: Zero-Leakage Recipient Routing
+Every notification belongs to an explicit authenticated recipient (`recipientUserId`).
+When a user queries `/v1/notifications`, the backend enforces:
+$$\text{Notification is Visible} \iff (\text{recipientUserId} == \text{current\_user.id} \lor \text{current\_user.id} \in \text{observerIds})$$
+
+- **CFO $\rightarrow$ Finance Manager (Rahul)**: Only Rahul receives it. Other Finance Managers, Department Heads, and Auditors cannot see it.
+- **Finance Manager $\rightarrow$ Engineering Head (Arjun)**: Only Arjun receives it. Marketing/Sales/HR Heads and Auditors cannot see it.
+- **Finance Manager $\rightarrow$ Auditor (Kavita)**: Only Kavita receives it. Department Heads and unrelated users cannot see it.
+- **Sensitive Protection**: Form 16 / Payroll discrepancy notifications are inaccessible to non-finance/non-auditor users.
+
+### B. Two-Way Request & Conversation Threading (`/v1/notifications/{id}/reply`)
+- **Conversation Thread**: Attach contextual replies to any financial alert or direct request.
+- **Full History**: Sender and recipient names, roles, timestamps, and message history.
+- **Quick Action Bar**: 1-click navigation to linked financial entity (`[Open Record]`), `[Escalate to CFO]`, and `[Mark Resolved]`.
+
+---
+
+## 4. 🧬 Financial Digital Twin Engine (`digital_twin_service.py`)
 
 ![Financial Digital Twin Studio](docs/screenshots/02_digital_twin_studio.png)
 
@@ -83,7 +103,7 @@ The Digital Twin maintains an in-memory, simulate-able replica of corporate fina
 
 ---
 
-## 4. 🤖 Multi-Agent Orchestrator Pipeline (`multi_agent_orchestrator.py`)
+## 5. 🤖 Multi-Agent Orchestrator Pipeline (`multi_agent_orchestrator.py`)
 
 FinPilot AI routes financial reasoning through 7 specialized agents with deterministic hand-offs:
 
@@ -99,49 +119,33 @@ graph TD
     NarratorAgent --> AuditLog[(Immutable Audit Log)]
 ```
 
-### The 7 Autonomous Agents
-1. **`IntentAgent`**: Classifies query intent and enforces RBAC permission bounds.
-2. **`RetrievalAgent`**: Fetches verified data points from budgets, invoices, payroll, and Digital Twin.
-3. **`AnalysisAgent`**: Executes deterministic Python math (run-rates, 18% GST, time-elapsed vs spend).
-4. **`RiskAgent`**: Computes 4-factor risk scoring (Budget Impact, Policy Compliance, Historical Variance, Approval Threshold).
-5. **`SimulationAgent`**: Forks in-memory Digital Twin branch to evaluate 90-day forward impact.
-6. **`CausalAgent`**: Uncovers hidden correlations against operational signals (submitter clustering, vendor changes).
-7. **`NarratorAgent`**: Synthesizes the 5-part enterprise decision narrative (*What Happened $\rightarrow$ Why It Matters $\rightarrow$ What Should Be Done $\rightarrow$ Who Needs to Act $\rightarrow$ What Happens Next*).
-
 ---
 
-## 5. 🏢 Corporate Decision Map & Control Center
+## 6. 🔒 Enterprise RBAC & Communication Directory Matrix
 
-![Company Decision Map](docs/screenshots/04_company_decision_map.png)
-![Executive Control Center](docs/screenshots/03_executive_control_center.png)
-
----
-
-## 6. 🔒 Enterprise RBAC Matrix
-
-| Capability / Resource | CFO | Finance Manager | Department Head | Auditor |
+| Capability / Resource | CFO (`CFO-001`) | Finance Manager (`FIN-MGR-001`) | Department Head (`ENG-HEAD-001`) | Auditor (`AUDITOR-001`) |
 |---|:---:|:---:|:---:|:---:|
-| **Universal Commerce & A2A Store** | ✅ | ✅ | ✅ (Catalog) | 👁️ (Audit) |
-| **Financial Digital Twin (90-Day What-If)** | ✅ Full Access | ✅ Read & Simulate | ❌ Scoped | 👁️ Read-Only |
-| **Autonomous Marketing Campaigns** | ✅ Full Sign-off | ✅ Create & Launch | ❌ | 👁️ Read-Only |
+| **Internal Communication** | All Roles | CFO, Dept Heads, Auditor | Finance Manager, CFO | Finance Manager, CFO |
+| **Notification Inbox** | Scoped to CFO ID | Scoped to FM ID | Scoped to Dept Head ID | Scoped to Auditor ID |
+| **Sensitive Tax Alerts** | ✅ Full Access | ✅ Full Access | ❌ Scoped Out | 👁️ Assigned Only |
+| **Two-Way Threading** | ✅ Reply & Resolve | ✅ Reply & Resolve | ✅ Reply (Dept Scoped) | ✅ Reply & Flag |
 | **HITL Approvals ($\ge$ ₹50,000)** | ✅ Final Approval | ✅ Review & Recommend | ❌ | 👁️ Read-Only |
 | **Form 16 Tax Reconciler** | ✅ Authorize | ✅ Reconcile & Upload | ❌ | 👁️ Audit Mismatches |
-| **Audit Log Compliance Inspection** | ✅ Full Access | ❌ | ❌ | ✅ Full Access |
 
 ---
 
 ## 7. 🧪 Automated Test Verification (100% Pass Rate)
 
 ```bash
-# 1. Commerce, AI-to-AI Shopping & Failure Resilience Suite
+# 1. Role-Based Notification Security & Isolation Suite
+python tests/test_role_based_notifications.py
+
+# 2. Commerce, AI-to-AI Shopping & Failure Resilience Suite
 python tests/test_commerce_and_ai_shopping.py
 
-# 2. Financial Digital Twin & Multi-Agent Tests
+# 3. Financial Digital Twin & Multi-Agent Tests
 python tests/test_digital_twin_and_agents.py
 
-# 3. Decision Operating System Suite
-python tests/test_decision_engine_upgrade.py
-
-# 4. Multi-Agent Reasoning Pipeline Suite
-python tests/test_ai_chat_pipeline.py
+# 4. Automated Live Browser CDP Interaction Test
+python tests/test_browser_interactions.py
 ```

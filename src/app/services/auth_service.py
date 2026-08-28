@@ -27,7 +27,8 @@ class AuthService:
 
         demo_users = [
             {
-                "id": "usr_cfo_001",
+                "id": "CFO-001",
+                "aliases": ["usr_cfo_001", "cfo"],
                 "name": "Vikramaditya Singhania",
                 "email": "cfo@aifinance.local",
                 "password_hash": hashed,
@@ -37,8 +38,9 @@ class AuthService:
                 "created_at": datetime.now().isoformat(),
             },
             {
-                "id": "usr_fm_002",
-                "name": "Rahul Sharma",
+                "id": "FIN-MGR-001",
+                "aliases": ["usr_fm_002", "fm", "financemanager"],
+                "name": "Rahul Verma",
                 "email": "finance.manager@aifinance.local",
                 "password_hash": hashed,
                 "role": Role.FINANCE_MANAGER.value,
@@ -47,8 +49,9 @@ class AuthService:
                 "created_at": datetime.now().isoformat(),
             },
             {
-                "id": "usr_dh_003",
-                "name": "Priya Verma",
+                "id": "ENG-HEAD-001",
+                "aliases": ["usr_dh_003", "depthead", "head"],
+                "name": "Arjun Mehta",
                 "email": "engineering.head@aifinance.local",
                 "password_hash": hashed,
                 "role": Role.DEPARTMENT_HEAD.value,
@@ -57,7 +60,41 @@ class AuthService:
                 "created_at": datetime.now().isoformat(),
             },
             {
-                "id": "usr_aud_004",
+                "id": "MKT-HEAD-001",
+                "aliases": ["mkt_head"],
+                "name": "Sunita Rao",
+                "email": "marketing.head@aifinance.local",
+                "password_hash": hashed,
+                "role": Role.DEPARTMENT_HEAD.value,
+                "department": "Marketing",
+                "is_active": True,
+                "created_at": datetime.now().isoformat(),
+            },
+            {
+                "id": "SALES-HEAD-001",
+                "aliases": ["sales_head"],
+                "name": "Rajesh Kapoor",
+                "email": "sales.head@aifinance.local",
+                "password_hash": hashed,
+                "role": Role.DEPARTMENT_HEAD.value,
+                "department": "Sales",
+                "is_active": True,
+                "created_at": datetime.now().isoformat(),
+            },
+            {
+                "id": "HR-HEAD-001",
+                "aliases": ["hr_head"],
+                "name": "Meera Patel",
+                "email": "hr.head@aifinance.local",
+                "password_hash": hashed,
+                "role": Role.DEPARTMENT_HEAD.value,
+                "department": "HR",
+                "is_active": True,
+                "created_at": datetime.now().isoformat(),
+            },
+            {
+                "id": "AUDITOR-001",
+                "aliases": ["usr_aud_004", "auditor"],
                 "name": "Kavita Iyer",
                 "email": "auditor@aifinance.local",
                 "password_hash": hashed,
@@ -73,7 +110,21 @@ class AuthService:
 
     def authenticate_user(self, email: str, password: str) -> Optional[Dict[str, Any]]:
         """Authenticates user credentials and returns user payload + token if valid."""
-        user = self._users.get(email.strip().lower())
+        email_clean = email.strip().lower()
+        user = self._users.get(email_clean)
+        
+        # Support enterprise.internal email alias
+        if not user and "@enterprise.internal" in email_clean:
+            prefix = email_clean.split("@")[0]
+            if prefix in ["cfo"]:
+                user = self._users.get("cfo@aifinance.local")
+            elif prefix in ["financemanager", "finance.manager"]:
+                user = self._users.get("finance.manager@aifinance.local")
+            elif prefix in ["depthead", "engineering.head"]:
+                user = self._users.get("engineering.head@aifinance.local")
+            elif prefix in ["auditor"]:
+                user = self._users.get("auditor@aifinance.local")
+
         if not user or not user.get("is_active"):
             return None
 
@@ -99,8 +150,11 @@ class AuthService:
         }
 
     def get_user_by_id(self, user_id: str) -> Optional[Dict[str, Any]]:
+        if not user_id:
+            return None
+        uid_clean = user_id.strip()
         for u in self._users.values():
-            if u["id"] == user_id:
+            if u["id"] == uid_clean or uid_clean in u.get("aliases", []):
                 return {
                     "id": u["id"],
                     "name": u["name"],
@@ -113,6 +167,8 @@ class AuthService:
         return None
 
     def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
+        if not email:
+            return None
         u = self._users.get(email.strip().lower())
         if u:
             return {
@@ -127,7 +183,7 @@ class AuthService:
         return None
 
     def list_all_users(self) -> List[Dict[str, Any]]:
-        """Returns all registered users (for CFO administration)."""
+        """Returns all registered users."""
         res = []
         for u in self._users.values():
             res.append({
@@ -141,12 +197,48 @@ class AuthService:
             })
         return res
 
+    def get_directory_for_user(self, current_user: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Returns the permitted list of recipient users for communication based on role routing rules:
+        - CFO can communicate with: Finance Manager, Department Heads, Auditor
+        - Finance Manager can communicate with: CFO, Department Heads, Auditor
+        - Department Head can communicate with: Finance Manager, CFO
+        - Auditor can communicate with: Finance Manager, CFO
+        """
+        role = current_user.get("role", "CFO")
+        current_id = current_user.get("id")
+        
+        all_users = self.list_all_users()
+        eligible = []
+        
+        for u in all_users:
+            if u["id"] == current_id:
+                continue # Skip self in direct recipient picker
+                
+            u_role = u["role"]
+            if role == Role.CFO.value:
+                # CFO can message anyone
+                eligible.append(u)
+            elif role == Role.FINANCE_MANAGER.value:
+                # Finance Manager can message CFO, Dept Heads, Auditor
+                eligible.append(u)
+            elif role == Role.DEPARTMENT_HEAD.value:
+                # Dept Head can message Finance Manager, CFO
+                if u_role in [Role.FINANCE_MANAGER.value, Role.CFO.value]:
+                    eligible.append(u)
+            elif role == Role.AUDITOR.value:
+                # Auditor can message Finance Manager, CFO
+                if u_role in [Role.FINANCE_MANAGER.value, Role.CFO.value]:
+                    eligible.append(u)
+                    
+        return eligible
+
     def create_user(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
         email = user_data["email"].strip().lower()
         if email in self._users:
             raise ValueError(f"User with email '{email}' already exists.")
 
-        user_id = f"usr_{int(datetime.now().timestamp())}"
+        user_id = user_data.get("id") or f"usr_{int(datetime.now().timestamp())}"
         hashed = hash_password(user_data.get("password", "password123"))
 
         new_user = {
@@ -165,10 +257,11 @@ class AuthService:
     def get_demo_accounts(self) -> List[Dict[str, str]]:
         """Returns demo accounts for quick switcher."""
         return [
-            {"name": "Vikramaditya Singhania", "email": "cfo@aifinance.local", "role": "CFO", "dept": "Executive"},
-            {"name": "Rahul Sharma", "email": "finance.manager@aifinance.local", "role": "FINANCE_MANAGER", "dept": "Finance Ops"},
-            {"name": "Priya Verma", "email": "engineering.head@aifinance.local", "role": "DEPARTMENT_HEAD", "dept": "Engineering"},
-            {"name": "Kavita Iyer", "email": "auditor@aifinance.local", "role": "AUDITOR", "dept": "Compliance"},
+            {"id": "CFO-001", "name": "Vikramaditya Singhania", "email": "cfo@aifinance.local", "role": "CFO", "dept": "Executive"},
+            {"id": "FIN-MGR-001", "name": "Rahul Verma", "email": "finance.manager@aifinance.local", "role": "FINANCE_MANAGER", "dept": "Finance Ops"},
+            {"id": "ENG-HEAD-001", "name": "Arjun Mehta", "email": "engineering.head@aifinance.local", "role": "DEPARTMENT_HEAD", "dept": "Engineering"},
+            {"id": "MKT-HEAD-001", "name": "Sunita Rao", "email": "marketing.head@aifinance.local", "role": "DEPARTMENT_HEAD", "dept": "Marketing"},
+            {"id": "AUDITOR-001", "name": "Kavita Iyer", "email": "auditor@aifinance.local", "role": "AUDITOR", "dept": "Compliance"},
         ]
 
 
