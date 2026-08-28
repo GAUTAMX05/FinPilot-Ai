@@ -57,8 +57,14 @@
 ---
 
 ### 7. Role-Based Access Control (RBAC) Authentication Screen
-*Enterprise authentication with role-tailored workspaces for CFO, Finance Manager, Department Head, and Auditor.*
+*Enterprise authentication with official FinPilot AI branding and role-tailored workspaces for CFO, Finance Manager, Department Head, and Auditor.*
 ![Login Screen](docs/screenshots/01_login_screen.png)
+
+---
+
+### 8. Role-Based User-Targeted Notification & 2-Way Internal Communication
+*Zero-leakage notification delivery scoped to authenticated users with threaded conversations and 1-click entity routing.*
+![Role-Based Notifications Drawer](docs/screenshots/10_role_based_notifications_drawer.png)
 
 ---
 
