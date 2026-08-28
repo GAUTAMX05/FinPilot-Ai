@@ -169,25 +169,25 @@
             <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">DEVELOPMENT</span>
           </div>
 
-          <div class="grid grid-cols-2 gap-2 text-xs">
-            <button type="button" onclick="quickDemoLogin('cfo@aifinance.local')" class="btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70">
-              <span class="font-bold text-white block text-xs">👑 CFO</span>
-              <span class="text-[10px] text-slate-400 block truncate">Vikramaditya S.</span>
+          <div class="grid grid-cols-2 gap-2 text-xs" id="demoAccountsGrid">
+            <button type="button" id="demoCard-cfo" onclick="selectDemoAccount('cfo')" class="demo-role-card btn-smooth p-2.5 rounded-xl border-2 border-blue-500 bg-blue-600/20 text-left space-y-0.5 shadow-glow-blue cursor-pointer transition-all">
+              <span class="demo-card-title font-bold text-blue-300 block text-xs">👑 CFO</span>
+              <span class="demo-card-desc text-[10px] text-slate-300 block truncate">Vikramaditya S.</span>
             </button>
             
-            <button type="button" onclick="quickDemoLogin('finance.manager@aifinance.local')" class="btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70">
-              <span class="font-bold text-white block text-xs">💼 Finance Mgr</span>
-              <span class="text-[10px] text-slate-400 block truncate">Rahul Verma</span>
+            <button type="button" id="demoCard-fm" onclick="selectDemoAccount('fm')" class="demo-role-card btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70 cursor-pointer transition-all">
+              <span class="demo-card-title font-bold text-white block text-xs">💼 Finance Mgr</span>
+              <span class="demo-card-desc text-[10px] text-slate-400 block truncate">Rahul Verma</span>
             </button>
             
-            <button type="button" onclick="quickDemoLogin('engineering.head@aifinance.local')" class="btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70">
-              <span class="font-bold text-white block text-xs">🛠️ Dept Head</span>
-              <span class="text-[10px] text-slate-400 block truncate">Arjun (Engineering)</span>
+            <button type="button" id="demoCard-head" onclick="selectDemoAccount('head')" class="demo-role-card btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70 cursor-pointer transition-all">
+              <span class="demo-card-title font-bold text-white block text-xs">🛠️ Dept Head</span>
+              <span class="demo-card-desc text-[10px] text-slate-400 block truncate">Arjun (Engineering)</span>
             </button>
             
-            <button type="button" onclick="quickDemoLogin('auditor@aifinance.local')" class="btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70">
-              <span class="font-bold text-white block text-xs">🔍 Auditor</span>
-              <span class="text-[10px] text-slate-400 block truncate">Kavita Iyer (Audit)</span>
+            <button type="button" id="demoCard-auditor" onclick="selectDemoAccount('auditor')" class="demo-role-card btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70 cursor-pointer transition-all">
+              <span class="demo-card-title font-bold text-white block text-xs">🔍 Auditor</span>
+              <span class="demo-card-desc text-[10px] text-slate-400 block truncate">Kavita Iyer (Audit)</span>
             </button>
           </div>
         </div>
@@ -2725,10 +2725,55 @@
     let speechRecognition = null;
     const currentThreadId = "finance-thread-" + Math.random().toString(36).substring(2, 9);
 
+    // =========================================================================
+    // DEMO ACCOUNTS SINGLE SOURCE OF TRUTH (RBAC)
+    // =========================================================================
+    const DEMO_ACCOUNTS = {
+      cfo: {
+        key: "cfo",
+        id: "CFO-001",
+        role: "CFO",
+        name: "Vikramaditya Singhania",
+        email: "cfo@aifinance.local",
+        password: "password123",
+        department: null,
+      },
+      fm: {
+        key: "fm",
+        id: "FIN-MGR-001",
+        role: "FINANCE_MANAGER",
+        name: "Rahul Verma",
+        email: "finance.manager@aifinance.local",
+        password: "password123",
+        department: null,
+      },
+      head: {
+        key: "head",
+        id: "ENG-HEAD-001",
+        role: "DEPARTMENT_HEAD",
+        name: "Arjun Mehta",
+        email: "engineering.head@aifinance.local",
+        password: "password123",
+        department: "Engineering",
+      },
+      auditor: {
+        key: "auditor",
+        id: "AUDITOR-001",
+        role: "AUDITOR",
+        name: "Kavita Iyer",
+        email: "auditor@aifinance.local",
+        password: "password123",
+        department: null,
+      },
+    };
+
+    let selectedDemoUser = DEMO_ACCOUNTS.cfo;
+
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
       initSpeechRecognition();
       setupKeyboardShortcuts();
+      setupEmailInputWatcher();
       checkAuthSession();
     });
 
@@ -2748,6 +2793,66 @@
           closeSalaryRevisionModal();
           closeReallocateModal();
           closeReportModal();
+        }
+      });
+    }
+
+    function setupEmailInputWatcher() {
+      const emailInput = document.getElementById("loginEmail");
+      if (emailInput) {
+        emailInput.addEventListener("input", (e) => {
+          const val = e.target.value.trim().toLowerCase();
+          const matchKey = Object.keys(DEMO_ACCOUNTS).find(k => DEMO_ACCOUNTS[k].email.toLowerCase() === val);
+          if (matchKey) {
+            selectDemoAccount(matchKey);
+          } else {
+            selectedDemoUser = null;
+            document.querySelectorAll(".demo-role-card").forEach(c => {
+              c.className = "demo-role-card btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70 cursor-pointer transition-all";
+              const title = c.querySelector(".demo-card-title");
+              const desc = c.querySelector(".demo-card-desc");
+              if (title) title.className = "demo-card-title font-bold text-white block text-xs";
+              if (desc) desc.className = "demo-card-desc text-[10px] text-slate-400 block truncate";
+            });
+          }
+        });
+      }
+    }
+
+    function selectDemoAccount(accountKey) {
+      const account = DEMO_ACCOUNTS[accountKey];
+      if (!account) return;
+
+      selectedDemoUser = account;
+
+      // 1. Update email/employee ID field
+      const emailInput = document.getElementById("loginEmail");
+      if (emailInput) {
+        emailInput.value = account.email;
+      }
+
+      // 2. Update password field
+      const passInput = document.getElementById("loginPassword");
+      if (passInput) {
+        passInput.value = account.password;
+      }
+
+      // 3. Update visual highlight on cards
+      const keys = ["cfo", "fm", "head", "auditor"];
+      keys.forEach(k => {
+        const card = document.getElementById(`demoCard-${k}`);
+        if (card) {
+          const title = card.querySelector(".demo-card-title");
+          const desc = card.querySelector(".demo-card-desc");
+          if (k === accountKey) {
+            card.className = "demo-role-card btn-smooth p-2.5 rounded-xl border-2 border-blue-500 bg-blue-600/20 text-left space-y-0.5 shadow-glow-blue cursor-pointer transition-all";
+            if (title) title.className = "demo-card-title font-bold text-blue-300 block text-xs";
+            if (desc) desc.className = "demo-card-desc text-[10px] text-slate-300 block truncate";
+          } else {
+            card.className = "demo-role-card btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70 cursor-pointer transition-all";
+            if (title) title.className = "demo-card-title font-bold text-white block text-xs";
+            if (desc) desc.className = "demo-card-desc text-[10px] text-slate-400 block truncate";
+          }
         }
       });
     }
@@ -2792,6 +2897,7 @@
     async function executeLogin(email, password) {
       const btn = document.getElementById("loginBtn");
       if (btn) {
+        btn.disabled = true;
         btn.innerHTML = `<span>Signing In...</span><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
         if (window.lucide) lucide.createIcons();
       }
@@ -2800,10 +2906,12 @@
         const res = await fetch("/v1/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ email: email.trim(), password })
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "Authentication failed. Invalid credentials.");
+        if (!res.ok || !data.success) {
+          throw new Error(data.detail || "Unable to sign in. Please check your credentials.");
+        }
 
         currentUser = data.data.user;
         authToken = data.data.access_token;
@@ -2816,27 +2924,26 @@
         renderWorkspaceForRole();
       } catch (err) {
         console.error("Login error:", err);
-        showToast(err.message || "Failed to sign in. Please verify connection.", true);
+        showToast(err.message || "Unable to sign in. Please check your credentials.", true);
       } finally {
         if (btn) {
+          btn.disabled = false;
           btn.innerHTML = `<span>Sign In to FinPilot AI Control Center</span><i data-lucide="arrow-right" class="w-4 h-4"></i>`;
           if (window.lucide) lucide.createIcons();
         }
       }
     }
 
-    async function quickDemoLogin(email) {
-      const emailInput = document.getElementById("loginEmail");
-      const passInput = document.getElementById("loginPassword");
-      if (emailInput) emailInput.value = email;
-      if (passInput) passInput.value = "password123";
-      await executeLogin(email, "password123");
-    }
-
     async function handleLoginSubmit(e) {
       if (e && e.preventDefault) e.preventDefault();
-      const email = document.getElementById("loginEmail")?.value || "cfo@aifinance.local";
-      const password = document.getElementById("loginPassword")?.value || "password123";
+      const email = document.getElementById("loginEmail")?.value?.trim() || "";
+      const password = document.getElementById("loginPassword")?.value || "";
+
+      if (!email || !password) {
+        showToast("Unable to sign in. Please check your credentials.", true);
+        return;
+      }
+
       await executeLogin(email, password);
     }
 
@@ -2846,11 +2953,12 @@
       const targetTab = urlParams.get("tab");
 
       if (autoRole) {
-        let email = "cfo@aifinance.local";
-        if (autoRole === "fm" || autoRole === "financemanager") email = "finance.manager@aifinance.local";
-        else if (autoRole === "head" || autoRole === "depthead") email = "engineering.head@aifinance.local";
-        else if (autoRole === "auditor") email = "auditor@aifinance.local";
-        quickDemoLogin(email);
+        let key = "cfo";
+        if (autoRole === "fm" || autoRole === "financemanager") key = "fm";
+        else if (autoRole === "head" || autoRole === "depthead") key = "head";
+        else if (autoRole === "auditor") key = "auditor";
+        selectDemoAccount(key);
+        executeLogin(DEMO_ACCOUNTS[key].email, DEMO_ACCOUNTS[key].password);
         if (targetTab) {
           setTimeout(() => switchTab(targetTab), 500);
         }
@@ -2891,10 +2999,18 @@
         app.style.display = "none";
         app.classList.add("hidden");
       }
+      // Reset demo selection and form fields to default CFO
+      selectDemoAccount("cfo");
     }
 
     async function switchDemoAccount(email) {
-      await quickDemoLogin(email);
+      const matchKey = Object.keys(DEMO_ACCOUNTS).find(k => DEMO_ACCOUNTS[k].email.toLowerCase() === email.toLowerCase());
+      if (matchKey) {
+        const acc = DEMO_ACCOUNTS[matchKey];
+        await executeLogin(acc.email, acc.password);
+      } else {
+        await executeLogin(email, "password123");
+      }
     }
 
     function handleLogout() {
