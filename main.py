@@ -1,9 +1,11 @@
+import os
 import sys
 import asyncio
 from pathlib import Path
 
 # Add project root to sys.path
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+BASE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE_DIR))
 
 if hasattr(sys.stdout, "reconfigure"):
     try:
@@ -18,7 +20,7 @@ import uvicorn
 from src.app.main import app
 
 if __name__ == '__main__':
-    print("Starting FinPilot AI on http://127.0.0.1:8000 (0.0.0.0:8000) ...")
+    print("Starting FinPilot AI on http://localhost:8000 (http://127.0.0.1:8000) ...")
     config = uvicorn.Config(
         app=app,
         host="0.0.0.0",
