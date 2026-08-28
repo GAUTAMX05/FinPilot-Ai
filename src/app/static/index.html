@@ -2714,6 +2714,14 @@
   <!-- 5. JAVASCRIPT ENGINE -->
   <!-- ===================================================================== -->
   <script>
+    // Defensive shims for external CDN dependencies
+    if (typeof window.lucide === 'undefined') {
+      window.lucide = { createIcons: function() {} };
+    }
+    if (typeof window.marked === 'undefined') {
+      window.marked = { parse: function(txt) { return txt ? txt.replace(/\n/g, '<br/>') : ''; } };
+    }
+
     let currentUser = null;
     let authToken = null;
     let activeAnalyticsMetric = "spending";
@@ -3420,6 +3428,7 @@
       const ctx = document.getElementById("digitalTwinChart");
       if (!ctx) return;
 
+      if (typeof Chart === 'undefined') return;
       if (digitalTwinChartInstance) {
         digitalTwinChartInstance.destroy();
       }
@@ -3965,6 +3974,7 @@
         const ctx = document.getElementById("financialAnalyticsChart");
         if (!ctx) return;
 
+        if (typeof Chart === 'undefined') return;
         if (analyticsChartInstance) {
           analyticsChartInstance.destroy();
         }
@@ -4259,29 +4269,6 @@
     function loadMoreEmployees() {
       employeesPagination.currentLimit += employeesPagination.pageSize;
       renderEmployeesTable();
-    }
-
-        // Allowance anomalies list
-        const aRes = await apiFetch("/v1/employees/anomalies/allowance");
-        const aData = await aRes.json();
-        const anoList = document.getElementById("allowanceAnomaliesList");
-        if (anoList) {
-          anoList.innerHTML = "";
-          aData.anomalies.forEach(a => {
-            anoList.innerHTML += `
-              <div class="p-2.5 rounded-xl bg-[#0B1729] border border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <span class="text-slate-200"><strong>${a.badge}:</strong> ${a.description}</span>
-                <button onclick="openEmployeeProfile('${a.employee_id}')" class="btn-smooth flex-shrink-0 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-semibold px-2.5 py-1 rounded-lg border border-amber-500/30">
-                  ${a.action_label}
-                </button>
-              </div>
-            `;
-          });
-        }
-        lucide.createIcons();
-      } catch (err) {
-        console.error("Employees error:", err);
-      }
     }
 
     function openAddEmployeeModal() {
