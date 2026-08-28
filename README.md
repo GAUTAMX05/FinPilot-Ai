@@ -17,7 +17,6 @@
 
 > **"Most finance AI tools describe what already happened. FinPilot AI simulates what happens next — before a human has to decide."**
 
-👉 **[📖 Download Complete 75-Part Technical Interview Handbook (PDF)](docs/Finpilot_AI_Technical_Interview_Handbook.pdf)** | **[🌐 Live Web PDF Viewer](http://localhost:8000/Finpilot_AI_Technical_Interview_Handbook.pdf)** | **[📄 HTML Version](http://localhost:8000/handbook)**
 
 ---
 
