@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/logo.png" alt="FinPilot AI Logo" width="220" />
+</p>
+
 # 🚀 FinPilot AI — Complete Architectural Walkthrough & System Guide
 
 **FinPilot AI** is an enterprise-grade **Financial Digital Twin, Merchant Growth & Autonomous Multi-Agent Decision Operating System**. Unlike conventional finance dashboards that merely report past transactions, FinPilot AI:

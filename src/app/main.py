@@ -58,6 +58,15 @@ def serve_dashboard():
     return HTMLResponse("<h1>FinPilot AI API is running. Access <a href='/docs'>/docs</a> for Swagger UI.</h1>")
 
 
+@app.get("/logo.png", tags=["Assets"])
+@app.get("/favicon.ico", tags=["Assets"])
+def serve_logo():
+    logo_path = os.path.join(STATIC_DIR, "assets", "logo.png")
+    if os.path.exists(logo_path):
+        return FileResponse(logo_path, media_type="image/png")
+    return HTMLResponse(status_code=404, content="Logo not found")
+
+
 @app.get("/health", tags=["System Health"])
 def health_check():
     """Health check endpoint."""

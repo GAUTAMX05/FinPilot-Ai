@@ -1,4 +1,12 @@
+<p align="center">
+  <img src="docs/assets/logo.png" alt="FinPilot AI Logo" width="220" />
+</p>
+
 # 💰 FinPilot AI — Financial Digital Twin & Multi-Agent Autonomous Decision Operating System
+
+<p align="center">
+  <strong>FINANCE • CONTROL • DECIDE • GROW</strong>
+</p>
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
