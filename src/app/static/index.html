@@ -170,22 +170,22 @@
           </div>
 
           <div class="grid grid-cols-2 gap-2 text-xs">
-            <button onclick="fillDemoLogin('cfo@aifinance.local')" class="btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70">
+            <button type="button" onclick="quickDemoLogin('cfo@aifinance.local')" class="btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70">
               <span class="font-bold text-white block text-xs">👑 CFO</span>
               <span class="text-[10px] text-slate-400 block truncate">Vikramaditya S.</span>
             </button>
             
-            <button onclick="fillDemoLogin('finance.manager@aifinance.local')" class="btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70">
+            <button type="button" onclick="quickDemoLogin('finance.manager@aifinance.local')" class="btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70">
               <span class="font-bold text-white block text-xs">💼 Finance Mgr</span>
               <span class="text-[10px] text-slate-400 block truncate">Rahul Verma</span>
             </button>
             
-            <button onclick="fillDemoLogin('engineering.head@aifinance.local')" class="btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70">
+            <button type="button" onclick="quickDemoLogin('engineering.head@aifinance.local')" class="btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70">
               <span class="font-bold text-white block text-xs">🛠️ Dept Head</span>
               <span class="text-[10px] text-slate-400 block truncate">Arjun (Engineering)</span>
             </button>
             
-            <button onclick="fillDemoLogin('auditor@aifinance.local')" class="btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70">
+            <button type="button" onclick="quickDemoLogin('auditor@aifinance.local')" class="btn-smooth p-2.5 rounded-xl border border-white/5 hover:border-blue-500/40 hover:bg-blue-600/10 text-left space-y-0.5 bg-[#071426]/70">
               <span class="font-bold text-white block text-xs">🔍 Auditor</span>
               <span class="text-[10px] text-slate-400 block truncate">Kavita Iyer (Audit)</span>
             </button>
@@ -2780,12 +2780,64 @@
         headers["Authorization"] = `Bearer ${authToken}`;
       }
       options.headers = headers;
-      const res = await fetch(url, options);
-      if (res.status === 401) {
-        handleLogout();
-        throw new Error("Session expired. Please sign in again.");
+      try {
+        const res = await fetch(url, options);
+        return res;
+      } catch (err) {
+        console.warn(`Network warning on ${url}:`, err);
+        throw err;
       }
-      return res;
+    }
+
+    async function executeLogin(email, password) {
+      const btn = document.getElementById("loginBtn");
+      if (btn) {
+        btn.innerHTML = `<span>Signing In...</span><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
+        if (window.lucide) lucide.createIcons();
+      }
+
+      try {
+        const res = await fetch("/v1/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Authentication failed. Invalid credentials.");
+
+        currentUser = data.data.user;
+        authToken = data.data.access_token;
+        try {
+          localStorage.setItem("ai_finance_user", JSON.stringify(currentUser));
+          localStorage.setItem("ai_finance_token", authToken);
+        } catch (e) {}
+
+        showToast(`Welcome back, ${currentUser.name}! Signed in as ${currentUser.role}.`);
+        renderWorkspaceForRole();
+      } catch (err) {
+        console.error("Login error:", err);
+        showToast(err.message || "Failed to sign in. Please verify connection.", true);
+      } finally {
+        if (btn) {
+          btn.innerHTML = `<span>Sign In to FinPilot AI Control Center</span><i data-lucide="arrow-right" class="w-4 h-4"></i>`;
+          if (window.lucide) lucide.createIcons();
+        }
+      }
+    }
+
+    async function quickDemoLogin(email) {
+      const emailInput = document.getElementById("loginEmail");
+      const passInput = document.getElementById("loginPassword");
+      if (emailInput) emailInput.value = email;
+      if (passInput) passInput.value = "password123";
+      await executeLogin(email, "password123");
+    }
+
+    async function handleLoginSubmit(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const email = document.getElementById("loginEmail")?.value || "cfo@aifinance.local";
+      const password = document.getElementById("loginPassword")?.value || "password123";
+      await executeLogin(email, password);
     }
 
     function checkAuthSession() {
@@ -2798,25 +2850,34 @@
         if (autoRole === "fm" || autoRole === "financemanager") email = "finance.manager@aifinance.local";
         else if (autoRole === "head" || autoRole === "depthead") email = "engineering.head@aifinance.local";
         else if (autoRole === "auditor") email = "auditor@aifinance.local";
-        fillDemoLogin(email);
+        quickDemoLogin(email);
         if (targetTab) {
           setTimeout(() => switchTab(targetTab), 500);
         }
         return;
       }
 
-      const savedUser = localStorage.getItem("ai_finance_user");
-      const savedToken = localStorage.getItem("ai_finance_token");
+      let savedUser = null;
+      let savedToken = null;
+      try {
+        savedUser = localStorage.getItem("ai_finance_user");
+        savedToken = localStorage.getItem("ai_finance_token");
+      } catch (e) {}
+
       if (savedUser && savedToken) {
-        currentUser = JSON.parse(savedUser);
-        authToken = savedToken;
-        renderWorkspaceForRole();
-        if (targetTab) {
-          setTimeout(() => switchTab(targetTab), 500);
+        try {
+          currentUser = JSON.parse(savedUser);
+          authToken = savedToken;
+          renderWorkspaceForRole();
+          if (targetTab) {
+            setTimeout(() => switchTab(targetTab), 500);
+          }
+          return;
+        } catch (e) {
+          console.warn("Failed to parse saved user:", e);
         }
-      } else {
-        showLoginScreen();
       }
+      showLoginScreen();
     }
 
     function showLoginScreen() {
@@ -2832,44 +2893,8 @@
       }
     }
 
-    function fillDemoLogin(email) {
-      document.getElementById("loginEmail").value = email;
-      document.getElementById("loginPassword").value = "password123";
-      document.getElementById("loginForm").dispatchEvent(new Event("submit"));
-    }
-
-    async function handleLoginSubmit(e) {
-      e.preventDefault();
-      const email = document.getElementById("loginEmail").value;
-      const password = document.getElementById("loginPassword").value;
-
-      try {
-        const res = await fetch("/v1/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "Authentication failed.");
-
-        currentUser = data.data.user;
-        authToken = data.data.access_token;
-        try {
-          localStorage.setItem("ai_finance_user", JSON.stringify(currentUser));
-          localStorage.setItem("ai_finance_token", authToken);
-        } catch (e) {
-          console.warn("localStorage not available:", e);
-        }
-
-        showToast(`Welcome back, ${currentUser.name}! Signed in as ${currentUser.role}.`);
-        renderWorkspaceForRole();
-      } catch (err) {
-        showToast(err.message, true);
-      }
-    }
-
     async function switchDemoAccount(email) {
-      fillDemoLogin(email);
+      await quickDemoLogin(email);
     }
 
     function handleLogout() {
