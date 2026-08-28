@@ -12,12 +12,12 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
 [![LangGraph](https://img.shields.io/badge/LangGraph-Multi--Agent-purple.svg)](https://langchain-ai.github.io/langgraph/)
 [![Razorpay](https://img.shields.io/badge/Razorpay-FINTECH%20API-blue.svg)](https://razorpay.com)
-[![Interview Master Guide PDF](https://img.shields.io/badge/📄%20Interview%20Master%20Guide-Download%20PDF-red.svg)](docs/FinPilot_AI_Complete_Interview_Master_Guide.pdf)
+[![Interview Master Handbook PDF](https://img.shields.io/badge/📄%20Master%20Interview%20Handbook-Download%20PDF-red.svg)](docs/Finpilot_AI_Technical_Interview_Handbook.pdf)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > **"Most finance AI tools describe what already happened. FinPilot AI simulates what happens next — before a human has to decide."**
 
-👉 **[📖 Download Complete Interview & Architectural Master Guide (PDF)](docs/FinPilot_AI_Complete_Interview_Master_Guide.pdf)** | **[🌐 Live Web Viewer](http://localhost:8000/interview-guide.pdf)**
+👉 **[📖 Download Complete 75-Part Technical Interview Handbook (PDF)](docs/Finpilot_AI_Technical_Interview_Handbook.pdf)** | **[🌐 Live Web PDF Viewer](http://localhost:8000/Finpilot_AI_Technical_Interview_Handbook.pdf)** | **[📄 HTML Version](http://localhost:8000/handbook)**
 
 ---
 

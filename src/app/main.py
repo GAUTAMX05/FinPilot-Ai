@@ -69,34 +69,37 @@ def serve_logo():
 
 @app.get("/interview-guide.pdf", tags=["Documentation"])
 @app.get("/docs/pdf", tags=["Documentation"])
+@app.get("/handbook.pdf", tags=["Documentation"])
+@app.get("/Finpilot_AI_Technical_Interview_Handbook.pdf", tags=["Documentation"])
 def serve_interview_guide_pdf():
-    """Serves the complete FinPilot AI Interview & System Master Guide PDF."""
-    pdf_path = os.path.join(STATIC_DIR, "docs", "FinPilot_AI_Complete_Interview_Master_Guide.pdf")
+    """Serves the complete FinPilot AI Technical Interview & Architecture Handbook PDF."""
+    pdf_path = os.path.join(STATIC_DIR, "docs", "Finpilot_AI_Technical_Interview_Handbook.pdf")
     if os.path.exists(pdf_path):
         return FileResponse(
             pdf_path,
             media_type="application/pdf",
-            filename="FinPilot_AI_Complete_Interview_Master_Guide.pdf"
+            filename="Finpilot_AI_Technical_Interview_Handbook.pdf"
         )
     # Fallback to docs directory
-    docs_pdf = os.path.join(os.path.dirname(os.path.dirname(__file__)), "docs", "FinPilot_AI_Complete_Interview_Master_Guide.pdf")
+    docs_pdf = os.path.join(os.path.dirname(os.path.dirname(__file__)), "docs", "Finpilot_AI_Technical_Interview_Handbook.pdf")
     if os.path.exists(docs_pdf):
         return FileResponse(
             docs_pdf,
             media_type="application/pdf",
-            filename="FinPilot_AI_Complete_Interview_Master_Guide.pdf"
+            filename="Finpilot_AI_Technical_Interview_Handbook.pdf"
         )
-    return HTMLResponse(status_code=404, content="Interview Guide PDF not found")
+    return HTMLResponse(status_code=404, content="Handbook PDF not found")
 
 
 @app.get("/interview-guide", response_class=HTMLResponse, tags=["Documentation"])
+@app.get("/handbook", response_class=HTMLResponse, tags=["Documentation"])
 def serve_interview_guide_html():
     """Serves the printable HTML Interview Master Guide."""
-    guide_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "docs", "interview_guide.html")
+    guide_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "docs", "Finpilot_AI_Technical_Interview_Handbook.html")
     if os.path.exists(guide_path):
         with open(guide_path, "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
-    return HTMLResponse(status_code=404, content="Interview Guide HTML not found")
+    return HTMLResponse(status_code=404, content="Handbook HTML not found")
 
 
 @app.get("/health", tags=["System Health"])
