@@ -37,3 +37,5 @@ chrome_test_user_data/
 tests/chrome_compose_test_data/
 
 tests/chrome_copilot_test_data/
+
+scripts/chrome_ss_data/

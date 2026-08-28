@@ -18,6 +18,20 @@
 
 ---
 
+## 🎯 Razorpay AI Agent Track Compliance Matrix
+
+| Track Requirement | Implementation in FinPilot AI | Interactive Endpoint / View |
+|---|---|---|
+| **🚀 Grows a Merchant's Sales** | **Smart Cross-Sell / Upsell Engine** (detects cart items & calculates synergistic bundle discounts) + **Autonomous Growth Campaign Orchestrator** (launches targeted promotional campaigns synced with marketing budget). | `POST /v1/commerce/campaigns/create`<br>`POST /v1/commerce/conversational-checkout`<br>*(Tab: AI Commerce & Growth)* |
+| **🤖 Enables AI-to-AI Shopping** | **Agent-Readable Universal Catalog Manifest** (`/v1/commerce/ai-manifest` in JSON-LD / Schema.org) + **Bounded Autonomous Buyer Agent** (`/v1/commerce/ai-buy` with hard `X-Spending-Token-Limit` bounds & Razorpay rails). | `GET /v1/commerce/ai-manifest`<br>`POST /v1/commerce/ai-buy`<br>*(Tab: AI Commerce & Growth)* |
+| **💬 Conversational In-App Checkout** | **In-App Cart & Checkout Assistant**: Natural language purchase parsing, live cart line items, statutory 18% GST calculation, and 1-click Razorpay test payment links. | `POST /v1/commerce/conversational-checkout`<br>*(Live Chat Panel in Tab 13)* |
+| **📦 Agent-Readable Product Catalogs** | **Universal Machine Protocol**: Exposes product IDs, specifications, tax codes, live inventories, bulk pricing tiers, and policy ceilings to buyer bots. | `GET /v1/commerce/ai-manifest`<br>`GET /v1/commerce/catalog` |
+| **✨ Automated Cross-Sell / Upsell Agents** | **Synergy Recommender**: Recommends complementary bundles (e.g. *API Gateway* $\rightarrow$ *Dedicated VPC* at 15% discount) with dynamic savings calculator. | Integrated into In-App Checkout & Conversational Chat |
+| **📈 Autonomous Campaign Orchestrators** | **Autonomous Growth Engine**: Deducts spend from live department budget, deploys campaign payment links, and projects ROAS (3.8x - 4.2x). | `POST /v1/commerce/campaigns/create`<br>*(Panel 3 in Tab 13)* |
+| **💳 Razorpay Test-Mode APIs** | **Fintech Rails**: Generates test-mode payment links (`https://rzp.io/i/...`), handles webhooks, idempotency keys, and payment state synchronization. | `src/app/services/razorpay_service.py` |
+
+---
+
 ## 📸 Interface & Capabilities Showcase
 
 ### 1. Merchant Sales Growth & AI-to-AI Shopping Studio

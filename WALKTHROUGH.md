@@ -13,6 +13,20 @@
 
 ---
 
+## 🎯 Razorpay AI Agent Hackathon Track Compliance
+
+| Hackathon Objective | How FinPilot AI Solves It | Technology / Endpoint |
+|---|---|---|
+| **1. Grows a Merchant's Sales** | **Smart Cross-Sell / Upsell Engine**: Identifies synergistic bundle pairings and applies dynamic discount incentives.<br>**Autonomous Campaign Orchestrator**: Synchronizes budget with Marketing ledger, generates promotional Razorpay links, and forecasts ROAS (3.8x - 4.2x). | `POST /v1/commerce/conversational-checkout`<br>`POST /v1/commerce/campaigns/create`<br>*(UI Tab: AI Commerce & Growth)* |
+| **2. Enables AI-to-AI Shopping** | **Universal Agent Manifest**: Machine-readable JSON-LD / Schema.org protocol allowing external buyer agents to discover catalogs, inventory, and policy bounds.<br>**Bounded AI-to-AI Purchasing**: Autonomous buyer bot negotiation within spending token limits. | `GET /v1/commerce/ai-manifest`<br>`POST /v1/commerce/ai-buy`<br>*(UI Tab: AI Commerce & Growth)* |
+| **3. Conversational In-App Checkout** | **Natural Language Cart Assistant**: Interactively parses purchase requests, calculates real-time 18% GST, and dispatches 1-click Razorpay test payment links. | `POST /v1/commerce/conversational-checkout`<br>*(Interactive Chat Panel in UI)* |
+| **4. Agent-Readable Product Catalogs** | **Universal Commerce Manifest**: Exposes product IDs, specifications, tax codes, live inventories, bulk pricing tiers, and policy ceilings to buyer bots. | `GET /v1/commerce/ai-manifest`<br>`GET /v1/commerce/catalog` |
+| **5. Automated Cross-Sell / Upsell Agents** | **Synergistic Bundle Recommendation**: Automatically suggests complementary items (e.g. *API Gateway* $\rightarrow$ *Dedicated VPC* at 15% discount) with dynamic savings calculator. | Integrated into In-App Checkout & Conversational Chat |
+| **6. Autonomous Campaign Orchestrators** | **Autonomous Growth Engine**: Deducts spend from live department budget, deploys campaign payment links, and projects ROAS (3.8x - 4.2x). | `POST /v1/commerce/campaigns/create`<br>*(Panel 3 in UI)* |
+| **7. Razorpay Test-Mode APIs** | **Fintech Rails**: Generates test-mode payment links (`https://rzp.io/i/...`), handles webhooks, idempotency keys, and payment state synchronization. | `src/app/services/razorpay_service.py` |
+
+---
+
 ## 🌟 Core System Pillars
 
 ```
