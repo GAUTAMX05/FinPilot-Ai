@@ -1,3 +1,4 @@
+import hashlib
 import uuid
 from typing import Dict, List, Any, Optional
 from datetime import datetime
@@ -7,55 +8,42 @@ class AuditLogService:
     def __init__(self):
         self._logs: List[Dict[str, Any]] = []
         self._flags: List[Dict[str, Any]] = []
+        self._last_hash = "GENESIS_BLOCK_000000000000000000000000000000000000000000000000000000"
         self._seed_initial_logs()
+
+    def _generate_hash(self, payload: str, prev_hash: str) -> str:
+        """Generates SHA-256 hash for immutable chaining."""
+        raw = f"{prev_hash}|{payload}"
+        return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
     def _seed_initial_logs(self):
         """Initial historical audit logs for compliance tracking."""
         initial_entries = [
-            {
-                "id": "log_001",
-                "user_id": "usr_fm_002",
-                "user_name": "Rahul Sharma",
-                "role": "FINANCE_MANAGER",
-                "action": "BUDGET_UPDATE",
-                "entity": "DEPARTMENT_BUDGET",
-                "entity_id": "Engineering",
-                "old_value": "4,500,000 INR",
-                "new_value": "5,000,000 INR",
-                "details": "FY26 Q1 Cloud Infrastructure allocation expansion",
-                "risk_level": "LOW",
-                "timestamp": "2026-08-20T10:15:30Z",
-            },
-            {
-                "id": "log_002",
-                "user_id": "usr_cfo_001",
-                "user_name": "Vikramaditya Singhania",
-                "role": "CFO",
-                "action": "FINAL_EXPENSE_APPROVAL",
-                "entity": "INVOICE",
-                "entity_id": "INV-2026-001",
-                "old_value": "PENDING_APPROVAL",
-                "new_value": "APPROVED",
-                "details": "Authorized Annual AWS Cloud commitment (₹1,85,000.00)",
-                "risk_level": "MEDIUM",
-                "timestamp": "2026-08-21T14:30:00Z",
-            },
-            {
-                "id": "log_003",
-                "user_id": "usr_aud_004",
-                "user_name": "Kavita Iyer",
-                "role": "AUDITOR",
-                "action": "FLAG_TRANSACTION",
-                "entity": "INVOICE",
-                "entity_id": "INV-2026-004",
-                "old_value": "SUBMITTED",
-                "new_value": "FLAGGED_FOR_REVIEW",
-                "details": "Flagged duplicate invoice submission pattern for SaaS licensing",
-                "risk_level": "HIGH",
-                "timestamp": "2026-08-22T09:45:12Z",
-            },
+            ("usr_fm_002", "Rahul Sharma", "FINANCE_MANAGER", "BUDGET_UPDATE", "DEPARTMENT_BUDGET", "Engineering", "4,500,000 INR", "5,000,000 INR", "FY26 Q1 Cloud Infrastructure allocation expansion", "LOW", "2026-08-20T10:15:30Z"),
+            ("usr_cfo_001", "Vikramaditya Singhania", "CFO", "FINAL_EXPENSE_APPROVAL", "INVOICE", "INV-2026-001", "PENDING_APPROVAL", "APPROVED", "Authorized Annual AWS Cloud commitment (₹1,85,000.00)", "MEDIUM", "2026-08-21T14:30:00Z"),
+            ("usr_aud_004", "Kavita Iyer", "AUDITOR", "FLAG_TRANSACTION", "INVOICE", "INV-2026-004", "SUBMITTED", "FLAGGED_FOR_REVIEW", "Flagged duplicate invoice submission pattern for SaaS licensing", "HIGH", "2026-08-22T09:45:12Z"),
         ]
-        self._logs.extend(initial_entries)
+        for user_id, user_name, role, action, entity, entity_id, old_val, new_val, details, risk, ts in initial_entries:
+            payload = f"{user_id}:{action}:{entity}:{entity_id}:{ts}"
+            entry_hash = self._generate_hash(payload, self._last_hash)
+            entry = {
+                "id": f"log_{uuid.uuid4().hex[:8]}",
+                "user_id": user_id,
+                "user_name": user_name,
+                "role": role,
+                "action": action,
+                "entity": entity,
+                "entity_id": entity_id,
+                "old_value": old_val,
+                "new_value": new_val,
+                "details": details,
+                "risk_level": risk,
+                "timestamp": ts,
+                "prev_hash": self._last_hash,
+                "audit_hash": entry_hash,
+            }
+            self._last_hash = entry_hash
+            self._logs.insert(0, entry)
 
     def log_action(
         self,
@@ -70,7 +58,11 @@ class AuditLogService:
         details: str = "",
         risk_level: str = "LOW",
     ) -> Dict[str, Any]:
-        """Appends an immutable audit log entry."""
+        """Appends an immutable cryptographic audit log entry."""
+        ts = datetime.now().isoformat()
+        payload = f"{user_id}:{action}:{entity}:{entity_id}:{ts}:{details}"
+        entry_hash = self._generate_hash(payload, self._last_hash)
+        
         entry = {
             "id": f"log_{uuid.uuid4().hex[:8]}",
             "user_id": user_id,
@@ -83,8 +75,11 @@ class AuditLogService:
             "new_value": new_value,
             "details": details,
             "risk_level": risk_level,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": ts,
+            "prev_hash": self._last_hash,
+            "audit_hash": entry_hash,
         }
+        self._last_hash = entry_hash
         self._logs.insert(0, entry)
         return entry
 

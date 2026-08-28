@@ -244,10 +244,14 @@ class MerchantCommerceService:
         subtotal = 0.0
         for item in cart:
             p_id = item.get("product_id")
-            unit_p = item.get("unit_price", 0.0)
-            qty = item.get("quantity", 1)
-            disc = item.get("discount_pct", 0.0)
-            item_total = (unit_p * qty) * (1 - disc / 100.0)
+            if "unit_price" not in item or not item.get("name"):
+                prod = products_map.get(p_id, {})
+                item["unit_price"] = item.get("unit_price") or prod.get("unit_price", 0.0)
+                item["name"] = item.get("name") or prod.get("name", p_id)
+            unit_p = float(item.get("unit_price", 0.0))
+            qty = int(item.get("quantity", 1))
+            disc = float(item.get("discount_pct", 0.0))
+            item_total = (unit_p * qty) * (1.0 - disc / 100.0)
             subtotal += item_total
 
         subtotal = round(subtotal, 2)

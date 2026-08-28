@@ -106,7 +106,24 @@
 
 ---
 
-## 🏗️ Architecture
+## 🧠 Build Quality & AI Judgment Architecture
+
+> Detailed Architecture Guide: [docs/AI_JUDGMENT_AND_ARCHITECTURE.md](docs/AI_JUDGMENT_AND_ARCHITECTURE.md)
+
+FinPilot AI adheres to a strict separation of concerns between **Deterministic Business Logic** and **Probabilistic AI Reasoning**:
+
+| Domain | Mechanism | Architectural Rationale |
+|---|---|---|
+| **💰 18% GST, Subtotals & Ledger Math** | **Deterministic Rules Engine** | **Never use LLMs for ledger arithmetic.** Exact Python float calculations prevent token hallucinations. |
+| **🛡️ Spending Token Bounds & ₹50K HITL** | **Hard Validation Guardrails** | Ceilings and thresholds are checked at the Pydantic/Python layer before transactions touch payment rails. |
+| **🔒 RBAC & User Recipient Isolation** | **Deterministic Auth Middleware** | Direct user ID and department matching guarantees zero cross-user message leakage. |
+| **🔗 Tamper-Evident Audit Logging** | **SHA-256 Hash Chaining** | Every compliance record links cryptographically to the previous log block. |
+| **💬 Natural Language Parsing** | **Autonomous Semantic Agent** | Extracts purchase intent and cart actions from unstructured text. |
+| **🔍 Causal Root-Cause Correlation** | **Causal Analysis Agent** | Pinpoints root causes by correlating financial anomalies with operational signals. |
+| **🧬 What-If 90-Day Narration** | **Narrator Agent** | Formulates structured 5-step role-tailored executive synthesis. |
+| **🤝 Autonomous Negotiation** | **Bounded Agent Protocol** | Bounded price negotiation within merchant discount ceilings (max 15%). |
+
+---
 
 ```
 finpilot_ai/
