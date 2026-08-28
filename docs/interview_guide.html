@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinPilot AI — Complete Interview & Architectural Master Guide</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 14mm 18mm 14mm;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: #0F172A;
+      background: #FFFFFF;
+      line-height: 1.55;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .page-break { page-break-before: always; }
+    .avoid-break { page-break-inside: avoid; }
+    h1, h2, h3, h4 { font-weight: 800; color: #0A192F; }
+    .gradient-text {
+      background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+</head>
+<body class="p-8 max-w-4xl mx-auto text-slate-800 text-sm">
+
+  <!-- ===================================================================== -->
+  <!-- COVER PAGE -->
+  <!-- ===================================================================== -->
+  <div class="text-center py-12 border-b-2 border-slate-200 mb-8 avoid-break">
+    <img src="assets/logo.png" alt="FinPilot AI Logo" class="w-32 h-32 mx-auto mb-4 rounded-2xl shadow-md border border-slate-200 p-2 object-contain bg-slate-900">
+    <h1 class="text-4xl font-black tracking-tight text-slate-900 mb-2">FinPilot <span class="text-blue-600">AI</span></h1>
+    <p class="text-base font-extrabold text-blue-600 tracking-widest uppercase mb-4">FINANCE • CONTROL • DECIDE • GROW</p>
+    <h2 class="text-xl font-bold text-slate-700 max-w-2xl mx-auto mb-6">Autonomous Financial Digital Twin & Multi-Agent Decision Operating System</h2>
+    
+    <div class="inline-block bg-blue-50 border border-blue-200 rounded-xl px-6 py-3 text-xs text-blue-900 font-semibold mb-6">
+      Complete Interview Master Guide & Comprehensive System Reference
+    </div>
+
+    <div class="grid grid-cols-3 gap-4 text-xs text-slate-500 max-w-lg mx-auto pt-4 border-t border-slate-100">
+      <div><strong>Track:</strong> Razorpay AI Agent</div>
+      <div><strong>Architecture:</strong> Hybrid Multi-Agent</div>
+      <div><strong>Version:</strong> Production 2.4</div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- SECTION 1: THE 30-SECOND ELEVATOR PITCH -->
+  <!-- ===================================================================== -->
+  <div class="mb-10 avoid-break">
+    <div class="flex items-center gap-2 border-b-2 border-blue-600 pb-2 mb-4">
+      <span class="bg-blue-600 text-white font-bold rounded-lg px-2 py-0.5 text-xs">01</span>
+      <h2 class="text-lg font-bold uppercase tracking-wider text-slate-900">The 30-Second Elevator Pitch (What to Say First)</h2>
+    </div>
+    
+    <div class="bg-slate-50 border-l-4 border-blue-600 p-4 rounded-r-xl text-slate-800 text-sm leading-relaxed mb-4">
+      <em>"Most financial AI tools describe what already happened by reading past dashboards. <strong>FinPilot AI simulates what happens next</strong> — before an executive has to commit capital. Built on <strong>Razorpay test-mode rails</strong>, FinPilot AI combines a <strong>90-Day Financial Digital Twin</strong>, an <strong>Autonomous Multi-Agent Decision Copilot</strong>, a <strong>Merchant Growth Engine with Smart Upsells</strong>, and an <strong>AI-to-AI Shopping Protocol</strong> with zero-leakage role-based security."</em>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 text-xs">
+      <div class="p-3 rounded-lg bg-blue-50/60 border border-blue-100">
+        <strong class="text-blue-900 block mb-1">Key Innovation #1: Digital Twin Simulation</strong>
+        Predicts day-by-day cash runway, burn velocity, and deficit risks 90 days forward under what-if scenarios.
+      </div>
+      <div class="p-3 rounded-lg bg-blue-50/60 border border-blue-100">
+        <strong class="text-blue-900 block mb-1">Key Innovation #2: AI-to-AI Commerce</strong>
+        Machine-readable store manifest (`/v1/commerce/ai-manifest`) enabling external buyer bots to negotiate within spending caps.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- SECTION 2: PROBLEM STATEMENT & WHY IT MATTERS -->
+  <!-- ===================================================================== -->
+  <div class="mb-10 avoid-break">
+    <div class="flex items-center gap-2 border-b-2 border-blue-600 pb-2 mb-4">
+      <span class="bg-blue-600 text-white font-bold rounded-lg px-2 py-0.5 text-xs">02</span>
+      <h2 class="text-lg font-bold uppercase tracking-wider text-slate-900">The Problem FinPilot AI Solves</h2>
+    </div>
+
+    <table class="w-full text-xs border border-slate-200 rounded-lg overflow-hidden mb-4">
+      <thead class="bg-slate-100 text-slate-700 text-left">
+        <tr>
+          <th class="p-2.5 border-b border-slate-200">The Traditional Finance Problem</th>
+          <th class="p-2.5 border-b border-slate-200">How FinPilot AI Fixes It</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <tr>
+          <td class="p-2.5 font-medium text-rose-700">1. Retrospective Dashboards: Only show historical data after overspending occurs.</td>
+          <td class="p-2.5 text-emerald-800 font-semibold">Proactive Digital Twin: Simulates counterfactuals 90 days out before money is disbursed.</td>
+        </tr>
+        <tr>
+          <td class="p-2.5 font-medium text-rose-700">2. LLM Hallucination Risk: Blindly trusting AI tokens with arithmetic causes financial errors.</td>
+          <td class="p-2.5 text-emerald-800 font-semibold">Disciplined AI Judgment: Exact Python math for GST & balances; AI reserved for semantic reasoning.</td>
+        </tr>
+        <tr>
+          <td class="p-2.5 font-medium text-rose-700">3. Friction in Merchant Sales: Slow manual checkouts and lack of machine-to-machine commerce.</td>
+          <td class="p-2.5 text-emerald-800 font-semibold">Autonomous AI-to-AI Shopping & Conversational Cart with 1-click Razorpay payment links.</td>
+        </tr>
+        <tr>
+          <td class="p-2.5 font-medium text-rose-700">4. Notification Noise & Data Leakage: Global feeds expose sensitive budgets across roles.</td>
+          <td class="p-2.5 text-emerald-800 font-semibold">Strict Recipient Isolation: Notifications and requests sent strictly to intended user IDs.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- ===================================================================== -->
+  <!-- SECTION 3: SYSTEM ARCHITECTURE & 5 CORE PILLARS -->
+  <!-- ===================================================================== -->
+  <div class="mb-10">
+    <div class="flex items-center gap-2 border-b-2 border-blue-600 pb-2 mb-4">
+      <span class="bg-blue-600 text-white font-bold rounded-lg px-2 py-0.5 text-xs">03</span>
+      <h2 class="text-lg font-bold uppercase tracking-wider text-slate-900">Core Architecture & 5 Technical Pillars</h2>
+    </div>
+
+    <!-- Pillar 1 -->
+    <div class="mb-6 p-4 rounded-xl border border-slate-200 bg-white avoid-break">
+      <h3 class="text-sm font-black text-blue-900 mb-1">Pillar 1: 🧬 Financial Digital Twin & What-If Studio</h3>
+      <p class="text-xs text-slate-600 mb-2">Maintains an in-memory clone of enterprise cash reserves (₹8.43M), department burn rates, and vendor liabilities.</p>
+      <ul class="list-disc list-inside text-xs text-slate-700 space-y-1">
+        <li><strong>90-Day Step-by-Step Differential Simulation:</strong> Computes daily cash continuity ($Cash_{i} = Cash_{i-1} + Inflow_i - Outflow_i$).</li>
+        <li><strong>Interactive Multiplier Sliders:</strong> Allows executives to simulate burn spikes, 14-day vendor payment deferrals, or Q3 headcount additions.</li>
+        <li><strong>4-Factor Decision Scorer (0–100):</strong> Evaluates Budget Impact, Policy Compliance, Variance Stability, and Approval Risk.</li>
+      </ul>
+    </div>
+
+    <!-- Pillar 2 -->
+    <div class="mb-6 p-4 rounded-xl border border-slate-200 bg-white avoid-break">
+      <h3 class="text-sm font-black text-blue-900 mb-1">Pillar 2: 🤖 7-Agent Autonomous Multi-Agent Pipeline</h3>
+      <p class="text-xs text-slate-600 mb-2">Coordinates 7 specialized sub-agents executing deterministic hand-offs:</p>
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div class="p-2 bg-slate-50 rounded border border-slate-100"><strong>1. Intent & RBAC Agent:</strong> Validates role boundaries.</div>
+        <div class="p-2 bg-slate-50 rounded border border-slate-100"><strong>2. Retrieval Agent:</strong> Extracts facts with lineage tracking.</div>
+        <div class="p-2 bg-slate-50 rounded border border-slate-100"><strong>3. Analysis Agent:</strong> Calculates daily burn velocity & GST.</div>
+        <div class="p-2 bg-slate-50 rounded border border-slate-100"><strong>4. Risk Agent:</strong> Computes multi-factor risk scores.</div>
+        <div class="p-2 bg-slate-50 rounded border border-slate-100"><strong>5. Simulation Agent:</strong> Runs forward Digital Twin projections.</div>
+        <div class="p-2 bg-slate-50 rounded border border-slate-100"><strong>6. Causal Agent:</strong> Pinpoints root cause correlations.</div>
+      </div>
+      <div class="p-2 bg-blue-50 rounded border border-blue-100 text-xs mt-2 text-blue-900">
+        <strong>7. Narrator Agent:</strong> Synthesizes structured 5-part role-tailored report: (1) What Happened, (2) Why It Matters, (3) What Should Be Done, (4) Who Needs to Act, (5) What Happens Next.
+      </div>
+    </div>
+
+    <!-- Pillar 3 -->
+    <div class="mb-6 p-4 rounded-xl border border-slate-200 bg-white avoid-break">
+      <h3 class="text-sm font-black text-blue-900 mb-1">Pillar 3: 🛍️ Merchant Growth & AI-to-AI Shopping Protocol</h3>
+      <ul class="list-disc list-inside text-xs text-slate-700 space-y-1">
+        <li><strong>Universal Agent Manifest:</strong> Machine-readable JSON-LD / Schema.org protocol at `/v1/commerce/ai-manifest`.</li>
+        <li><strong>Bounded AI-to-AI Purchasing:</strong> External AI buyer bots negotiate tiered discounts (up to 15%) within hard spending token limits.</li>
+        <li><strong>Conversational In-App Checkout:</strong> Natural language cart assistant with real-time 18% GST and 1-click Razorpay test payment links.</li>
+        <li><strong>Autonomous Campaign Orchestrator:</strong> Deploys growth campaigns synchronized with marketing budget and forecasts ROAS (4.0x).</li>
+      </ul>
+    </div>
+
+    <!-- Pillar 4 -->
+    <div class="mb-6 p-4 rounded-xl border border-slate-200 bg-white avoid-break">
+      <h3 class="text-sm font-black text-blue-900 mb-1">Pillar 4: 📨 Role-Based User-Targeted Notification Center</h3>
+      <ul class="list-disc list-inside text-xs text-slate-700 space-y-1">
+        <li><strong>Strict Recipient Isolation:</strong> Filtered at database layer (`recipientUserId == current_user.id`). Zero cross-user notification leaks.</li>
+        <li><strong>2-Way Threaded Conversations:</strong> Live chat bubble modal with reply inputs between CFO, Managers, and Department Heads.</li>
+        <li><strong>New Request Compose Modal:</strong> Dynamic eligible recipient directory routing.</li>
+        <li><strong>Direct Entity Deep-Linking:</strong> 1-click navigation to referenced invoices, budgets, or tax reconciliation screens.</li>
+      </ul>
+    </div>
+
+    <!-- Pillar 5 -->
+    <div class="p-4 rounded-xl border border-slate-200 bg-white avoid-break">
+      <h3 class="text-sm font-black text-blue-900 mb-1">Pillar 5: 🛡️ Four-Tier Failure Resilience Engine</h3>
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div class="p-2 bg-rose-50 rounded border border-rose-100"><strong>1. Gateway Timeout:</strong> Exponential backoff with idempotency key and offline queue.</div>
+        <div class="p-2 bg-rose-50 rounded border border-rose-100"><strong>2. Malformed Payload:</strong> Schema validation with field-level corrective hints.</div>
+        <div class="p-2 bg-rose-50 rounded border border-rose-100"><strong>3. Budget Cap Hit:</strong> Pre-disbursement freeze with automated escalation ticket.</div>
+        <div class="p-2 bg-rose-50 rounded border border-rose-100"><strong>4. Token Limit Breach:</strong> Transaction paused for human override authorization.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- ===================================================================== -->
+  <!-- SECTION 4: AI JUDGMENT & BUILD QUALITY -->
+  <!-- ===================================================================== -->
+  <div class="mb-10 avoid-break">
+    <div class="flex items-center gap-2 border-b-2 border-blue-600 pb-2 mb-4">
+      <span class="bg-blue-600 text-white font-bold rounded-lg px-2 py-0.5 text-xs">04</span>
+      <h2 class="text-lg font-bold uppercase tracking-wider text-slate-900">Disciplined AI Judgment: Knowing When NOT to Use AI</h2>
+    </div>
+
+    <p class="text-xs text-slate-600 mb-3">Interviewers love to test candidates on whether they understand the limits of LLMs. Here is the exact architectural boundary:</p>
+
+    <div class="grid grid-cols-2 gap-4 text-xs">
+      <div class="p-3.5 rounded-xl bg-slate-900 text-white border border-slate-800">
+        <strong class="text-rose-400 block text-sm mb-1">🚫 Where We DO NOT Use AI:</strong>
+        <ul class="space-y-1.5 text-slate-300">
+          <li>• <strong>Ledger & Tax Arithmetic:</strong> GST (18%), discounts, and burn rates use pure Python floating-point math to eliminate hallucinations.</li>
+          <li>• <strong>Security & RBAC Ceilings:</strong> ₹50K HITL threshold and token limits are validated deterministically in Pydantic models.</li>
+          <li>• <strong>Audit Chaining:</strong> SHA-256 cryptographic hashing links compliance records immutably.</li>
+        </ul>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-blue-900 text-white border border-blue-800">
+        <strong class="text-blue-300 block text-sm mb-1">🤖 Where We DO Use AI:</strong>
+        <ul class="space-y-1.5 text-blue-100">
+          <li>• <strong>Natural Language Understanding:</strong> Extracting semantic purchase intent from conversational requests.</li>
+          <li>• <strong>Causal Root Cause Correlation:</strong> Linking operational signals with spending anomalies.</li>
+          <li>• <strong>Multi-Agent Role-Aware Narration:</strong> Tailoring executive explanations for CFOs vs Auditors.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- SECTION 5: STEP-BY-STEP 5-MINUTE LIVE DEMO SCRIPT -->
+  <!-- ===================================================================== -->
+  <div class="mb-10 avoid-break">
+    <div class="flex items-center gap-2 border-b-2 border-blue-600 pb-2 mb-4">
+      <span class="bg-blue-600 text-white font-bold rounded-lg px-2 py-0.5 text-xs">05</span>
+      <h2 class="text-lg font-bold uppercase tracking-wider text-slate-900">5-Minute Live Interview Pitch Script (What to Click & Say)</h2>
+    </div>
+
+    <div class="space-y-3 text-xs">
+      <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <strong class="text-blue-900 block font-bold mb-0.5">Minute 1: Login & Executive Overview (Tab 1: Control Center)</strong>
+        <p class="text-slate-700"><em>"I'm logging in as the CFO Vikramaditya. Notice the live ₹8.43M liquidity, 82/100 decision score, and dynamic department burn telemetry. Every action here is governed by our Financial Digital Twin."</em></p>
+      </div>
+
+      <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <strong class="text-blue-900 block font-bold mb-0.5">Minute 2: 90-Day Digital Twin Simulation (Tab 2: What-If Studio)</strong>
+        <p class="text-slate-700"><em>"Let's test what happens if Engineering spend increases by 15% and we delay vendor payments by 14 days. Watch the trajectory chart instantly project cash reserves and runway without touching the production ledger."</em></p>
+      </div>
+
+      <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <strong class="text-blue-900 block font-bold mb-0.5">Minute 3: Multi-Agent Financial Copilot (Tab 8: Copilot Chat)</strong>
+        <p class="text-slate-700"><em>"I'll click the prompt 'Why is Engineering overspending?'. Our 7-sub-agent orchestrator classifies intent, pulls telemetry, runs causal correlation, and generates a 5-step role-tailored action plan."</em></p>
+      </div>
+
+      <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <strong class="text-blue-900 block font-bold mb-0.5">Minute 4: Merchant Sales Growth & AI-to-AI Shopping (Tab 13: Commerce Studio)</strong>
+        <p class="text-slate-700"><em>"Here is our AI commerce engine. I can chat with the cart assistant, get a 15% smart upsell bundle, or launch an autonomous AI buyer bot that negotiates within spending token limits and produces a Razorpay payment link."</em></p>
+      </div>
+
+      <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <strong class="text-blue-900 block font-bold mb-0.5">Minute 5: Role-Based Notifications & Audit Trail (Bell Icon)</strong>
+        <p class="text-slate-700"><em>"Finally, clicking the notification bell opens our user-targeted notification center with 2-way threads, 1-click entity routing, and SHA-256 cryptographically chained audit logging."</em></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- ===================================================================== -->
+  <!-- SECTION 6: TOP 10 INTERVIEW QUESTIONS & MODEL ANSWERS -->
+  <!-- ===================================================================== -->
+  <div class="mb-10">
+    <div class="flex items-center gap-2 border-b-2 border-blue-600 pb-2 mb-4">
+      <span class="bg-blue-600 text-white font-bold rounded-lg px-2 py-0.5 text-xs">06</span>
+      <h2 class="text-lg font-bold uppercase tracking-wider text-slate-900">Top 10 Technical Interview Questions & Answers</h2>
+    </div>
+
+    <div class="space-y-4 text-xs">
+      <div class="p-3 rounded-lg border border-slate-200 avoid-break">
+        <strong class="text-blue-900 block font-bold mb-1">Q1: How do you prevent AI hallucinations in financial calculations?</strong>
+        <p class="text-slate-700"><strong>Answer:</strong> We enforce strict architectural boundaries. All arithmetic (18% GST, burn rate calculations, subtotal sums, and budget balances) is computed deterministically in Python. The LLM is only used for intent parsing, causal correlation, and semantic narrative formulation.</p>
+      </div>
+
+      <div class="p-3 rounded-lg border border-slate-200 avoid-break">
+        <strong class="text-blue-900 block font-bold mb-1">Q2: How does the AI-to-AI Shopping protocol work?</strong>
+        <p class="text-slate-700"><strong>Answer:</strong> We expose a machine-readable JSON-LD catalog manifest at `/v1/commerce/ai-manifest`. External buyer agents send purchase requests with an authorized `X-Spending-Token-Limit` header. Our merchant agent validates the ceiling, applies bulk discount rules within policy constraints (max 15%), and returns a test-mode Razorpay payment link.</p>
+      </div>
+
+      <div class="p-3 rounded-lg border border-slate-200 avoid-break">
+        <strong class="text-blue-900 block font-bold mb-1">Q3: How does the Financial Digital Twin simulate 90 days forward?</strong>
+        <p class="text-slate-700"><strong>Answer:</strong> It takes an in-memory snapshot of liquid reserves, department budgets, and scheduled invoices, then applies day-by-day differential equations with modifier multipliers (burn spikes, payment delays, headcount changes) to project daily cash continuity and runway days.</p>
+      </div>
+
+      <div class="p-3 rounded-lg border border-slate-200 avoid-break">
+        <strong class="text-blue-900 block font-bold mb-1">Q4: How do you enforce strict role-based notification isolation?</strong>
+        <p class="text-slate-700"><strong>Answer:</strong> Notifications are filtered at the service query layer against `recipientUserId == current_user.id` or explicit `observerIds`. Senders, recipients, and observers are isolated so no department head or auditor can see private CFO requests.</p>
+      </div>
+
+      <div class="p-3 rounded-lg border border-slate-200 avoid-break">
+        <strong class="text-blue-900 block font-bold mb-1">Q5: What happens when Razorpay API drops or times out?</strong>
+        <p class="text-slate-700"><strong>Answer:</strong> Our 4-Tier Failure Resilience Engine kicks in with an exponential backoff retry mechanism (3 attempts with jitter) using idempotency keys. If the gateway remains unresponsive, the transaction is queued in an offline state and an escalation ticket is dispatched.</p>
+      </div>
+
+      <div class="p-3 rounded-lg border border-slate-200 avoid-break">
+        <strong class="text-blue-900 block font-bold mb-1">Q6: What is the tech stack and how is it tested?</strong>
+        <p class="text-slate-700"><strong>Answer:</strong> Backend: Python 3.11, FastAPI, Pydantic, LangChain/LangGraph, SQLite/In-memory store. Frontend: Tailwind CSS, Vanilla JS, Lucide icons, Chart.js. We have 7 automated test suites with 100% pass rate including Chrome CDP browser automation tests.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- FOOTER -->
+  <!-- ===================================================================== -->
+  <div class="pt-6 border-t border-slate-200 text-center text-xs text-slate-400 avoid-break">
+    <p><strong>FinPilot AI</strong> — Autonomous Multi-Agent Financial Digital Twin & Decision Operating System</p>
+    <p>GitHub: <a href="https://github.com/GAUTAMX05/FinPilot-Ai" class="text-blue-600 underline">https://github.com/GAUTAMX05/FinPilot-Ai</a> • Built for Razorpay AI Agent Track</p>
+  </div>
+
+</body>
+</html>

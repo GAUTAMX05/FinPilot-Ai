@@ -67,6 +67,38 @@ def serve_logo():
     return HTMLResponse(status_code=404, content="Logo not found")
 
 
+@app.get("/interview-guide.pdf", tags=["Documentation"])
+@app.get("/docs/pdf", tags=["Documentation"])
+def serve_interview_guide_pdf():
+    """Serves the complete FinPilot AI Interview & System Master Guide PDF."""
+    pdf_path = os.path.join(STATIC_DIR, "docs", "FinPilot_AI_Complete_Interview_Master_Guide.pdf")
+    if os.path.exists(pdf_path):
+        return FileResponse(
+            pdf_path,
+            media_type="application/pdf",
+            filename="FinPilot_AI_Complete_Interview_Master_Guide.pdf"
+        )
+    # Fallback to docs directory
+    docs_pdf = os.path.join(os.path.dirname(os.path.dirname(__file__)), "docs", "FinPilot_AI_Complete_Interview_Master_Guide.pdf")
+    if os.path.exists(docs_pdf):
+        return FileResponse(
+            docs_pdf,
+            media_type="application/pdf",
+            filename="FinPilot_AI_Complete_Interview_Master_Guide.pdf"
+        )
+    return HTMLResponse(status_code=404, content="Interview Guide PDF not found")
+
+
+@app.get("/interview-guide", response_class=HTMLResponse, tags=["Documentation"])
+def serve_interview_guide_html():
+    """Serves the printable HTML Interview Master Guide."""
+    guide_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "docs", "interview_guide.html")
+    if os.path.exists(guide_path):
+        with open(guide_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(status_code=404, content="Interview Guide HTML not found")
+
+
 @app.get("/health", tags=["System Health"])
 def health_check():
     """Health check endpoint."""

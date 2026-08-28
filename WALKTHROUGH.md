@@ -4,6 +4,8 @@
 
 # 🚀 FinPilot AI — Complete Architectural Walkthrough & System Guide
 
+👉 **[📄 Download Interview Master Guide (PDF)](docs/FinPilot_AI_Complete_Interview_Master_Guide.pdf)** | **[🌐 Live Browser PDF](http://localhost:8000/interview-guide.pdf)**
+
 **FinPilot AI** is an enterprise-grade **Financial Digital Twin, Merchant Growth & Autonomous Multi-Agent Decision Operating System**. Unlike conventional finance dashboards that merely report past transactions, FinPilot AI:
 1. **Grows Merchant Sales**: Conversational in-app checkout, smart bundle upsells, and autonomous marketing growth campaign orchestration.
 2. **Enables AI-to-AI Shopping**: Machine-readable product catalogs (`/v1/commerce/ai-manifest`), bounded negotiation, and autonomous Razorpay test-mode transactions.
