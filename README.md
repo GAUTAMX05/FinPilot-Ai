@@ -12,7 +12,6 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
 [![LangGraph](https://img.shields.io/badge/LangGraph-Multi--Agent-purple.svg)](https://langchain-ai.github.io/langgraph/)
 [![Razorpay](https://img.shields.io/badge/Razorpay-FINTECH%20API-blue.svg)](https://razorpay.com)
-[![Interview Master Handbook PDF](https://img.shields.io/badge/📄%20Master%20Interview%20Handbook-Download%20PDF-red.svg)](docs/Finpilot_AI_Technical_Interview_Handbook.pdf)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > **"Most finance AI tools describe what already happened. FinPilot AI simulates what happens next — before a human has to decide."**
