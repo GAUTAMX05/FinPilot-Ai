@@ -44,3 +44,13 @@ This document outlines 4 real, measurable financial and algorithmic metrics impl
   ```bash
   python tests/test_commerce_and_ai_shopping.py && python tests/test_digital_twin_and_agents.py && python tests/test_decision_engine_upgrade.py && python tests/test_ai_chat_pipeline.py
   ```
+
+---
+
+## ⚠️ Commercial Projections Audit: ROAS "3.8x–4.2x" Qualification
+
+- **Location in App:** AI Commerce & Growth Tab (Panel 3: Autonomous Growth Campaign Orchestrator).
+- **Underlying Calculation in Code:** In [`src/app/services/merchant_commerce_service.py`](../src/app/services/merchant_commerce_service.py#L500-L550), `create_growth_campaign` computes projected campaign revenue using a standard e-commerce SaaS benchmark multiplier:
+  $$\text{Incremental Revenue Projected} = \text{Allocated Budget} \times 4.0$$
+  For a ₹50,000 marketing allocation deducted from the live Marketing department ledger, the model projects ₹200,000 in gross revenue ($\text{ROAS} = 4.0\text{x}$).
+- **Honest Technical Assessment:** This figure is an **algorithmic forward projection model** based on pre-configured SaaS conversion assumptions, **not** an ex-post measured historical conversion metric from real customer traffic. It is clearly labeled in the system as a forward projection benchmark linked to automated budget ledger deductions.
