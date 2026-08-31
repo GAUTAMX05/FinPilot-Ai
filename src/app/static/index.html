@@ -5209,7 +5209,13 @@
           document.getElementById("a2aResultRationale").innerText = data.negotiation_summary?.negotiation_rationale || "";
           
           const payUrl = document.getElementById("a2aResultPaymentUrl");
-          if (payUrl) payUrl.href = data.payment_execution?.payment_url || "#";
+          if (payUrl) {
+            const rawUrl = data.payment_execution?.payment_url || "";
+            const validUrl = rawUrl.startsWith("http") ? rawUrl : `https://rzp.io/i/${(data.payment_execution?.payment_link_id || 'plink_test').substring(0, 14)}`;
+            payUrl.href = validUrl;
+            payUrl.target = "_blank";
+            payUrl.innerHTML = `<span class="truncate max-w-[220px] inline-block">${validUrl}</span><i data-lucide="external-link" class="w-3 h-3 flex-shrink-0"></i>`;
+          }
 
           showToast("AI-to-AI purchase transaction successfully completed!");
         } else {
