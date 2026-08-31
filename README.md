@@ -4,7 +4,22 @@
 
 # FinPilot AI
 
-**Live Demo:** [https://finpilot-ai-s9km.onrender.com/](https://finpilot-ai-s9km.onrender.com/) (test creds: `cfo@aifinance.local` / `password123`, or select any 1-click role on the login screen)
+**Live Demo:** [https://finpilot-ai-s9km.onrender.com/](https://finpilot-ai-s9km.onrender.com/)
+
+> [!NOTE]
+> **Cold Start Notice:** First load may take up to 60 seconds while the Render free-tier instance wakes up.
+
+### Demo Role Logins
+| Role | Email / Identifier | Password | 1-Click Autologin Link |
+|---|---|---|---|
+| **CFO** | `cfo@aifinance.local` | `password123` | [Launch CFO Workspace](https://finpilot-ai-s9km.onrender.com/?autologin=cfo) |
+| **Finance Manager** | `financemanager@aifinance.local` | `password123` | [Launch Finance Manager Workspace](https://finpilot-ai-s9km.onrender.com/?autologin=fm) |
+| **Department Head** | `depthead@aifinance.local` | `password123` | [Launch Department Head Workspace](https://finpilot-ai-s9km.onrender.com/?autologin=head) |
+| **Auditor** | `auditor@aifinance.local` | `password123` | [Launch Auditor Workspace](https://finpilot-ai-s9km.onrender.com/?autologin=auditor) |
+
+We built FinPilot AI to solve a core problem growing businesses face: financial decisions are fragmented across spreadsheets, accounting exports, and delayed approvals. When finance teams review invoices, allocate department budgets, or approve large disbursements, they lack immediate visibility into forward cash runway and policy compliance.
+
+FinPilot AI gives finance managers, department heads, and executives a unified financial orchestration workspace. We combine deterministic backend calculations (exact 18% GST audit rules, statutory payroll deductions, hard budget limits) with LangGraph-orchestrated agents for natural language financial queries, root-cause anomaly detection, and forward cash-flow simulation. On the merchant commerce side, the system provides machine-readable catalog manifests (`/v1/commerce/ai-manifest`), bounded AI-to-AI procurement negotiation, and conversational in-app checkout linked to Razorpay payment rails.
 
 [![CI Tests](https://github.com/GAUTAMX05/FinPilot-Ai/actions/workflows/tests.yml/badge.svg)](https://github.com/GAUTAMX05/FinPilot-Ai/actions/workflows/tests.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -12,10 +27,6 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-Multi--Agent-purple.svg)](https://langchain-ai.github.io/langgraph/)
 [![Razorpay](https://img.shields.io/badge/Razorpay-FINTECH%20API-blue.svg)](https://razorpay.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-We built FinPilot AI to solve a core problem growing businesses face: financial decisions are fragmented across spreadsheets, accounting exports, and delayed approvals. When finance teams review invoices, allocate department budgets, or approve large disbursements, they lack immediate visibility into forward cash runway and policy compliance.
-
-FinPilot AI gives finance managers, department heads, and executives a unified financial orchestration workspace. We combine deterministic backend calculations (exact 18% GST audit rules, statutory payroll deductions, hard budget limits) with LangGraph-orchestrated agents for natural language financial queries, root-cause anomaly detection, and forward cash-flow simulation. On the merchant commerce side, the system provides machine-readable catalog manifests (`/v1/commerce/ai-manifest`), bounded AI-to-AI procurement negotiation, and conversational in-app checkout linked to Razorpay payment rails.
 
 ---
 
