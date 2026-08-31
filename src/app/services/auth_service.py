@@ -113,17 +113,21 @@ class AuthService:
         email_clean = email.strip().lower()
         user = self._users.get(email_clean)
         
-        # Support enterprise.internal email alias
-        if not user and "@enterprise.internal" in email_clean:
-            prefix = email_clean.split("@")[0]
-            if prefix in ["cfo"]:
-                user = self._users.get("cfo@aifinance.local")
-            elif prefix in ["financemanager", "finance.manager"]:
-                user = self._users.get("finance.manager@aifinance.local")
-            elif prefix in ["depthead", "engineering.head"]:
-                user = self._users.get("engineering.head@aifinance.local")
-            elif prefix in ["auditor"]:
-                user = self._users.get("auditor@aifinance.local")
+        # Comprehensive alias & ID fallback lookup
+        if not user:
+            for u in self._users.values():
+                aliases = [a.lower() for a in u.get("aliases", [])]
+                email_prefix = email_clean.split("@")[0]
+                user_email_prefix = u["email"].lower().split("@")[0]
+                if (
+                    email_clean == u["id"].lower()
+                    or email_clean in aliases
+                    or email_prefix in aliases
+                    or email_prefix == u["id"].lower()
+                    or email_prefix == user_email_prefix
+                ):
+                    user = u
+                    break
 
         if not user or not user.get("is_active"):
             return None

@@ -19,9 +19,21 @@ class AuditLogService:
     def _seed_initial_logs(self):
         """Initial historical audit logs for compliance tracking."""
         initial_entries = [
-            ("usr_fm_002", "Rahul Sharma", "FINANCE_MANAGER", "BUDGET_UPDATE", "DEPARTMENT_BUDGET", "Engineering", "4,500,000 INR", "5,000,000 INR", "FY26 Q1 Cloud Infrastructure allocation expansion", "LOW", "2026-08-20T10:15:30Z"),
-            ("usr_cfo_001", "Vikramaditya Singhania", "CFO", "FINAL_EXPENSE_APPROVAL", "INVOICE", "INV-2026-001", "PENDING_APPROVAL", "APPROVED", "Authorized Annual AWS Cloud commitment (₹1,85,000.00)", "MEDIUM", "2026-08-21T14:30:00Z"),
-            ("usr_aud_004", "Kavita Iyer", "AUDITOR", "FLAG_TRANSACTION", "INVOICE", "INV-2026-004", "SUBMITTED", "FLAGGED_FOR_REVIEW", "Flagged duplicate invoice submission pattern for SaaS licensing", "HIGH", "2026-08-22T09:45:12Z"),
+            ("usr_fm_002", "Rahul Verma", "FINANCE_MANAGER", "BUDGET_UPDATE", "DEPARTMENT_BUDGET", "Engineering", "4,500,000 INR", "5,000,000 INR", "FY26 Q1 Cloud Infrastructure allocation expansion", "LOW", "2026-08-15T09:15:30Z"),
+            ("usr_cfo_001", "Vikramaditya Singhania", "CFO", "FINAL_EXPENSE_APPROVAL", "INVOICE", "INV-2026-001", "PENDING_APPROVAL", "APPROVED", "Authorized Annual AWS Cloud commitment (₹1,85,000.00)", "MEDIUM", "2026-08-16T11:30:00Z"),
+            ("usr_aud_004", "Kavita Iyer", "AUDITOR", "FLAG_TRANSACTION", "INVOICE", "INV-2026-004", "SUBMITTED", "FLAGGED_FOR_REVIEW", "Flagged duplicate invoice submission pattern for SaaS licensing", "HIGH", "2026-08-17T14:45:12Z"),
+            ("usr_dh_003", "Arjun Mehta", "DEPARTMENT_HEAD", "REALLOCATION_REQUEST", "BUDGET", "Engineering", "5,000,000 INR", "5,250,000 INR", "Requested GPU compute cluster expansion for AI reasoning", "MEDIUM", "2026-08-18T10:00:00Z"),
+            ("usr_fm_002", "Rahul Verma", "FINANCE_MANAGER", "ALLOWANCE_OVERRIDE", "EMPLOYEE", "EMP0004", "POLICY_CAP", "AUTHORIZED_EXCEPTION", "Approved client-onsite travel expense surge during Bangalore summit", "LOW", "2026-08-19T16:20:15Z"),
+            ("usr_aud_004", "Kavita Iyer", "AUDITOR", "TAX_AUDIT_VERIFIED", "FORM16", "EMP0012", "UNDER_AUDIT", "RECONCILED", "Section 80C declaration proofs verified against TDS deduction ledger", "LOW", "2026-08-20T09:10:45Z"),
+            ("usr_cfo_001", "Vikramaditya Singhania", "CFO", "POLICY_CALIBRATION", "DIGITAL_TWIN", "POLICY-GOV-01", "THRESHOLD_100K", "THRESHOLD_50K", "Calibrated autonomous single-transaction approval ceiling to ₹50,000", "HIGH", "2026-08-21T13:15:00Z"),
+            ("usr_fm_002", "Rahul Verma", "FINANCE_MANAGER", "RECONCILIATION_MATCH", "TRANSACTION", "TXN-2026-088", "UNMATCHED", "MATCHED", "Automated two-way ledger match with Razorpay payout gateway ref", "LOW", "2026-08-22T17:40:22Z"),
+            ("usr_aud_004", "Kavita Iyer", "AUDITOR", "GST_INTEGRITY_AUDIT", "INVOICE", "INV-2026-022", "PENDING_TAX_AUDIT", "GST_VERIFIED", "18% GST calculation mathematically matched subtotal tax amount", "LOW", "2026-08-23T11:05:10Z"),
+            ("usr_dh_003", "Sunita Rao", "DEPARTMENT_HEAD", "CAMPAIGN_BUDGET_SYNC", "MARKETING", "CMP-GROWTH-01", "0 INR", "50,000 INR", "Allocated autonomous growth campaign budget with 4.0x target ROAS", "LOW", "2026-08-24T14:50:00Z"),
+            ("usr_fm_002", "Rahul Verma", "FINANCE_MANAGER", "VENDOR_RISK_EVALUATION", "VENDOR", "CloudNova Systems", "TIER_2", "TIER_1_PREFERRED", "Completed SOC-2 Type II vendor governance compliance review", "LOW", "2026-08-25T10:30:18Z"),
+            ("usr_cfo_001", "Vikramaditya Singhania", "CFO", "LIQUIDITY_BUFFER_LOCK", "TREASURY", "TREASURY_ACCOUNT", "10,000,000 INR", "12,500,000 INR", "Locked minimum operational liquidity floor for 90-day forward runway", "HIGH", "2026-08-26T15:10:00Z"),
+            ("usr_aud_004", "Kavita Iyer", "AUDITOR", "ANOMALY_ESCALATION", "INVOICE", "INV-2026-089", "REVIEW_REQUIRED", "ESCALATED_TO_CFO", "Invoice total ₹1,45,000 exceeds single-item department authorization cap", "HIGH", "2026-08-27T09:40:30Z"),
+            ("usr_fm_002", "Rahul Verma", "FINANCE_MANAGER", "PAYROLL_RUN_AUTHORIZED", "PAYROLL", "PAYROLL-2026-08", "CALCULATED", "DISBURSED", "Authorized August 2026 payroll run across 100 employee records", "LOW", "2026-08-28T12:00:00Z"),
+            ("usr_cfo_001", "Vikramaditya Singhania", "CFO", "SECURITY_AUDIT_PASS", "CONTROL_CENTER", "RBAC_SYSTEM", "INITIALIZED", "ACTIVE", "Completed comprehensive buildathon readiness and security scan", "LOW", "2026-08-28T18:00:00Z"),
         ]
         for user_id, user_name, role, action, entity, entity_id, old_val, new_val, details, risk, ts in initial_entries:
             payload = f"{user_id}:{action}:{entity}:{entity_id}:{ts}"
