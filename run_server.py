@@ -1,3 +1,4 @@
+import os
 import sys
 import asyncio
 from pathlib import Path
@@ -18,18 +19,7 @@ import uvicorn
 from src.app.main import app
 
 if __name__ == '__main__':
-    print("Starting FinPilot AI on http://127.0.0.1:8000 (0.0.0.0:8000) ...")
-    config = uvicorn.Config(
-        app=app,
-        host="0.0.0.0",
-        port=8000,
-        log_level="info",
-        loop="asyncio"
-    )
-    server = uvicorn.Server(config)
-    loop = asyncio.SelectorEventLoop()
-    asyncio.set_event_loop(loop)
-    try:
-        loop.run_until_complete(server.serve())
-    finally:
-        loop.close()
+    host = os.environ.get("HOST", "0.0.0.0")
+    port = int(os.environ.get("PORT", 8000))
+    print(f"Starting FinPilot AI on {host}:{port} ...")
+    uvicorn.run(app, host=host, port=port, log_level="info")

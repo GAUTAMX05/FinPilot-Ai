@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: finpilot-ai
+    runtime: python
+    buildCommand: "pip install -r requirements.txt && pip install -e ."
+    startCommand: "python run_server.py"
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SUPERVISOR_MODEL
+        value: gpt-4o-mini
+      - key: SUB_AGENT_MODEL
+        value: gpt-4o-mini
+      - key: HITL_APPROVAL_THRESHOLD_INR
+        value: "50000.0"
+      - key: AUTONOMOUS_PAYOUT_LIMIT_INR
+        value: "10000.0"
