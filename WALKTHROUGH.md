@@ -157,17 +157,17 @@ graph TD
 ## 7. 🧪 Automated Test Verification (100% Pass Rate)
 
 ```bash
-# 1. Role-Based Notification Security & Isolation Suite
-python tests/test_role_based_notifications.py
-
-# 2. Commerce, AI-to-AI Shopping & Failure Resilience Suite
+# 1. Merchant Growth & AI-to-AI Shopping Suite
 python tests/test_commerce_and_ai_shopping.py
 
-# 3. Financial Digital Twin & Multi-Agent Tests
+# 2. Financial Digital Twin & Multi-Agent Tests
 python tests/test_digital_twin_and_agents.py
 
-# 4. Automated Live Browser CDP Interaction Test
-python tests/test_browser_interactions.py
+# 3. Financial Decision Engine Upgrade Suite
+python tests/test_decision_engine_upgrade.py
+
+# 4. AI Chat & Comprehensive Reasoning Pipeline
+python tests/test_ai_chat_pipeline.py
 ```
 
 ---
