@@ -4,7 +4,7 @@
 
 # FinPilot AI
 
-**Live Demo:** [https://finpilot-ai.onrender.com](https://finpilot-ai.onrender.com) (test creds: CFO `cfo@aifinance.local` / `password123`, or select any 1-click role on the login screen)
+**Live Demo:** [https://finpilot-ai-s9km.onrender.com/](https://finpilot-ai-s9km.onrender.com/) (test creds: `cfo@aifinance.local` / `password123`, or select any 1-click role on the login screen)
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
@@ -178,10 +178,15 @@ python tests/test_ai_chat_pipeline.py
 
 ## Deployment
 
-The application is configured for deployment on cloud platforms such as Render or Railway:
-1. Set start command to `uvicorn src.app.main:app --host 0.0.0.0 --port $PORT` (or run `python run_server.py`).
-2. The application reads `$PORT` from environment variables and binds to `0.0.0.0`.
-3. If `OPENAI_API_KEY` or `RAZORPAY_KEY_ID` are not configured, the service boots normally using deterministic fallback routines.
+The application is configured for 1-click cloud deployment on Render (or any container/PaaS host):
+
+1. **Blueprint Deployment (Render):**
+   - Connect the repository `GAUTAMX05/FinPilot-Ai` in [Render Dashboard](https://dashboard.render.com/).
+   - Select **New +** $\rightarrow$ **Blueprint** (Render reads `render.yaml` automatically).
+   - Build Command: `pip install -r requirements.txt && pip install -e .`
+   - Start Command: `python run_server.py`
+2. **Port Binding:** The server listens on `0.0.0.0` and reads the dynamically assigned `$PORT` environment variable.
+3. **Resilient Startup:** If `OPENAI_API_KEY` or `RAZORPAY_KEY_ID` are not configured in environment variables, the service automatically boots into deterministic simulation mode with full demo data and functional endpoints.
 
 ---
 
