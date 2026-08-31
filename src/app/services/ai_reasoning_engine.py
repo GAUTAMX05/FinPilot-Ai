@@ -554,11 +554,14 @@ class AutonomousFinancialReasoningEngine:
         suspicious_list = []
         for inv in invoices:
             flags = []
+            subtotal = float(inv.get("subtotal") or (inv.get("total_amount", 0.0) / 1.18))
+            tax_claimed = float(inv.get("tax_gst") if inv.get("tax_gst") is not None else inv.get("tax_amount", subtotal * 0.18))
+            total_amt = float(inv.get("total_amount") or (subtotal + tax_claimed))
             # Tax check
-            expected_tax = round(inv["subtotal"] * 0.18, 2)
-            if abs(inv["tax_gst"] - expected_tax) > 1.0:
-                flags.append(f"Tax Mismatch: Claimed ₹{inv['tax_gst']:,.2f} vs Expected 18% GST (₹{expected_tax:,.2f})")
-            if inv["total_amount"] >= 50000:
+            expected_tax = round(subtotal * 0.18, 2)
+            if abs(tax_claimed - expected_tax) > 1.0:
+                flags.append(f"Tax Mismatch: Claimed ₹{tax_claimed:,.2f} vs Expected 18% GST (₹{expected_tax:,.2f})")
+            if total_amt >= 50000:
                 flags.append("Exceeds Manager Authorization Threshold (≥ ₹50,000)")
             if flags:
                 suspicious_list.append({"inv": inv, "flags": flags})
