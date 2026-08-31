@@ -169,3 +169,9 @@ python tests/test_digital_twin_and_agents.py
 # 4. Automated Live Browser CDP Interaction Test
 python tests/test_browser_interactions.py
 ```
+
+---
+
+## 8. 🛠️ A Failure We Hit and How We Fixed It
+
+During end-to-end integration testing of the single-page application, clicking on any of the 100 enterprise employees in the Employee Finance table produced an unhandled `"Error: Employee profile not found."` error in the modal, and demo role switching occasionally failed to update credentials. We diagnosed the root cause across two layers: first, while `dataset_service.py` was serving all 100 enterprise records (`EMP0001` through `EMP0100`), the downstream `employee_finance_service.py` had an internal `return` statement placed early on line 22 that returned only 4 hardcoded demo records before parsing the JSON dataset. Second, an unclosed duplicate code block in `index.html` was triggering a synchronous client-side JavaScript syntax error that blocked event listeners on initial page load. We resolved this by removing the stray syntax block, adding defensive fallback shims for CDN dependencies (`lucide`, `Chart.js`), and updating `_init_employees()` in `employee_finance_service.py` to dynamically load and enrich all 100 dataset employees with normalized ID matching (`EMP0001` vs `EMP-0001`). Finally, we added comprehensive automated tests in `test_demo_login.py` to ensure all 100 employee profiles and all 4 demo RBAC roles authenticate and render reliably.
