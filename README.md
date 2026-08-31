@@ -2,11 +2,9 @@
   <img src="docs/assets/logo.png" alt="FinPilot AI Logo" width="220" />
 </p>
 
-# 💰 FinPilot AI — Financial Digital Twin & Multi-Agent Autonomous Decision Operating System
+# FinPilot AI
 
-<p align="center">
-  <strong>FINANCE • CONTROL • DECIDE • GROW</strong>
-</p>
+**Live Demo:** [https://finpilot-ai.onrender.com](https://finpilot-ai.onrender.com) (test creds: CFO `cfo@aifinance.local` / `password123`, or select any 1-click role on the login screen)
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
@@ -14,41 +12,51 @@
 [![Razorpay](https://img.shields.io/badge/Razorpay-FINTECH%20API-blue.svg)](https://razorpay.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **"Most finance AI tools describe what already happened. FinPilot AI simulates what happens next — before a human has to decide."**
+We built FinPilot AI to solve a core problem growing businesses face: financial decisions are fragmented across spreadsheets, accounting exports, and delayed approvals. When finance teams review invoices, allocate department budgets, or approve large disbursements, they lack immediate visibility into forward cash runway and policy compliance.
 
+FinPilot AI gives finance managers, department heads, and executives a unified financial orchestration workspace. We combine deterministic backend calculations (exact 18% GST audit rules, statutory payroll deductions, hard budget limits) with LangGraph-orchestrated agents for natural language financial queries, root-cause anomaly detection, and forward cash-flow simulation. On the merchant commerce side, the system provides machine-readable catalog manifests (`/v1/commerce/ai-manifest`), bounded AI-to-AI procurement negotiation, and conversational in-app checkout linked to Razorpay payment rails.
 
 ---
 
-## 🎯 Razorpay AI Agent Track Compliance Matrix
+## Razorpay AI Agent Track — Compliance Reference
 
 | Track Requirement | Implementation in FinPilot AI | Interactive Endpoint / View |
 |---|---|---|
-| **🚀 Grows a Merchant's Sales** | **Smart Cross-Sell / Upsell Engine** (detects cart items & calculates synergistic bundle discounts) + **Autonomous Growth Campaign Orchestrator** (launches targeted promotional campaigns synced with marketing budget). | `POST /v1/commerce/campaigns/create`<br>`POST /v1/commerce/conversational-checkout`<br>*(Tab: AI Commerce & Growth)* |
-| **🤖 Enables AI-to-AI Shopping** | **Agent-Readable Universal Catalog Manifest** (`/v1/commerce/ai-manifest` in JSON-LD / Schema.org) + **Bounded Autonomous Buyer Agent** (`/v1/commerce/ai-buy` with hard `X-Spending-Token-Limit` bounds & Razorpay rails). | `GET /v1/commerce/ai-manifest`<br>`POST /v1/commerce/ai-buy`<br>*(Tab: AI Commerce & Growth)* |
-| **💬 Conversational In-App Checkout** | **In-App Cart & Checkout Assistant**: Natural language purchase parsing, live cart line items, statutory 18% GST calculation, and 1-click Razorpay test payment links. | `POST /v1/commerce/conversational-checkout`<br>*(Live Chat Panel in Tab 13)* |
-| **📦 Agent-Readable Product Catalogs** | **Universal Machine Protocol**: Exposes product IDs, specifications, tax codes, live inventories, bulk pricing tiers, and policy ceilings to buyer bots. | `GET /v1/commerce/ai-manifest`<br>`GET /v1/commerce/catalog` |
-| **✨ Automated Cross-Sell / Upsell Agents** | **Synergy Recommender**: Recommends complementary bundles (e.g. *API Gateway* $\rightarrow$ *Dedicated VPC* at 15% discount) with dynamic savings calculator. | Integrated into In-App Checkout & Conversational Chat |
-| **📈 Autonomous Campaign Orchestrators** | **Autonomous Growth Engine**: Deducts spend from live department budget, deploys campaign payment links, and projects ROAS (3.8x - 4.2x). | `POST /v1/commerce/campaigns/create`<br>*(Panel 3 in Tab 13)* |
-| **💳 Razorpay Test-Mode APIs** | **Fintech Rails**: Generates test-mode payment links (`https://rzp.io/i/...`), handles webhooks, idempotency keys, and payment state synchronization. | `src/app/services/razorpay_service.py` |
+| **Grows Merchant Sales** | Smart cross-sell / upsell recommender and autonomous marketing campaign orchestrator synced with budget balances. | `POST /v1/commerce/campaigns/create`<br>`POST /v1/commerce/conversational-checkout`<br>*(Tab: AI Commerce & Growth)* |
+| **Enables AI-to-AI Shopping** | Machine-readable catalog manifest (`/v1/commerce/ai-manifest` in JSON-LD / Schema.org) and bounded autonomous buyer agent with spending token limits. | `GET /v1/commerce/ai-manifest`<br>`POST /v1/commerce/ai-buy`<br>*(Tab: AI Commerce & Growth)* |
+| **Conversational In-App Checkout** | Natural language cart parsing, line item extraction, statutory 18% GST calculation, and Razorpay test payment links. | `POST /v1/commerce/conversational-checkout`<br>*(Live Chat Panel in Tab 13)* |
+| **Agent-Readable Catalogs** | Structured product catalog exposing IDs, specifications, tax codes, stock levels, and volume discount tiers to autonomous agents. | `GET /v1/commerce/ai-manifest`<br>`GET /v1/commerce/catalog` |
+| **Automated Cross-Sell / Upsell** | Recommends complementary bundles (e.g. API Gateway + Dedicated VPC) with automated savings calculations. | Integrated in In-App Checkout & Conversational Chat |
+| **Autonomous Campaign Orchestrators** | Deducts promotional spend from department marketing budget, deploys payment links, and tracks projected ROAS. | `POST /v1/commerce/campaigns/create`<br>*(Panel 3 in Tab 13)* |
+| **Razorpay Test-Mode APIs** | Test-mode payment links (`https://rzp.io/i/...`), webhook signature verification, idempotency keys, and payment state synchronization. | `src/app/services/razorpay_service.py` |
 
 ---
 
-## 📸 Interface & Capabilities Showcase
+## Known Limitations
 
-### 1. Merchant Sales Growth & AI-to-AI Shopping Studio
+1. **In-Memory State & Seeded Datasets:** The application uses in-memory data repositories initialized from `enterprise_dataset.json` rather than a persistent external SQL database (PostgreSQL/MySQL). State resets when the server process restarts.
+2. **Simulated Agent-to-Agent Negotiation:** The AI-to-AI buyer-seller negotiation runs locally through deterministic bounded algorithms and semantic rule sets rather than separate decentralized network nodes.
+3. **Test-Mode Payment Rails:** Razorpay integration operates on test API keys with synthetic fallback link generation when live API keys are not provided in environment variables.
+4. **Single-Tenant Workspace:** The system simulates enterprise RBAC roles (CFO, Finance Manager, Department Head, Auditor) across a single organization dataset rather than isolated multi-tenant workspaces.
+
+---
+
+## Application Interface & Core Workflows
+
+### 1. Merchant Sales Growth & AI Commerce Studio
 *Agent-readable product catalog (`/v1/commerce/ai-manifest`), autonomous AI buyer volume negotiation within strict policy bounds, conversational in-app checkout with smart upsell bundles, and growth campaigns via Razorpay test rails.*
 ![Merchant Sales Growth & AI-to-AI Shopping Studio](docs/screenshots/09_merchant_ai_commerce.png)
 
 ---
 
-### 2. Financial Digital Twin & What-If Simulation Studio
-*Live simulate-able model: Evaluate forward spend velocity, deferred vendor payouts, and headcount growth before executing transactions.*
+### 2. Forward Cash-Flow & Scenario Simulation Studio
+*Interactive simulation model: evaluate forward spend velocity, deferred vendor payouts, and headcount expansion before committing transactions.*
 ![Financial Digital Twin Studio](docs/screenshots/02_digital_twin_studio.png)
 
 ---
 
-### 3. Executive Control Center & Financial Decision Engine
-*Real-time corporate positions, dynamic time-series analytics, and automated decision review triggers.*
+### 3. Executive Control Center
+*Real-time corporate cash positions, department burn rates, and automated decision review triggers.*
 ![Executive Control Center](docs/screenshots/03_executive_control_center.png)
 
 ---
@@ -59,96 +67,71 @@
 
 ---
 
-### 5. Invoice Intelligence & Expense Affordability Auditor
-*Automated 18% GST tax auditor, duplicate submission detection, and department runway affordability simulations.*
+### 5. Invoice Intelligence & GST Compliance Auditor
+*Automated 18% GST calculation, duplicate invoice detection, and department runway affordability checks.*
 ![Invoice Intelligence](docs/screenshots/05_invoice_intelligence_auditor.png)
 
 ---
 
-### 6. Human-in-the-Loop (HITL) Disbursement Approvals Queue
+### 6. Human-in-the-Loop (HITL) Disbursement Approvals
 *Autonomous threshold enforcement with 1-click Razorpay payment link generation for disbursements $\ge$ ₹50,000.*
 ![Approvals Queue](docs/screenshots/06_hitl_approvals_queue.png)
 
 ---
 
-### 7. Role-Based Access Control (RBAC) Authentication Screen
-*Enterprise authentication with official FinPilot AI branding and role-tailored workspaces for CFO, Finance Manager, Department Head, and Auditor.*
+### 7. Role-Based Access Control (RBAC) Authentication
+*Authentication with four pre-configured roles: CFO, Finance Manager, Department Head, and Auditor.*
 ![Login Screen](docs/screenshots/01_login_screen.png)
 
 ---
 
-### 8. Role-Based User-Targeted Notification & 2-Way Internal Communication
-*Zero-leakage notification delivery scoped to authenticated users with threaded conversations and 1-click entity routing.*
+### 8. Role-Scoped Notifications Drawer
+*Notification delivery scoped to authenticated users with threaded conversations and entity routing.*
 ![Role-Based Notifications Drawer](docs/screenshots/10_role_based_notifications_drawer.png)
 
 ---
 
-## 🌟 Key Features
+## Core System Architecture
 
-1. **Merchant Sales Growth & Smart Upsells**:
-   - Conversational in-app checkout assistant with real-time dynamic cart, 18% GST calculation, and smart bundle discount incentives.
-   - Autonomous Marketing Growth Campaign orchestrator that synchronizes spend with department budget balances, generating promotional Razorpay links and tracking ROAS.
-2. **AI-to-AI Autonomous Shopping Protocol**:
-   - Machine-readable Universal Commerce Manifest (`/v1/commerce/ai-manifest`) in JSON-LD / Schema.org format.
-   - Bounded AI-to-AI purchasing: Autonomous AI buyers negotiate tiered bulk discounts (up to 15%) within hard spending token ceilings and Razorpay payment links.
-3. **Financial Digital Twin & 90-Day Forward Simulation**:
-   - Clones real-time financial state and runs counterfactual "what-if" simulations on burn velocities, deferred payouts, and headcount growth.
-4. **Autonomous Multi-Agent Orchestration**:
-   - 7 specialized agents (*Intent*, *Retrieval*, *Analysis*, *Risk*, *Simulation*, *Causal*, *Narrator*) executing deterministic hand-offs.
-5. **Causal Anomaly Detection**:
-   - Correlates financial variances with nearby operational signals (submitter clustering, vendor additions, tax offsets) to explain root causes.
-6. **Self-Calibrating Policy Engine**:
-   - Tracks human reviewer overrides to detect policy friction and propose 1-click calibrations.
-7. **Four-Tier Failure Handling & Resilience Engine**:
-   - **Gateway Drop / Timeout**: Exponential backoff with idempotency key and offline transaction queue.
-   - **Malformed / Invalid Payload**: Field-level schema diagnostics with corrective guidance and zero ledger side-effects.
-   - **Department Budget Cap Hit**: Pre-disbursement freeze and automated HITL escalation ticket.
-   - **AI Spending Token Overage**: Token limit breach prevention and human override authorization link.
-
----
-
-## 🧠 Build Quality & AI Judgment Architecture
-
-> Detailed Architecture Guide: [docs/AI_JUDGMENT_AND_ARCHITECTURE.md](docs/AI_JUDGMENT_AND_ARCHITECTURE.md)
-
-FinPilot AI adheres to a strict separation of concerns between **Deterministic Business Logic** and **Probabilistic AI Reasoning**:
+FinPilot AI separates deterministic calculations from probabilistic AI reasoning:
 
 | Domain | Mechanism | Architectural Rationale |
 |---|---|---|
-| **💰 18% GST, Subtotals & Ledger Math** | **Deterministic Rules Engine** | **Never use LLMs for ledger arithmetic.** Exact Python float calculations prevent token hallucinations. |
-| **🛡️ Spending Token Bounds & ₹50K HITL** | **Hard Validation Guardrails** | Ceilings and thresholds are checked at the Pydantic/Python layer before transactions touch payment rails. |
-| **🔒 RBAC & User Recipient Isolation** | **Deterministic Auth Middleware** | Direct user ID and department matching guarantees zero cross-user message leakage. |
-| **🔗 Tamper-Evident Audit Logging** | **SHA-256 Hash Chaining** | Every compliance record links cryptographically to the previous log block. |
-| **💬 Natural Language Parsing** | **Autonomous Semantic Agent** | Extracts purchase intent and cart actions from unstructured text. |
-| **🔍 Causal Root-Cause Correlation** | **Causal Analysis Agent** | Pinpoints root causes by correlating financial anomalies with operational signals. |
-| **🧬 What-If 90-Day Narration** | **Narrator Agent** | Formulates structured 5-step role-tailored executive synthesis. |
-| **🤝 Autonomous Negotiation** | **Bounded Agent Protocol** | Bounded price negotiation within merchant discount ceilings (max 15%). |
+| **18% GST, Subtotals & Ledger Math** | Deterministic Rules Engine | Arithmetic is executed in pure Python to prevent LLM token calculation errors. |
+| **Spending Limits & ₹50K HITL Thresholds** | Hard Validation Guardrails | Ceilings and thresholds are enforced at the API layer before payment rails are called. |
+| **RBAC & Data Scoping** | Auth Middleware | Role and department matching ensures users only access authorized financial records. |
+| **Audit Logging** | SHA-256 Hash Chaining | Each audit entry is linked to the previous log entry to maintain tamper evidence. |
+| **Natural Language Parsing** | Semantic Agent | Parses conversational purchasing requests and unstructured user queries. |
+| **Root-Cause Analysis** | Causal Correlation Agent | Correlates financial variances with operational events (vendor additions, tax adjustments). |
+| **Forward Scenario Narration** | Narrator Agent | Generates structured, role-tailored summaries of simulation results. |
+| **AI Buyer Negotiation** | Bounded Negotiation Engine | Bounded volume discount negotiation capped by merchant discount ceilings (max 15%). |
 
 ---
 
+## Project Structure
+
 ```
-finpilot_ai/
+FinPilot_Ai/
 ├── src/
 │   └── app/
 │       ├── api/
 │       │   └── endpoints/     # Commerce, Simulation, Invoices, Budgets, Approvals, Payroll, Chat
-│       ├── core/              # Config, Security, Policy rules, RBAC
-│       ├── data/              # Merchant catalog, Department budgets, Sample benchmarks
-│       ├── graphs/            # LangGraph multi-agent controller state machine
-│       ├── services/          # Merchant Commerce, Digital Twin, Policy Calibration, Multi-Agent Orchestrator
-│       ├── static/            # Dark Razorpay-style fintech frontend & AI Commerce Studio
+│       ├── core/              # Config, Security, Policy rules, RBAC middleware
+│       ├── data/              # Merchant catalog, enterprise dataset, benchmarks
+│       ├── graphs/            # LangGraph multi-agent workflow state machine
+│       ├── services/          # Commerce, Simulation, Policy Calibration, Multi-Agent Orchestrator
+│       ├── static/            # Frontend single-page application & AI Commerce Studio
 │       └── main.py            # Application entrypoint
 ├── docs/
-│   └── screenshots/           # High-resolution UI captures (01 - 09)
-├── tests/                     # 100% automated test suites
-├── WALKTHROUGH.md             # Complete system & architecture guide
-├── PITCH_DECK_GUIDE.md        # 5-minute executive pitch script & Q&A guide
-└── pyproject.toml             # Project configuration & dependencies
+│   └── screenshots/           # UI captures (01 - 10)
+├── tests/                     # Automated test suites
+├── WALKTHROUGH.md             # System walkthrough and API documentation
+└── pyproject.toml             # Project dependencies and packaging
 ```
 
 ---
 
-## 🚀 Quickstart
+## Quickstart
 
 ### 1. Clone & Install
 ```bash
@@ -160,7 +143,7 @@ pip install -e .
 ### 2. Configure Environment
 ```bash
 cp .env.example .env
-# Add your OPENAI_API_KEY and RAZORPAY credentials
+# Optional: Add OPENAI_API_KEY and RAZORPAY API keys (app boots in fallback mode if omitted)
 ```
 
 ### 3. Launch Server
@@ -175,7 +158,7 @@ python run_server.py
 
 ---
 
-## 🧪 Automated Test Suites (100% Pass)
+## Automated Test Suites
 
 ```bash
 # Merchant Growth & AI-to-AI Shopping Suite
@@ -184,7 +167,7 @@ python tests/test_commerce_and_ai_shopping.py
 # Digital Twin & Multi-Agent Tests
 python tests/test_digital_twin_and_agents.py
 
-# Decision Operating System Suite
+# Decision Engine Suite
 python tests/test_decision_engine_upgrade.py
 
 # AI Chat & Reasoning Pipeline
@@ -193,6 +176,14 @@ python tests/test_ai_chat_pipeline.py
 
 ---
 
+## Deployment
+
+The application is configured for deployment on cloud platforms such as Render or Railway:
+1. Set start command to `uvicorn src.app.main:app --host 0.0.0.0 --port $PORT` (or run `python run_server.py`).
+2. The application reads `$PORT` from environment variables and binds to `0.0.0.0`.
+3. If `OPENAI_API_KEY` or `RAZORPAY_KEY_ID` are not configured, the service boots normally using deterministic fallback routines.
+
+---
+
 ## 📖 In-Depth System Documentation
 - [WALKTHROUGH.md](WALKTHROUGH.md) — Comprehensive architectural breakdown, simulation math, and API schemas.
-
