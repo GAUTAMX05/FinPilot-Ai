@@ -1,11 +1,15 @@
+# -*- coding: utf-8 -*-
 import os
 import logging
-from fastapi import FastAPI
+from datetime import datetime
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+
 from src.app.core.config import settings
-from src.app.core.database import init_db
+from src.app.core.database import init_db, get_db_connection
+from src.app.services.razorpay_service import razorpay_service
 from src.app.api import api_router
 
 logging.basicConfig(
@@ -14,7 +18,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("FinPilotAIApp")
 
-# Ensure SQLite schema and initial data are ready
+# Ensure SQLite schema and initial benchmark data are bootstrap ready
 init_db()
 
 app = FastAPI(
@@ -62,15 +66,54 @@ def serve_dashboard():
     return HTMLResponse("<h1>FinPilot AI API is running. Access <a href='/docs'>/docs</a> for Swagger UI.</h1>")
 
 
-@app.get("/health", tags=["Health"])
+@app.get("/health", tags=["Health & Observability"])
 def health_check():
-    """Health check endpoint for Render/container readiness."""
+    """Liveness probe reporting service status and runtime version."""
     return {
         "status": "healthy",
         "app": "FinPilot AI — Autonomous Finance Controller for Razorpay Merchants",
         "version": settings.VERSION,
-        "environment": settings.ENVIRONMENT
+        "environment": settings.ENVIRONMENT,
+        "timestamp": datetime.utcnow().isoformat()
     }
+
+
+@app.get("/ready", tags=["Health & Observability"])
+def readiness_check():
+    """
+    Readiness probe validating database connectivity, benchmark dataset integrity,
+    and gateway status without leaking credentials.
+    """
+    try:
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute("SELECT COUNT(*) FROM benchmark_records")
+        bench_count = c.fetchone()[0]
+        c.execute("SELECT COUNT(*) FROM reconciliation_runs")
+        runs_count = c.fetchone()[0]
+        conn.close()
+
+        gw_status = razorpay_service.get_gateway_status()
+
+        return {
+            "status": "ready",
+            "app": "FinPilot AI — Autonomous Finance Controller",
+            "database": {
+                "engine": "SQLite",
+                "connected": True,
+                "benchmark_records_seeded": bench_count,
+                "reconciliation_runs_executed": runs_count
+            },
+            "gateway": {
+                "mode": gw_status["gateway_mode"],
+                "is_configured": gw_status["is_configured"],
+                "supported_currencies": gw_status["supported_currencies"]
+            },
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"[ReadinessCheck] Service not ready: {e}")
+        raise HTTPException(status_code=503, detail=f"Service not ready: {str(e)}")
 
 
 if __name__ == "__main__":

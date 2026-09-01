@@ -11,7 +11,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 BASE_URL = "http://127.0.0.1:8000"
 
-def test_endpoint(name, path, method="GET", body=None, headers=None):
+def run_endpoint_check(name, path, method="GET", body=None, headers=None):
     headers = headers or {}
     url = f"{BASE_URL}{path}"
     data = json.dumps(body).encode("utf-8") if body else None
@@ -151,7 +151,7 @@ def run_frontend_api_tests():
     passed = 0
     failed = 0
     for name, path, method, body in endpoints:
-        ok, res = test_endpoint(name, path, method, body)
+        ok, res = run_endpoint_check(name, path, method, body)
         if ok:
             passed += 1
         else:

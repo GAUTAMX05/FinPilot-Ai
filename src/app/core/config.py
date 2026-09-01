@@ -4,8 +4,9 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "FinPilot AI"
-    VERSION: str = "0.1.0"
+    VERSION: str = "1.0.0"
     API_V1_STR: str = "/v1"
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "production" if os.getenv("RENDER") else "development")
 
     # LLM Settings
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")

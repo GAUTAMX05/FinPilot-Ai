@@ -99,6 +99,14 @@
       margin: 0;
     }
   </style>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/controller.js"></script>
+  <script src="/static/js/exceptions.js"></script>
+  <script src="/static/js/reconciliation.js"></script>
+  <script src="/static/js/evaluation.js"></script>
+  <script src="/static/js/merchant_day.js"></script>
+    
 </head>
 <body class="min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white bg-[#050B18] text-slate-100">
 
@@ -1429,6 +1437,89 @@
         <!-- ================================================================= -->
         <!-- TAB 7: HYBRID RECONCILIATION & EXCEPTION CENTER -->
         <!-- ================================================================= -->
+        
+        <!-- ===================================================================== -->
+        <!-- VIEW: GUIDED "MERCHANT DAY" CONNECTED GOVERNANCE DEMO -->
+        <!-- ===================================================================== -->
+        <div id="view-merchantday" class="tab-view hidden space-y-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#0B1729] p-6 rounded-3xl border border-white/10 shadow-card">
+            <div>
+              <div class="flex items-center gap-2.5">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase tracking-wide">Connected Governance</span>
+                <span class="text-xs text-slate-400 font-mono">16-Stage Value Loop</span>
+              </div>
+              <h2 class="text-xl font-extrabold text-white tracking-tight mt-1.5">Guided "Merchant Day" Simulation</h2>
+              <p class="text-xs text-slate-300 mt-1 max-w-2xl">
+                Demonstrating FinPilot AI closing the loop: AI Procurement → Catalog Discovery → Policy-Bounded Negotiation → Deterministic GST → Razorpay Payment Link → 3-Way Reconciliation → Exception Detection → Grounded AI Root Cause → CFO HITL Approval → SHA-256 Cryptographic Audit Trail.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <button onclick="runMerchantDayWorkflow()" class="btn-smooth px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-glow-blue transition">
+                <i data-lucide="play" class="w-4 h-4"></i>
+                <span>Execute Merchant Day</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Merchant Day Flow Chart Steps -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="p-5 rounded-3xl bg-[#0B1729] border border-white/10 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-blue-400">1. MORNING SNAPSHOT</span>
+                <i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>
+              </div>
+              <h4 class="font-bold text-white text-sm">Liquidity & Runway Evaluation</h4>
+              <p class="text-xs text-slate-300">Continuous check on cash reserves (₹84.35L), committed burn, and 30-day runway projection.</p>
+            </div>
+
+            <div class="p-5 rounded-3xl bg-[#0B1729] border border-white/10 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-blue-400">2. AI COMMERCE</span>
+                <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i>
+              </div>
+              <h4 class="font-bold text-white text-sm">Autonomous Buyer Discovery</h4>
+              <p class="text-xs text-slate-300">AI Buyer queries machine-readable catalog, applies spending token cap, and executes 12% bulk negotiation.</p>
+            </div>
+
+            <div class="p-5 rounded-3xl bg-[#0B1729] border border-white/10 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-blue-400">3. STATUTORY TAX</span>
+                <i data-lucide="calculator" class="w-4 h-4 text-emerald-400"></i>
+              </div>
+              <h4 class="font-bold text-white text-sm">Deterministic 18% GST</h4>
+              <p class="text-xs text-slate-300">Pure Python float arithmetic computes statutory GST (₹11,880.00) with zero LLM arithmetic risk.</p>
+            </div>
+
+            <div class="p-5 rounded-3xl bg-[#0B1729] border border-white/10 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-blue-400">4. RAZORPAY LINK</span>
+                <i data-lucide="credit-card" class="w-4 h-4 text-blue-400"></i>
+              </div>
+              <h4 class="font-bold text-white text-sm">Payment Link Generation</h4>
+              <p class="text-xs text-slate-300">Calls Razorpay API in Test Mode or deterministic simulation if keys omitted (no fake rzp.io links).</p>
+            </div>
+
+            <div class="p-5 rounded-3xl bg-[#0B1729] border border-white/10 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-blue-400">5. 3-WAY RECONCILIATION</span>
+                <i data-lucide="git-merge" class="w-4 h-4 text-indigo-400"></i>
+              </div>
+              <h4 class="font-bold text-white text-sm">Automated Settlement Matching</h4>
+              <p class="text-xs text-slate-300">Compares Payment Gross vs ERP Invoice vs Bank Settlement. Pinpoints fee variances and missing items.</p>
+            </div>
+
+            <div class="p-5 rounded-3xl bg-[#0B1729] border border-white/10 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-blue-400">6. CFO GOVERNANCE</span>
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+              </div>
+              <h4 class="font-bold text-white text-sm">HITL Approval & SHA-256 Audit</h4>
+              <p class="text-xs text-slate-300">Grounded AI diagnosis presented to CFO. Decision recorded in cryptographically chained ledger.</p>
+            </div>
+          </div>
+        </div>
+        
         <div id="view-reconciliation" class="tab-view hidden space-y-6">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0B1729] p-5 rounded-3xl border border-white/10 shadow-card">
             <div>
@@ -3350,6 +3441,7 @@
 
       const titles = {
         dashboard: "Autonomous Finance Controller for Razorpay Merchants",
+        merchantday: "Guided Merchant Day Simulation (Connected 16-Stage Value Loop)",
         reconciliation: "3-Way Deterministic Reconciliation Engine (Payment vs Invoice vs Settlement)",
         exceptions: "Exception Center & Grounded AI Root-Cause Analysis",
         evaluation: "Measured Benchmark Performance & Ground Truth Evaluation",
@@ -5871,15 +5963,15 @@
           
           setTxt("dashLastRunId", s.run_id || "RUN-LATEST");
           setTxt("dashThroughputRps", `${s.throughput_rps ? Math.round(s.throughput_rps).toLocaleString() : '32,500'} records/sec`);
-          setTxt("ctrlRecordsProcessed", s.records_processed || 120);
-          setTxt("ctrlAutoReconciled", s.auto_reconciled || 95);
-          setTxt("ctrlMatchRate", `${s.match_rate || 79.2}%`);
-          setTxt("ctrlExceptionsCount", s.exceptions_count || 25);
-          setTxt("ctrlHumanReviewCount", s.human_review || 25);
-          setTxt("ctrlAmountInReview", `₹${((s.amount_under_review || 1451058) / 100000).toFixed(2)}L`);
+          setTxt("ctrlRecordsProcessed", s.records_processed !== undefined ? s.records_processed : "N/A");
+          setTxt("ctrlAutoReconciled", s.auto_reconciled !== undefined ? s.auto_reconciled : "N/A");
+          setTxt("ctrlMatchRate", `${s.match_rate !== undefined ? s.match_rate : "N/A"}%`);
+          setTxt("ctrlExceptionsCount", s.exceptions_count !== undefined ? s.exceptions_count : "0");
+          setTxt("ctrlHumanReviewCount", s.human_review !== undefined ? s.human_review : "0");
+          setTxt("ctrlAmountInReview", `₹${((s.amount_under_review !== undefined ? s.amount_under_review : 0) / 100000).toFixed(2)}L`);
 
           const excBadge = document.getElementById("navExcBadge");
-          if (excBadge) excBadge.innerText = s.exceptions_count || 25;
+          if (excBadge) excBadge.innerText = s.exceptions_count !== undefined ? s.exceptions_count : "0";
         }
 
         if (data.exceptions) {
@@ -6189,10 +6281,10 @@
       if (!evalData) return;
       const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
 
-      setTxt("evalAccuracy", `${evalData.match_accuracy || 100.0}%`);
-      setTxt("evalPrecision", `${evalData.exception_precision || 100.0}%`);
-      setTxt("evalRecall", `${evalData.exception_recall || 100.0}%`);
-      setTxt("evalF1Score", `${evalData.f1_score || 100.0}%`);
+      setTxt("evalAccuracy", `${evalData.match_accuracy !== undefined ? evalData.match_accuracy : "N/A"}%`);
+      setTxt("evalPrecision", `${evalData.exception_precision !== undefined ? evalData.exception_precision : "N/A"}%`);
+      setTxt("evalRecall", `${evalData.exception_recall !== undefined ? evalData.exception_recall : "N/A"}%`);
+      setTxt("evalF1Score", `${evalData.f1_score !== undefined ? evalData.f1_score : "N/A"}%`);
       setTxt("evalTP", evalData.exceptions_detected || 25);
       setTxt("evalTN", (evalData.total_records || 120) - (evalData.exceptions_detected || 25));
       setTxt("evalFP", evalData.false_positives || 0);
@@ -6356,5 +6448,42 @@
       </div>
     </div>
 
+
+    <!-- ===================================================================== -->
+    <!-- MODAL: MERCHANT DAY GUIDED SIMULATION EXECUTION -->
+    <!-- ===================================================================== -->
+    <div id="merchantDayModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="max-w-2xl w-full bg-[#0B1729] rounded-3xl p-6 sm:p-7 border border-emerald-500/30 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-white/10 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+              <i data-lucide="play-circle" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-extrabold text-white text-base">Merchant Day Live Governance Cycle</h3>
+              <p class="text-xs text-slate-400">Full Connected Pipeline Execution</p>
+            </div>
+          </div>
+          <button onclick="closeMerchantDayModal()" class="p-2 rounded-xl text-slate-400 hover:text-white bg-white/5">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div id="merchantDayStepsList" class="space-y-2.5">
+          <!-- Step cards injected here -->
+        </div>
+
+        <div id="merchantDaySummaryBox" class="hidden p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300">
+          <span id="merchantDaySummaryText"></span>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button onclick="closeMerchantDayModal()" class="btn-smooth px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-glow-blue">
+            Done & View Dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+        
 </body>
 </html>

@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 from typing import Dict, List, Any, Optional
 from pydantic import BaseModel, Field
 from fastapi import APIRouter, HTTPException, Depends, Header
 
 from src.app.services.finance_controller_service import finance_controller_service
+from src.app.services.razorpay_service import razorpay_service
 from src.app.core.database import init_db
 
 router = APIRouter(prefix="/controller", tags=["Autonomous Finance Controller"])
@@ -10,17 +12,19 @@ router = APIRouter(prefix="/controller", tags=["Autonomous Finance Controller"])
 
 class CloseMonthRequest(BaseModel):
     actor: Optional[str] = Field(default="Finance Manager", description="Actor initiating month-close reconciliation")
+    tenant_id: Optional[str] = Field(default="merchant_default", description="Merchant Organization Tenant ID")
 
 
 class ExceptionDecisionRequest(BaseModel):
-    decision: str = Field(..., description="One of: APPROVE, REJECT, ESCALATE")
+    decision: str = Field(..., description="One of: APPROVE, REJECT, ESCALATE, RESOLVE")
     actor_name: Optional[str] = Field(default="Finance Manager", description="Name of the human approver")
-    actor_role: Optional[str] = Field(default="FINANCE_MANAGER", description="Role of the human approver")
+    actor_role: Optional[str] = Field(default="FINANCE_MANAGER", description="Role of the human approver (CFO, FINANCE_MANAGER, AUDITOR)")
     comments: Optional[str] = Field(default="", description="Audit comments or rationale for the decision")
+    request_id: Optional[str] = Field(default=None, description="Client or gateway request correlation ID")
 
 
 class BenchmarkReloadRequest(BaseModel):
-    dataset_type: Optional[str] = Field(default="100_standard", description="Dataset type to reload")
+    dataset_type: Optional[str] = Field(default="120_standard", description="Dataset type to reload")
 
 
 @router.post("/close-month")
@@ -32,36 +36,46 @@ def close_month(req: Optional[CloseMonthRequest] = None):
     and cryptographic SHA-256 audit logging.
     """
     actor = req.actor if req else "Finance Manager"
-    res = finance_controller_service.run_close_month(actor=actor)
+    tenant_id = req.tenant_id if req else "merchant_default"
+    res = finance_controller_service.run_close_month(actor=actor, tenant_id=tenant_id)
     return res
 
 
 @router.get("/dashboard")
-def get_dashboard():
+def get_dashboard(tenant_id: str = "merchant_default"):
     """
     Returns real-time Finance Controller KPIs, run statistics,
-    open exception summary, and recent human-in-the-loop decisions.
+    open exception summary, gateway connectivity status, and recent human decisions.
     """
-    return finance_controller_service.get_dashboard_summary()
+    return finance_controller_service.get_dashboard_summary(tenant_id=tenant_id)
+
+
+@router.get("/gateway-status")
+def get_gateway_status():
+    """
+    Returns live Razorpay gateway connection mode (Test Mode / Live / Simulation)
+    and supported settlement features without leaking credentials.
+    """
+    return razorpay_service.get_gateway_status()
 
 
 @router.get("/reconciliation")
-def get_reconciliation(limit: int = 150):
+def get_reconciliation(limit: int = 150, tenant_id: str = "merchant_default"):
     """
     Returns full list of reconciled records with 3-way matching status,
     payment gross, invoice total, settlement net, and variance.
     """
-    records = finance_controller_service.get_reconciliation_records(limit=limit)
+    records = finance_controller_service.get_reconciliation_records(limit=limit, tenant_id=tenant_id)
     return {"total": len(records), "records": records}
 
 
 @router.get("/exceptions")
-def get_exceptions():
+def get_exceptions(tenant_id: str = "merchant_default"):
     """
     Returns active exceptions queue with severity, amount difference,
     AI root cause, and policy triggered.
     """
-    exceptions = finance_controller_service.get_exceptions()
+    exceptions = finance_controller_service.get_exceptions(tenant_id=tenant_id)
     return {"total": len(exceptions), "exceptions": exceptions}
 
 
@@ -99,14 +113,16 @@ def investigate_exception(exception_id: str):
 def decide_exception(exception_id: str, req: ExceptionDecisionRequest):
     """
     Executes Human-in-the-Loop approval/rejection/escalation on an exception,
-    updating state and appending to the SHA-256 chained audit log.
+    enforcing RBAC permissions, updating state atomically, and appending
+    to the SHA-256 chained audit log.
     """
     res = finance_controller_service.decide_exception(
         exception_id=exception_id,
         decision=req.decision,
         actor_name=req.actor_name or "Finance Manager",
         actor_role=req.actor_role or "FINANCE_MANAGER",
-        comments=req.comments or ""
+        comments=req.comments or "",
+        request_id=req.request_id
     )
     if not res.get("success"):
         raise HTTPException(status_code=400, detail=res.get("detail"))
@@ -114,12 +130,12 @@ def decide_exception(exception_id: str, req: ExceptionDecisionRequest):
 
 
 @router.get("/evaluation")
-def get_evaluation():
+def get_evaluation(tenant_id: str = "merchant_default"):
     """
     Returns measured benchmark performance metrics calculated against ground truth:
     Accuracy, Precision, Recall, F1 Score, Execution Duration, and Throughput.
     """
-    return finance_controller_service.evaluate_benchmark()
+    return finance_controller_service.evaluate_benchmark(tenant_id=tenant_id)
 
 
 @router.post("/benchmark/reload")
@@ -133,9 +149,20 @@ def reload_benchmark(req: Optional[BenchmarkReloadRequest] = None):
 
 
 @router.get("/audit-trail")
-def get_audit_trail(limit: int = 50):
+def get_audit_trail(limit: int = 50, tenant_id: str = "merchant_default"):
     """
     Returns chronological immutable audit trail with SHA-256 hash chaining.
     """
-    trail = finance_controller_service.get_audit_trail(limit=limit)
+    trail = finance_controller_service.get_audit_trail(limit=limit, tenant_id=tenant_id)
     return {"total": len(trail), "audit_events": trail}
+
+
+@router.post("/merchant-day/run")
+def run_merchant_day(tenant_id: str = "merchant_default"):
+    """
+    Executes the connected 16-step "Merchant Day" workflow:
+    Morning Health -> AI Procurement -> Catalog Discovery -> Negotiation -> Cart & GST ->
+    Razorpay Link -> Transaction -> 3-Way Reconciliation -> Exception Detection ->
+    AI Root Cause -> HITL Decision -> Cryptographic Audit Hash -> Updated Ledger.
+    """
+    return finance_controller_service.run_merchant_day_demo(tenant_id=tenant_id)

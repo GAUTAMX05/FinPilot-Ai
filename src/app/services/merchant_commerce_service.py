@@ -274,8 +274,11 @@ class MerchantCommerceService:
                 )
                 checkout_details = {
                     "order_id": f"ORD-CONV-{uuid.uuid4().hex[:6].upper()}",
-                    "payment_link_id": payment_link_res.get("id"),
-                    "payment_url": payment_link_res.get("short_url", "https://rzp.io/i/mock_payment"),
+                    "payment_link_id": payment_link_res.get("payment_link_id"),
+                    "payment_url": payment_link_res.get("payment_link"),
+                    "payment_mode": payment_link_res.get("payment_mode", "simulation"),
+                    "is_real_razorpay_link": payment_link_res.get("is_real_razorpay_link", False),
+                    "unavailable_reason": payment_link_res.get("unavailable_reason"),
                     "status": "AWAITING_PAYMENT",
                     "currency": "INR",
                     "requires_hitl": total_amount >= 50000.0
@@ -312,7 +315,10 @@ class MerchantCommerceService:
             narrative_parts.append(f"\n💡 **Recommended Smart Bundle:** Add **{top_rec['upsell_product_name']}** and save **₹{top_rec['customer_savings']:,.2f}** ({top_rec['bundle_discount_pct']}% OFF).\n*Reason: {top_rec['reasoning']}*")
 
         if checkout_details:
-            narrative_parts.append(f"\n✅ **Razorpay Payment Link Ready:** [Click here to pay ₹{total_amount:,.2f}]({checkout_details['payment_url']})\nOrder ID: `{checkout_details['order_id']}`")
+            if checkout_details.get("is_real_razorpay_link") and checkout_details.get("payment_url"):
+                narrative_parts.append(f"\n✅ **Razorpay Payment Link Ready (Test Mode):** [Click here to pay ₹{total_amount:,.2f}]({checkout_details['payment_url']})\nOrder ID: `{checkout_details['order_id']}`")
+            else:
+                narrative_parts.append(f"\nℹ️ **Simulation Mode (Razorpay Keys Unset):** Checkout ID `{checkout_details['order_id']}` registered for ₹{total_amount:,.2f} INR (Simulation Reference: `{checkout_details.get('payment_link_id')}`).")
 
         return {
             "assistant_response": "\n".join(narrative_parts),
@@ -486,10 +492,13 @@ class MerchantCommerceService:
                 "governance_status": "PENDING_CFO_REVIEW" if requires_hitl else "AUTONOMOUSLY_APPROVED"
             },
             "payment_execution": {
-                "gateway": "Razorpay Test Mode",
-                "payment_link_id": payment_link.get("payment_link_id") or payment_link.get("id"),
-                "payment_url": payment_link.get("short_url") or f"https://rzp.io/i/{transaction_id[4:].lower()}",
-                "status": "PAYMENT_LINK_ACTIVE"
+                "gateway": "Razorpay Gateway",
+                "payment_mode": payment_link.get("payment_mode", "simulation"),
+                "is_real_razorpay_link": payment_link.get("is_real_razorpay_link", False),
+                "payment_link_id": payment_link.get("payment_link_id"),
+                "payment_url": payment_link.get("payment_link"),
+                "unavailable_reason": payment_link.get("unavailable_reason"),
+                "status": "PAYMENT_LINK_ACTIVE" if payment_link.get("is_real_razorpay_link") else "SIMULATION_ORDER_CREATED"
             },
             "items_fulfilled": validated_items,
             "timestamp": datetime.utcnow().isoformat()

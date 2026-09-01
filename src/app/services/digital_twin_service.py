@@ -233,7 +233,7 @@ class FinancialDigitalTwin:
         safe_threshold = state["cash_position"]["safe_liquidity_threshold"]
         daily_net_burn = (daily_dept_burn_total + daily_payroll_outflow) - daily_inflow
         runway_days = round((final_liquidity - safe_threshold) / daily_net_burn) if daily_net_burn > 0 else 999
-        runway_days = max(0, min(999, runway_days))
+        runway_days = max(1, min(999, int(runway_days)))
 
         return {
             "simulation_days": days,

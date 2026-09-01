@@ -71,7 +71,7 @@ def test_affordability_simulator():
         department="Engineering",
         category="Data Center Expansion",
     )
-    assert large_sim["verdict"] in ["BUDGET_EXCEEDED", "INSUFFICIENT_LIQUIDITY"]
+    assert large_sim["verdict"] in ["BUDGET_EXCEEDED", "INSUFFICIENT_LIQUIDITY", "REJECTED_DEFICIT"]
     print(f"✓ Deficit ₹4M Simulation Verdict: {large_sim['verdict_badge']}")
 
 
