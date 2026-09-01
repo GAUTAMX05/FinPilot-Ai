@@ -39,7 +39,7 @@ async function fetchControllerDashboard() {
     }
 
     if (data.exceptions) {
-      allExceptionsCache = data.exceptions;
+      window.allExceptionsCache = data.exceptions;
       renderDashboardExceptionsTable(data.exceptions.slice(0, 8));
       updateExceptionFilterCounts(data.exceptions);
     }
@@ -48,7 +48,9 @@ async function fetchControllerDashboard() {
       renderEvaluationScorecard(data.evaluation);
     }
 
-    lucide.createIcons();
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
   } catch (err) {
     console.error("fetchControllerDashboard error:", err);
   }
@@ -91,16 +93,19 @@ async function triggerCloseMonth() {
         icon.classList.add("text-emerald-400");
       }
     }
-    lucide.createIcons();
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
   }
 
   clearInterval(timer);
 
   try {
+    const userName = (typeof currentUser !== 'undefined' && currentUser && currentUser.name) ? currentUser.name : "Finance Manager";
     const res = await apiFetch("/v1/controller/close-month", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ actor: currentUser.name || "Finance Manager" })
+      body: JSON.stringify({ actor: userName })
     });
     const data = await res.json();
 
@@ -120,7 +125,9 @@ async function triggerCloseMonth() {
 function closeMonthModalDone() {
   const modal = document.getElementById("closeMonthModal");
   if (modal) modal.classList.add("hidden");
-  switchTab("dashboard");
+  if (typeof switchTab === 'function') {
+    switchTab("dashboard");
+  }
 }
 
 async function reloadBenchmarkDataset() {

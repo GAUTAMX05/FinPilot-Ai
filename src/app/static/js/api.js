@@ -3,7 +3,7 @@
 // =========================================================================
 
 async function apiFetch(endpoint, options = {}) {
-  const token = localStorage.getItem("finpilot_token");
+  const token = localStorage.getItem("finpilot_token") || (typeof authToken !== 'undefined' ? authToken : null);
   const headers = {
     ...(token ? { "Authorization": `Bearer ${token}` } : {}),
     ...(options.headers || {})
@@ -29,7 +29,9 @@ function showToast(message, isError = false) {
     <span>${message}</span>
   `;
   document.body.appendChild(toast);
-  lucide.createIcons();
+  if (window.lucide && typeof window.lucide.createIcons === 'function') {
+    window.lucide.createIcons();
+  }
 
   setTimeout(() => {
     toast.classList.add("opacity-0", "translate-y-2");

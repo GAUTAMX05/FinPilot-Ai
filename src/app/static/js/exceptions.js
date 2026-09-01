@@ -2,27 +2,27 @@
 // FINPILOT AI — EXCEPTION CENTER & HITL DECISION ENGINE
 // =========================================================================
 
-let currentSelectedExceptionId = null;
-let allExceptionsCache = [];
+window.currentSelectedExceptionId = null;
+window.allExceptionsCache = [];
 
 async function loadExceptionsCenter() {
   try {
     const res = await apiFetch("/v1/controller/exceptions");
     const data = await res.json();
-    allExceptionsCache = data.exceptions || [];
-    updateExceptionFilterCounts(allExceptionsCache);
-    renderExceptionsGrid(allExceptionsCache);
+    window.allExceptionsCache = data.exceptions || [];
+    updateExceptionFilterCounts(window.allExceptionsCache);
+    renderExceptionsGrid(window.allExceptionsCache);
   } catch (err) {
     console.error("loadExceptionsCenter error:", err);
   }
 }
 
 function updateExceptionFilterCounts(exceptions) {
-  const all = exceptions.length;
-  const review = exceptions.filter(e => e.status === "REQUIRES_HUMAN_REVIEW").length;
-  const esc = exceptions.filter(e => e.status === "ESCALATED_TO_CFO").length;
-  const auto = exceptions.filter(e => e.status === "AUTO_RESOLVED").length;
-  const app = exceptions.filter(e => e.status === "HUMAN_APPROVED").length;
+  const all = (exceptions || []).length;
+  const review = (exceptions || []).filter(e => e.status === "REQUIRES_HUMAN_REVIEW").length;
+  const esc = (exceptions || []).filter(e => e.status === "ESCALATED_TO_CFO").length;
+  const auto = (exceptions || []).filter(e => e.status === "AUTO_RESOLVED").length;
+  const app = (exceptions || []).filter(e => e.status === "HUMAN_APPROVED").length;
 
   const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
   setTxt("countExcAll", all);
@@ -32,20 +32,20 @@ function updateExceptionFilterCounts(exceptions) {
   setTxt("countExcApproved", app);
 }
 
-function filterExceptionsList(statusFilter) {
-  // Visual active pill state
+function filterExceptionsList(statusFilter, evt) {
   document.querySelectorAll("#exceptionFilterPills button").forEach(b => {
     b.className = "px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#0B1729] hover:bg-[#0F1D32] text-slate-300 border border-white/10";
   });
-  const activeBtn = event ? event.target.closest("button") : null;
+  const e = evt || (typeof event !== 'undefined' ? event : null);
+  const activeBtn = e && e.target ? e.target.closest("button") : null;
   if (activeBtn) {
     activeBtn.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-glow-blue";
   }
 
   if (statusFilter === "ALL") {
-    renderExceptionsGrid(allExceptionsCache);
+    renderExceptionsGrid(window.allExceptionsCache || []);
   } else {
-    const filtered = allExceptionsCache.filter(e => e.status === statusFilter);
+    const filtered = (window.allExceptionsCache || []).filter(item => item.status === statusFilter);
     renderExceptionsGrid(filtered);
   }
 }
@@ -90,7 +90,9 @@ function renderDashboardExceptionsTable(exceptions) {
       </td>
     </tr>
   `).join("");
-  lucide.createIcons();
+  if (window.lucide && typeof window.lucide.createIcons === 'function') {
+    window.lucide.createIcons();
+  }
 }
 
 function renderExceptionsGrid(exceptions) {
@@ -130,11 +132,13 @@ function renderExceptionsGrid(exceptions) {
       </div>
     </div>
   `).join("");
-  lucide.createIcons();
+  if (window.lucide && typeof window.lucide.createIcons === 'function') {
+    window.lucide.createIcons();
+  }
 }
 
 async function openExceptionInvestigation(exceptionId) {
-  currentSelectedExceptionId = exceptionId;
+  window.currentSelectedExceptionId = exceptionId;
   try {
     const res = await apiFetch(`/v1/controller/exceptions/${exceptionId}/investigate`, { method: "POST" });
     const data = await res.json();
@@ -144,16 +148,21 @@ async function openExceptionInvestigation(exceptionId) {
     setTxt("invModalSeverity", data.severity);
     setTxt("invModalTxnId", data.transaction_id || "-");
     setTxt("invModalType", (data.exception_type || '').replace(/_/g, ' '));
-    setTxt("invModalEvidence", data.ai_investigation?.evidence || "No evidence recorded.");
-    setTxt("invModalIssue", data.ai_investigation?.issue || "Issue under audit review.");
-    setTxt("invModalRootCause", data.ai_investigation?.root_cause || "Analyzing multi-vector financial signals.");
-    setTxt("invModalRecommendation", data.ai_investigation?.recommendation || "Review and verify with vendor billing contract.");
+    setTxt("invModalEvidence", data.ai_investigation?.evidence || "");
+    setTxt("invModalIssue", data.ai_investigation?.issue || "");
+    setTxt("invModalRootCause", data.ai_investigation?.root_cause || "");
+    setTxt("invModalRecommendation", data.ai_investigation?.recommendation || "");
     setTxt("invModalPolicy", `Policy Triggered: ${data.policy_triggered || 'STANDARD_AUDIT'}`);
-    setTxt("invModalReviewer", `${currentUser.name || 'User'} (${currentUser.role || 'CFO'})`);
+    
+    const reviewerName = (typeof currentUser !== 'undefined' && currentUser && currentUser.name) ? currentUser.name : 'User';
+    const reviewerRole = (typeof currentUser !== 'undefined' && currentUser && currentUser.role) ? currentUser.role : 'CFO';
+    setTxt("invModalReviewer", `${reviewerName} (${reviewerRole})`);
 
     const modal = document.getElementById("controllerInvestigateModal");
     if (modal) modal.classList.remove("hidden");
-    lucide.createIcons();
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
   } catch (err) {
     showToast(err.message, true);
   }
@@ -165,21 +174,24 @@ function closeInvestigateModal() {
 }
 
 async function submitExceptionDecision(decision) {
-  if (!currentSelectedExceptionId) return;
+  if (!window.currentSelectedExceptionId) return;
 
   try {
-    const res = await apiFetch(`/v1/controller/exceptions/${currentSelectedExceptionId}/decide`, {
+    const reviewerName = (typeof currentUser !== 'undefined' && currentUser && currentUser.name) ? currentUser.name : "Finance Manager";
+    const reviewerRole = (typeof currentUser !== 'undefined' && currentUser && currentUser.role) ? currentUser.role : "FINANCE_MANAGER";
+
+    const res = await apiFetch(`/v1/controller/exceptions/${window.currentSelectedExceptionId}/decide`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         decision: decision,
-        actor_name: currentUser.name || "Finance Manager",
-        actor_role: currentUser.role || "FINANCE_MANAGER",
+        actor_name: reviewerName,
+        actor_role: reviewerRole,
         comments: `Action ${decision} submitted via FinPilot UI.`
       })
     });
     const data = await res.json();
-    showToast(`Decision ${decision} recorded! Audit SHA: ${data.sha256_audit_hash ? data.sha256_audit_hash.substring(0, 10) : 'OK'}...`);
+    showToast(`Decision ${decision} recorded! Audit SHA: ${data.sha256_audit_hash?.substring(0, 10)}...`);
     closeInvestigateModal();
     fetchControllerDashboard();
     loadExceptionsCenter();
