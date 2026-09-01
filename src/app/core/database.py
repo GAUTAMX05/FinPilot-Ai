@@ -220,7 +220,12 @@ def init_db():
         try:
             with open(BENCHMARK_JSON_PATH, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                records = data.get("benchmark_records", [])
+                if isinstance(data, dict):
+                    records = data.get("benchmark_records", [])
+                elif isinstance(data, list):
+                    records = data
+                else:
+                    records = []
 
             for r in records:
                 cursor.execute("""
