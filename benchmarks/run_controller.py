@@ -40,7 +40,7 @@ from src.app.services.finance_controller_service import finance_controller_servi
 
 def run_benchmark(output_json_path: str = None) -> int:
     print("=" * 72)
-    print("   FINPILOT AI — AUTONOMOUS FINANCE CONTROLLER BENCHMARK EVALUATION   ")
+    print("   FINPILOT AI -- AUTONOMOUS FINANCE CONTROLLER BENCHMARK EVALUATION   ")
     print("=" * 72)
 
     print("\n[1/3] Initializing SQLite database and verifying benchmark dataset...")
@@ -51,12 +51,12 @@ def run_benchmark(output_json_path: str = None) -> int:
     run_res = finance_controller_service.run_close_month(actor="Benchmark CLI")
     duration_ms = round((time.perf_counter() - start) * 1000, 2)
 
-    print(f"      • Run ID: {run_res['run_id']}")
-    print(f"      • Records Processed: {run_res['records_processed']}")
-    print(f"      • Matched Records: {run_res['auto_reconciled']} ({run_res['match_rate_percentage']}%)")
-    print(f"      • Detected Exceptions: {run_res['exceptions_count']}")
-    print(f"      • Processing Latency: {run_res['duration_ms']} ms")
-    print(f"      • Throughput: {run_res['throughput_rps']:,.1f} records/sec")
+    print(f"      - Run ID: {run_res['run_id']}")
+    print(f"      - Records Processed: {run_res['records_processed']}")
+    print(f"      - Matched Records: {run_res['auto_reconciled']} ({run_res['match_rate_percentage']}%)")
+    print(f"      - Detected Exceptions: {run_res['exceptions_count']}")
+    print(f"      - Processing Latency: {run_res['duration_ms']} ms")
+    print(f"      - Throughput: {run_res['throughput_rps']:,.1f} records/sec")
 
     print("\n[3/3] Evaluating reconciliation against internal ground truth...")
     eval_res = finance_controller_service.evaluate_benchmark(run_id=run_res["run_id"])
@@ -86,7 +86,7 @@ def run_benchmark(output_json_path: str = None) -> int:
                 "run_summary": run_res,
                 "evaluation_metrics": eval_res
             }, f, indent=2)
-        print(f"\n[✓] Machine-readable benchmark report saved to: {output_json_path}")
+        print(f"\n[PASSED] Machine-readable benchmark report saved to: {output_json_path}")
 
     passed = (
         eval_res["match_accuracy"] >= 90.0
@@ -97,10 +97,10 @@ def run_benchmark(output_json_path: str = None) -> int:
     )
 
     if passed:
-        print("\n🎉 BENCHMARK STATUS: PASSED (All correctness thresholds satisfied)")
+        print("\n[SUCCESS] BENCHMARK STATUS: PASSED (All correctness thresholds satisfied)")
         return 0
     else:
-        print("\n❌ BENCHMARK STATUS: FAILED (Thresholds not met)")
+        print("\n[FAILED] BENCHMARK STATUS: FAILED (Thresholds not met)")
         return 1
 
 
