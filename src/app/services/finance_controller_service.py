@@ -6,7 +6,7 @@ import logging
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 
-from src.app.core.database import get_db_connection, generate_sha256_audit_hash
+from src.app.core.database import init_db, get_db_connection, generate_sha256_audit_hash
 
 logger = logging.getLogger("FinanceControllerService")
 
@@ -26,6 +26,7 @@ class FinanceControllerService:
         self._ensure_initialized()
 
     def _ensure_initialized(self):
+        init_db()
         conn = get_db_connection()
         c = conn.cursor()
         c.execute("SELECT COUNT(*) FROM reconciliation_runs")
