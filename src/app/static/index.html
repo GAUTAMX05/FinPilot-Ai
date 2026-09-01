@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FinPilot AI | Financial Digital Twin & Autonomous Decision Platform</title>
+  <title>FinPilot AI — Autonomous Finance Controller for Razorpay Merchants</title>
   <link rel="icon" type="image/png" href="/static/assets/logo.png">
   
   <!-- Tailwind CSS CDN -->
@@ -2145,6 +2145,142 @@
         </div>
 
         <!-- ================================================================= -->
+        
+        <!-- ================================================================= -->
+        <!-- TAB: EXCEPTION CENTER & AI ROOT-CAUSE INVESTIGATION -->
+        <!-- ================================================================= -->
+        <div id="view-exceptions" class="tab-view hidden space-y-6">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0B1729] p-5 rounded-3xl border border-white/10 shadow-card">
+            <div>
+              <h2 class="text-xl font-extrabold text-white tracking-tight">🚨 Financial Exception Center</h2>
+              <p class="text-xs text-slate-400 mt-0.5">Grounded AI root-cause diagnostics with human approval & override controls.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="loadExceptionsCenter()" class="btn-smooth px-3.5 py-1.5 rounded-xl bg-[#071426] hover:bg-[#0F1D32] text-xs text-slate-300 border border-white/10 flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Refresh Exceptions</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Exception Status Filter Pills -->
+          <div class="flex flex-wrap items-center gap-2" id="exceptionFilterPills">
+            <button onclick="filterExceptionsList('ALL')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-glow-blue">All Exceptions (<span id="countExcAll">25</span>)</button>
+            <button onclick="filterExceptionsList('REQUIRES_HUMAN_REVIEW')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#0B1729] hover:bg-[#0F1D32] text-amber-300 border border-amber-500/30">Needs Review (<span id="countExcReview">24</span>)</button>
+            <button onclick="filterExceptionsList('ESCALATED_TO_CFO')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#0B1729] hover:bg-[#0F1D32] text-rose-300 border border-rose-500/30">Escalated to CFO (<span id="countExcEscalated">4</span>)</button>
+            <button onclick="filterExceptionsList('AUTO_RESOLVED')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#0B1729] hover:bg-[#0F1D32] text-emerald-300 border border-emerald-500/30">Auto Resolved (<span id="countExcAuto">1</span>)</button>
+            <button onclick="filterExceptionsList('HUMAN_APPROVED')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#0B1729] hover:bg-[#0F1D32] text-blue-300 border border-blue-500/30">Human Approved (<span id="countExcApproved">0</span>)</button>
+          </div>
+
+          <!-- Full Exceptions List Container -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="exceptionsGridContainer">
+            <!-- Dynamically populated exception cards -->
+          </div>
+
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- TAB: MEASURED BENCHMARK PERFORMANCE & EVALUATION -->
+        <!-- ================================================================= -->
+        <div id="view-evaluation" class="tab-view hidden space-y-6">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0B1729] p-5 rounded-3xl border border-white/10 shadow-card">
+            <div>
+              <h2 class="text-xl font-extrabold text-white tracking-tight">📈 Measured Benchmark Performance & Evaluation</h2>
+              <p class="text-xs text-slate-400 mt-0.5">Objective evaluation against internal ground truth (120 Synthetic Financial Records).</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="runBenchmarkEvaluation()" class="btn-smooth px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-extrabold text-white shadow-glow-blue flex items-center gap-1.5">
+                <i data-lucide="play" class="w-3.5 h-3.5"></i>
+                <span>RERUN BENCHMARK</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Evaluation Scorecard Grid -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <div class="bg-[#0B1729] p-5 rounded-3xl border border-emerald-500/30 shadow-card space-y-2">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Match Accuracy</span>
+              <div class="text-3xl font-black text-emerald-400 mono" id="evalAccuracy">100.0%</div>
+              <div class="text-[11px] text-slate-400">120 / 120 Total Correct Classifications</div>
+            </div>
+
+            <div class="bg-[#0B1729] p-5 rounded-3xl border border-blue-500/30 shadow-card space-y-2">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Exception Precision</span>
+              <div class="text-3xl font-black text-blue-400 mono" id="evalPrecision">100.0%</div>
+              <div class="text-[11px] text-slate-400">TP / (TP + FP) — Zero False Alarms</div>
+            </div>
+
+            <div class="bg-[#0B1729] p-5 rounded-3xl border border-purple-500/30 shadow-card space-y-2">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Exception Recall</span>
+              <div class="text-3xl font-black text-purple-400 mono" id="evalRecall">100.0%</div>
+              <div class="text-[11px] text-slate-400">25 / 25 Known Exceptions Detected</div>
+            </div>
+
+            <div class="bg-[#0B1729] p-5 rounded-3xl border border-amber-500/30 shadow-card space-y-2">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">F1 Composite Score</span>
+              <div class="text-3xl font-black text-amber-300 mono" id="evalF1Score">100.0%</div>
+              <div class="text-[11px] text-slate-400">Harmonic Mean of Precision & Recall</div>
+            </div>
+
+          </div>
+
+          <!-- Evaluation Telemetry & Confusion Matrix Summary -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            
+            <div class="bg-[#0B1729] p-5 rounded-3xl border border-white/10 space-y-4">
+              <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                <i data-lucide="table" class="w-4 h-4 text-blue-400"></i>
+                <span>Confusion Matrix & Detection Breakdown</span>
+              </h3>
+              <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="p-3.5 rounded-2xl bg-[#071426] border border-white/5 space-y-1">
+                  <span class="text-slate-400 text-[11px]">True Positives (Exceptions Detected):</span>
+                  <span class="text-xl font-bold text-emerald-400 mono block" id="evalTP">25</span>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-[#071426] border border-white/5 space-y-1">
+                  <span class="text-slate-400 text-[11px]">True Negatives (Normal Matches):</span>
+                  <span class="text-xl font-bold text-blue-400 mono block" id="evalTN">95</span>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-[#071426] border border-white/5 space-y-1">
+                  <span class="text-slate-400 text-[11px]">False Positives (False Flags):</span>
+                  <span class="text-xl font-bold text-slate-400 mono block" id="evalFP">0</span>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-[#071426] border border-white/5 space-y-1">
+                  <span class="text-slate-400 text-[11px]">False Negatives (Missed Flags):</span>
+                  <span class="text-xl font-bold text-slate-400 mono block" id="evalFN">0</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-[#0B1729] p-5 rounded-3xl border border-white/10 space-y-4">
+              <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                <i data-lucide="zap" class="w-4 h-4 text-yellow-400"></i>
+                <span>Throughput & System Benchmarks</span>
+              </h3>
+              <div class="space-y-3 text-xs">
+                <div class="flex items-center justify-between p-3 rounded-2xl bg-[#071426] border border-white/5">
+                  <span class="text-slate-300">Total Benchmark Records:</span>
+                  <span class="font-bold text-white mono" id="evalTotalRecords">120 Records</span>
+                </div>
+                <div class="flex items-center justify-between p-3 rounded-2xl bg-[#071426] border border-white/5">
+                  <span class="text-slate-300">Execution Latency:</span>
+                  <span class="font-bold text-emerald-400 mono" id="evalDuration">0.004 seconds (3.7 ms)</span>
+                </div>
+                <div class="flex items-center justify-between p-3 rounded-2xl bg-[#071426] border border-white/5">
+                  <span class="text-slate-300">Processing Throughput:</span>
+                  <span class="font-bold text-blue-400 mono" id="evalThroughput">32,520 records/sec</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+
         <!-- TAB 14: IMMUTABLE AUDIT TRAIL (CFO & AUDITOR) -->
         <!-- ================================================================= -->
         <div id="view-audit" class="tab-view hidden space-y-6">
@@ -3136,38 +3272,35 @@
 
       const navSections = [
         {
-          heading: "DECISION CONTROL",
+          heading: "AUTONOMOUS CONTROLLER",
           items: [
-            { id: "dashboard", label: "Control Center", icon: "layout-dashboard" },
+            { id: "dashboard", label: "Finance Controller", icon: "layout-dashboard" },
+            { id: "reconciliation", label: "Reconciliation Engine", icon: "scale" },
+            { id: "exceptions", label: "Exception Center", icon: "alert-triangle", hasExcBadge: true },
+            { id: "evaluation", label: "Benchmark & Evaluation", icon: "gauge" },
+            { id: "audit", label: "Immutable Audit Trail", icon: "file-text" },
+          ]
+        },
+        {
+          heading: "FINANCIAL INTELLIGENCE",
+          items: [
+            { id: "chat", label: "Financial Copilot", icon: "bot" },
             { id: "digitaltwin", label: "Digital Twin What-If", icon: "cpu" },
             { id: "decisionmap", label: "Decision Map", icon: "git-fork" },
-            { id: "chat", label: "Financial Copilot", icon: "shield-check" },
             { id: "watchtower", label: "Watchtower Radar", icon: "radar" },
           ]
         },
         {
-          heading: "FINANCIAL OPERATIONS",
+          heading: "OPERATIONS & COMMERCE",
           items: [
             { id: "commerce", label: "AI Commerce & Growth", icon: "shopping-bag" },
             { id: "budgets", label: "Department Budgets", icon: "pie-chart" },
             { id: "invoices", label: "Invoice Intelligence", icon: "scan" },
-            { id: "reconciliation", label: "Reconciliation", icon: "scale" },
             ...(role !== "AUDITOR" ? [{ id: "approvals", label: "Approvals Queue", icon: "shield-check", hasBadge: true }] : []),
             { id: "cashflow", label: "Cash Forecast", icon: "wallet" },
             { id: "vendors", label: "Vendor Radar", icon: "building-2" },
-          ]
-        },
-        {
-          heading: "PEOPLE & TAX",
-          items: [
             { id: "allowances", label: "Employee Finance", icon: "users" },
             { id: "taxreporting", label: "Tax & Form 16", icon: "file-check-2" },
-          ]
-        },
-        {
-          heading: "GOVERNANCE",
-          items: [
-            ...(role === "CFO" || role === "AUDITOR" ? [{ id: "audit", label: "Audit Center", icon: "file-text" }] : []),
           ]
         }
       ];
@@ -3184,12 +3317,16 @@
           const isActive = item.id === "dashboard";
           btn.className = `w-full px-3 py-2 rounded-xl text-left flex items-center justify-between gap-2.5 transition-all ${isActive ? 'bg-blue-600 text-white font-semibold shadow-glow-blue' : 'text-slate-400 hover:text-white hover:bg-white/5'}`;
           
+          let badgeHtml = "";
+          if (item.hasBadge) badgeHtml = '<span id="navApprovalBadge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">0</span>';
+          if (item.hasExcBadge) badgeHtml = '<span id="navExcBadge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">25</span>';
+
           btn.innerHTML = `
             <div class="flex items-center gap-2.5">
               <i data-lucide="${item.icon}" class="w-4 h-4"></i>
               <span>${item.label}</span>
             </div>
-            ${item.hasBadge ? '<span id="navApprovalBadge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">0</span>' : ''}
+            ${badgeHtml}
           `;
           secDiv.appendChild(btn);
         });
@@ -3212,21 +3349,23 @@
       if (activeBtn) activeBtn.className = "w-full px-3 py-2 rounded-xl text-left flex items-center justify-between gap-2.5 transition-all bg-blue-600 text-white font-semibold shadow-glow-blue";
 
       const titles = {
-        dashboard: "Financial Control Center",
+        dashboard: "Autonomous Finance Controller for Razorpay Merchants",
+        reconciliation: "3-Way Deterministic Reconciliation Engine (Payment vs Invoice vs Settlement)",
+        exceptions: "Exception Center & Grounded AI Root-Cause Analysis",
+        evaluation: "Measured Benchmark Performance & Ground Truth Evaluation",
+        audit: "Immutable Financial Audit Trail (SHA-256 Hash Chained)",
         digitaltwin: "Financial Digital Twin & What-If Simulation Studio",
         decisionmap: "Company Financial Decision Map",
         chat: "Financial Decision Copilot",
         watchtower: "Financial Watchtower Radar",
         budgets: "Department Budgets & Runway Assessment",
         invoices: "Invoice Intelligence & Simulator",
-        reconciliation: "Two-Stage Financial Reconciliation",
         approvals: "Disbursement Approvals Queue",
         cashflow: "Cash Flow & Liquidity Forecasting",
         vendors: "Vendor Spend & Risk Review Radar",
         allowances: "Employee Finance & Allowance Governance",
         taxreporting: "Tax & Salary Reporting (Form 16 Reconciliation)",
         commerce: "Merchant Sales Growth & AI-to-AI Shopping Studio",
-        audit: "Immutable Financial Audit Trail",
       };
       const titleEl = document.getElementById("topbarPageTitle");
       if (titleEl && titles[tabId]) titleEl.innerText = titles[tabId];
@@ -3268,6 +3407,9 @@
     }
 
     async function refreshAllDashboardData() {
+      try { fetchControllerDashboard(); } catch(e){}
+      try { loadReconciliationTable(); } catch(e){}
+      try { loadExceptionsCenter(); } catch(e){}
       await Promise.all([
         loadNotificationsData(),
         fetchAndRenderAnalyticsChart(),
@@ -5704,5 +5846,146 @@
       lucide.createIcons();
     }
   </script>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL: CLOSE MONTH LIVE PROGRESS EXECUTION -->
+    <!-- ===================================================================== -->
+    <div id="closeMonthModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="max-w-lg w-full bg-[#0B1729] rounded-3xl p-6 sm:p-7 border border-blue-500/30 shadow-2xl space-y-6">
+        
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-2xl bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center">
+              <i data-lucide="zap" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-extrabold text-white text-base">Closing Financial Books...</h3>
+              <p class="text-xs text-slate-400">Autonomous 3-Way Reconciliation & Governance Pipeline</p>
+            </div>
+          </div>
+          <span id="closeMonthTime" class="text-xs font-mono font-bold text-blue-400">0.0s</span>
+        </div>
+
+        <!-- Animated Progress Steps -->
+        <div class="space-y-3 text-xs" id="closeMonthStepsContainer">
+          <div id="step-1" class="flex items-center justify-between p-3 rounded-2xl bg-[#071426] border border-white/5 transition-all">
+            <span class="text-slate-300">1. Fetching & normalizing 120 Razorpay records...</span>
+            <i data-lucide="loader" class="w-4 h-4 text-blue-400 animate-spin step-icon"></i>
+          </div>
+          <div id="step-2" class="flex items-center justify-between p-3 rounded-2xl bg-[#071426] border border-white/5 transition-all opacity-50">
+            <span class="text-slate-300">2. Executing deterministic 3-way reconciliation...</span>
+            <i data-lucide="circle" class="w-4 h-4 text-slate-500 step-icon"></i>
+          </div>
+          <div id="step-3" class="flex items-center justify-between p-3 rounded-2xl bg-[#071426] border border-white/5 transition-all opacity-50">
+            <span class="text-slate-300">3. Auditing Razorpay 2% fee & 18% GST deductions...</span>
+            <i data-lucide="circle" class="w-4 h-4 text-slate-500 step-icon"></i>
+          </div>
+          <div id="step-4" class="flex items-center justify-between p-3 rounded-2xl bg-[#071426] border border-white/5 transition-all opacity-50">
+            <span class="text-slate-300">4. Classifying exceptions & evaluating policy limits...</span>
+            <i data-lucide="circle" class="w-4 h-4 text-slate-500 step-icon"></i>
+          </div>
+          <div id="step-5" class="flex items-center justify-between p-3 rounded-2xl bg-[#071426] border border-white/5 transition-all opacity-50">
+            <span class="text-slate-300">5. Synthesizing grounded AI root-cause diagnostics...</span>
+            <i data-lucide="circle" class="w-4 h-4 text-slate-500 step-icon"></i>
+          </div>
+          <div id="step-6" class="flex items-center justify-between p-3 rounded-2xl bg-[#071426] border border-white/5 transition-all opacity-50">
+            <span class="text-slate-300">6. Sealing cryptographic SHA-256 audit log...</span>
+            <i data-lucide="circle" class="w-4 h-4 text-slate-500 step-icon"></i>
+          </div>
+        </div>
+
+        <!-- Telemetry Summary -->
+        <div id="closeMonthResultSummary" class="hidden p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 space-y-1">
+          <div class="font-bold flex items-center gap-1.5">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            <span>Month-End Close Completed Successfully!</span>
+          </div>
+          <div class="text-[11px] text-emerald-400" id="closeMonthSummaryText"></div>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button id="closeMonthDoneBtn" onclick="closeMonthModalDone()" class="hidden btn-smooth px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-glow-blue">
+            View Controller Results
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL: GROUNDED AI ROOT-CAUSE INVESTIGATION & HUMAN-IN-THE-LOOP -->
+    <!-- ===================================================================== -->
+    <div id="controllerInvestigateModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="max-w-2xl w-full bg-[#0B1729] rounded-3xl p-6 sm:p-7 border border-white/10 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+        
+        <div class="flex items-start justify-between">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-500/20 text-blue-400 border border-blue-500/30" id="invModalExcId">EXC-0001</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-rose-500/20 text-rose-300 border border-rose-500/30" id="invModalSeverity">HIGH</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono text-slate-400" id="invModalTxnId">pay_RZP_1001</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-bold text-white" id="invModalType">Settlement Fee Variance</h3>
+          </div>
+          <button onclick="closeInvestigateModal()" class="p-2 rounded-xl bg-[#071426] hover:bg-[#0F1D32] text-slate-400 hover:text-white border border-white/10">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Financial Evidence Strip -->
+        <div class="p-4 rounded-2xl bg-[#071426] border border-white/5 space-y-2 text-xs">
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Verified Structured Evidence</div>
+          <div class="text-slate-200 font-mono text-[11px] leading-relaxed" id="invModalEvidence">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- 5-Part Grounded AI Diagnostic Report -->
+        <div class="space-y-3 text-xs">
+          
+          <div class="p-3.5 rounded-2xl bg-[#071426] border border-blue-500/20 space-y-1">
+            <span class="text-[10px] font-bold text-blue-400 uppercase tracking-wider block">1. What Happened</span>
+            <p class="text-slate-200 text-[11px]" id="invModalIssue"></p>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-[#071426] border border-purple-500/20 space-y-1">
+            <span class="text-[10px] font-bold text-purple-400 uppercase tracking-wider block">2. Why It Happened (Root Cause)</span>
+            <p class="text-slate-200 text-[11px]" id="invModalRootCause"></p>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-[#071426] border border-emerald-500/20 space-y-1">
+            <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">3. FinPilot Recommendation</span>
+            <p class="text-slate-200 text-[11px]" id="invModalRecommendation"></p>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-[#071426] border border-amber-500/20 space-y-1">
+            <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">4. Triggered Policy & Guardrail</span>
+            <p class="text-slate-200 text-[11px] font-mono" id="invModalPolicy"></p>
+          </div>
+
+        </div>
+
+        <!-- Human in the loop action bar -->
+        <div class="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+          <div class="text-[11px] text-slate-400">
+            Reviewer: <span class="text-white font-bold" id="invModalReviewer">Vikramaditya S. (CFO)</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="submitExceptionDecision('REJECT')" class="btn-smooth px-3.5 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 text-xs font-bold">
+              Reject
+            </button>
+            <button onclick="submitExceptionDecision('ESCALATE')" class="btn-smooth px-3.5 py-2 rounded-xl bg-amber-600/20 hover:bg-amber-600/40 text-amber-300 border border-amber-500/30 text-xs font-bold">
+              Escalate to CFO
+            </button>
+            <button onclick="submitExceptionDecision('APPROVE')" class="btn-smooth px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold shadow-glow-blue">
+              Approve Adjustment
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
 </body>
 </html>

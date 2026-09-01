@@ -14,6 +14,7 @@ from src.app.api.endpoints.notifications import router as notifications_router
 from src.app.api.endpoints.simulation import router as simulation_router
 from src.app.api.endpoints.commerce import router as commerce_router
 from src.app.api.endpoints.dataset import router as dataset_router
+from src.app.api.endpoints.controller import router as controller_router
 
 __all__ = [
     "auth_router",
@@ -32,4 +33,5 @@ __all__ = [
     "simulation_router",
     "commerce_router",
     "dataset_router",
+    "controller_router",
 ]
