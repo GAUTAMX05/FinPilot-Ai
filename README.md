@@ -1,12 +1,47 @@
 # FinPilot AI — Autonomous Finance Controller for Razorpay Merchants
 
 [![CI - Automated Test Suites](https://github.com/GAUTAMX05/FinPilot-Ai/actions/workflows/tests.yml/badge.svg)](https://github.com/GAUTAMX05/FinPilot-Ai/actions/workflows/tests.yml)
-[![Live Production Demo](https://img.shields.io/badge/Live%20Demo-finpilot--ai.onrender.com-blue?style=flat&logo=render)](https://finpilot-ai-s9km.onrender.com/)
+[![Live Production Demo](https://img.shields.io/badge/Live%20Demo-finpilot--ai.onrender.com-blue?style=for-the-badge&logo=render)](https://finpilot-ai-s9km.onrender.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110/)
 [![Razorpay AI Buildathon](https://img.shields.io/badge/Track-AI%20Finance%20Controller-528FF0)](https://razorpay.com/)
 
-> **FinPilot AI** is an autonomous financial intelligence and governance controller built specifically for Razorpay merchants. It closes the critical loop across **Payment Transactions $ightarrow$ Settlement Data $ightarrow$ Invoices $ightarrow$ Deterministic 3-Way Reconciliation $ightarrow$ Multi-Vector Exception Detection $ightarrow$ Grounded AI Root-Cause Diagnostics $ightarrow$ RBAC-Gated Human Approval (HITL) $ightarrow$ SHA-256 Chained Cryptographic Audit Logging $ightarrow$ Real-Time Balance Sheet State**.
+> **FinPilot AI** is an autonomous financial intelligence and governance controller built specifically for Razorpay merchants. It closes the critical loop across **Payment Transactions → Settlement Data → Invoices → Deterministic 3-Way Reconciliation → Multi-Vector Exception Detection → Grounded AI Root-Cause Diagnostics → RBAC-Gated Human Approval (HITL) → SHA-256 Chained Cryptographic Audit Logging → Real-Time Balance Sheet State**.
+
+---
+
+## 🌐 Live Production Demo & Quick Walkthrough
+
+### 🔗 **Live URL:** [https://finpilot-ai-s9km.onrender.com/](https://finpilot-ai-s9km.onrender.com/)
+
+The application is deployed live with zero setup required. You can test all features directly from your browser:
+
+### 👤 Demo RBAC Accounts (One-Click Selection on Login Screen)
+
+| Role | Demo User | Email | Password | Permissions |
+| :--- | :--- | :--- | :--- | :--- |
+| 👑 **CFO** | Vikramaditya S. | `cfo@aifinance.local` | `password123` | Full admin, high-value approvals ($\ge$ ₹10k), month-close authority |
+| 💼 **Finance Manager** | Rahul Verma | `finance.manager@aifinance.local` | `password123` | Operational reconciliation, standard exception approvals ($<$ ₹10k) |
+| 🛠️ **Dept Head** | Arjun Mehta (Eng) | `engineering.head@aifinance.local` | `password123` | Scoped department view, spending token requests |
+| 🔍 **Auditor** | Kavita Iyer | `auditor@aifinance.local` | `password123` | Read-only access to immutable SHA-256 audit ledger |
+
+### ⚡ 5 Interactive Hero Features to Try Immediately
+
+1. **Run Autonomous Month-End Close (Deterministic 3-Way Matching):**
+   - Click the **"Run Month-End Close"** button on the Controller Dashboard.
+   - Watches the deterministic engine reconcile 120 transaction records against billing invoices and Razorpay net settlements in **$<3$ milliseconds** (42,000+ records/sec throughput).
+2. **Grounded 5-Part AI Root-Cause Diagnostics & HITL Approval:**
+   - Go to the **Exception Center** tab or click **"Investigate"** on any flagged variance.
+   - Review structured evidence, root-cause diagnosis, recommended journal adjustments, and policy checks.
+   - Click **"Approve Adjustment"** to trigger state transition and seal the action with a **64-character SHA-256 audit hash**.
+3. **Execute the 16-Stage "Merchant Day" Value Loop:**
+   - Click the **"Merchant Day Demo"** tab in the sidebar and press **"Launch Guided Merchant Day"**.
+   - Watch the autonomous pipeline execute the complete cycle from morning liquidity check $ightarrow$ AI B2B purchase $ightarrow$ deterministic GST calculation $ightarrow$ payment link $ightarrow$ reconciliation $ightarrow$ exception handling $ightarrow$ CFO approval.
+4. **Inspect Razorpay Gateway Status & Payment Link Integrity:**
+   - The top banner dynamically displays gateway health: `RAZORPAY (TEST)`, `RAZORPAY (LIVE)`, or `SIMULATION MODE (TEST)`.
+   - Guaranteed **zero fake `rzp.io` URLs** when running without API keys.
+5. **Explore the Financial Digital Twin & Predictive Runway:**
+   - Navigate to the **Digital Twin Studio** tab to simulate 90-day forward cash flow trajectories and run what-if expense scenarios.
 
 ---
 
@@ -117,17 +152,17 @@ python -m src.app.benchmarks.run_controller --json
 **Benchmark Output Sample:**
 ```
 ========================================================================
-   FINPILOT AI — AUTONOMOUS FINANCE CONTROLLER BENCHMARK EVALUATION   
+   FINPILOT AI -- AUTONOMOUS FINANCE CONTROLLER BENCHMARK EVALUATION   
 ========================================================================
 
 [1/3] Initializing SQLite database and verifying benchmark dataset...
 [2/3] Executing deterministic 3-way reconciliation pipeline...
-      • Run ID: RUN-20260901054939-6887
-      • Records Processed: 120
-      • Matched Records: 95 (79.2%)
-      • Detected Exceptions: 25
-      • Processing Latency: 2.85 ms
-      • Throughput: 42,105.3 records/sec
+      - Run ID: RUN-20260901060543-1616
+      - Records Processed: 120
+      - Matched Records: 95 (79.2%)
+      - Detected Exceptions: 25
+      - Processing Latency: 2.93 ms
+      - Throughput: 40,955.6 records/sec
 
 [3/3] Evaluating reconciliation against internal ground truth...
 
@@ -145,9 +180,10 @@ python -m src.app.benchmarks.run_controller --json
   Exception Recall:              100.0%
   F1 Composite Score:            100.0%
   Execution Time:                0.0030 s
-  Throughput:                    42,105.3 records/sec
+  Throughput:                    40,955.6 records/sec
 ========================================================================
-🎉 BENCHMARK STATUS: PASSED (All correctness thresholds satisfied)
+
+[SUCCESS] BENCHMARK STATUS: PASSED (All correctness thresholds satisfied)
 ```
 
 ---
@@ -230,8 +266,8 @@ FinPilot implements 4 distinct enterprise personas:
 | :--- | :--- | :--- |
 | **CFO** | Vikramaditya S. | Full administrative control, approvals for high-value variances ($\ge$ ₹10k), budget reallocations, and policy overrides. |
 | **Finance Manager** | Rahul Verma | Operational month-close runs, standard exception approvals ($<$ ₹10k), vendor invoice validation. |
-| **Department Head** | Priya Sharma (Eng) | Department-level spending view, budget requests, and procurement authorization within spending tokens. |
-| **Auditor** | Kavita Nair | Read-only access to immutable SHA-256 audit log, compliance scorecards, and reconciliation ledgers. (Cannot approve/reject). |
+| **Department Head** | Arjun Mehta (Eng) | Department-level spending view, budget requests, and procurement authorization within spending tokens. |
+| **Auditor** | Kavita Iyer | Read-only access to immutable SHA-256 audit log, compliance scorecards, and reconciliation ledgers. (Cannot approve/reject). |
 
 ---
 
