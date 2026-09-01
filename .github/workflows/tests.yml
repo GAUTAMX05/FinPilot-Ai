@@ -27,6 +27,12 @@ jobs:
           pip install -r requirements.txt
           pip install -e .
 
+      - name: Run Reproducible Benchmark Evaluation CLI
+        run: python -m src.app.benchmarks.run_controller
+
+      - name: Run Bulletproof Controller & HITL Test Suite
+        run: pytest tests/test_bulletproof_controller_and_hitl.py -v
+
       - name: Run Autonomous Finance Controller Benchmark Test
         run: python tests/test_finance_controller_benchmark.py
 
