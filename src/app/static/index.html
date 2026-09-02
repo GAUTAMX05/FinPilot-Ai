@@ -4402,15 +4402,32 @@
 
     async function loadEmployeesData() {
       try {
-        const [empRes, allowRes] = await Promise.all([
-          apiFetch("/v1/dataset/employees"),
-          apiFetch("/v1/dataset/allowances")
-        ]);
-        const data = await empRes.json();
-        const allowData = await allowRes.json();
+        let emps = [];
+        let allows = [];
+        try {
+          const empRes = await apiFetch("/v1/dataset/employees");
+          const empData = await empRes.json();
+          emps = empData.employees || [];
+        } catch (e) {
+          console.warn("[loadEmployeesData] dataset/employees failed:", e);
+        }
 
-        employeesPagination.allEmployees = data.employees || [];
-        employeesPagination.allAllowances = allowData.allowances || [];
+        if (!emps || !emps.length) {
+          try {
+            const empRes2 = await apiFetch("/v1/employees");
+            const empData2 = await empRes2.json();
+            emps = empData2.employees || [];
+          } catch (e) {}
+        }
+
+        try {
+          const allowRes = await apiFetch("/v1/dataset/allowances");
+          const allowData = await allowRes.json();
+          allows = allowData.allowances || [];
+        } catch (e) {}
+
+        employeesPagination.allEmployees = emps || [];
+        employeesPagination.allAllowances = allows || [];
         employeesPagination.currentLimit = employeesPagination.pageSize;
 
         renderEmployeesTable();
@@ -5084,14 +5101,28 @@
 
     async function loadInvoicesData() {
       try {
-        const [invRes, sumRes] = await Promise.all([
-          apiFetch(`/v1/dataset/invoices?start_date=${currentDateSpan.startDate}&end_date=${currentDateSpan.endDate}`),
-          apiFetch(`/v1/dataset/summary?start_date=${currentDateSpan.startDate}&end_date=${currentDateSpan.endDate}`)
-        ]);
-        const data = await invRes.json();
-        const sumData = await sumRes.json();
+        let invs = [];
+        let sumData = {};
+        try {
+          const invRes = await apiFetch(`/v1/dataset/invoices?start_date=${currentDateSpan.startDate}&end_date=${currentDateSpan.endDate}`);
+          const data = await invRes.json();
+          invs = data.invoices || [];
+        } catch (e) {}
 
-        invoicesPagination.allInvoices = data.invoices || [];
+        if (!invs || !invs.length) {
+          try {
+            const invRes2 = await apiFetch("/v1/invoices");
+            const data2 = await invRes2.json();
+            invs = data2.invoices || [];
+          } catch (e) {}
+        }
+
+        try {
+          const sumRes = await apiFetch(`/v1/dataset/summary?start_date=${currentDateSpan.startDate}&end_date=${currentDateSpan.endDate}`);
+          sumData = await sumRes.json();
+        } catch (e) {}
+
+        invoicesPagination.allInvoices = invs || [];
         invoicesPagination.currentLimit = invoicesPagination.pageSize;
 
         renderInvoicesTable();
