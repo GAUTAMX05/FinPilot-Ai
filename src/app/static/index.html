@@ -3503,22 +3503,18 @@
       try { fetchControllerDashboard(); } catch(e){}
       try { loadReconciliationTable(); } catch(e){}
       try { loadExceptionsCenter(); } catch(e){}
-      await Promise.all([
-        loadNotificationsData(),
-        fetchAndRenderAnalyticsChart(),
-        loadDigitalTwinData(),
-        loadBudgetsData(),
-        loadTaxReportingData(),
-        loadEmployeesData(),
-        loadReconciliationData(),
-        loadCashFlowData(),
-        loadInvoicesData(),
-        loadApprovalsData(),
-        loadVendorsData(),
-        loadWatchtowerAlerts(),
-        loadAuditLogsData(),
-      ]);
-      showToast("Financial data refreshed successfully.");
+      try { await loadInvoicesData(); } catch(e) { console.warn("loadInvoicesData warning:", e); }
+      try { await loadEmployeesData(); } catch(e) { console.warn("loadEmployeesData warning:", e); }
+      try { await loadBudgetsData(); } catch(e) { console.warn("loadBudgetsData warning:", e); }
+      try { await loadTaxReportingData(); } catch(e) { console.warn("loadTaxReportingData warning:", e); }
+      try { await loadDigitalTwinData(); } catch(e) { console.warn("loadDigitalTwinData warning:", e); }
+      try { await loadCashFlowData(); } catch(e) { console.warn("loadCashFlowData warning:", e); }
+      try { await loadApprovalsData(); } catch(e) { console.warn("loadApprovalsData warning:", e); }
+      try { await loadVendorsData(); } catch(e) { console.warn("loadVendorsData warning:", e); }
+      try { await loadWatchtowerAlerts(); } catch(e) { console.warn("loadWatchtowerAlerts warning:", e); }
+      try { await loadAuditLogsData(); } catch(e) { console.warn("loadAuditLogsData warning:", e); }
+      try { await loadNotificationsData(); } catch(e) { console.warn("loadNotificationsData warning:", e); }
+      try { fetchAndRenderAnalyticsChart(); } catch(e) { console.warn("fetchAndRenderAnalyticsChart warning:", e); }
     }
 
     // =========================================================================

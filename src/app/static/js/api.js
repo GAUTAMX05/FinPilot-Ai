@@ -3,22 +3,19 @@
 // =========================================================================
 
 async function apiFetch(endpoint, options = {}) {
-  const token = localStorage.getItem("finpilot_token") || (typeof authToken !== 'undefined' ? authToken : null);
+  const token = localStorage.getItem("ai_finance_token") || localStorage.getItem("finpilot_token") || (typeof authToken !== 'undefined' && authToken ? authToken : null);
   const headers = {
     ...(token ? { "Authorization": `Bearer ${token}` } : {}),
     ...(options.headers || {})
   };
   
-  const res = await fetch(endpoint, { ...options, headers });
-  if (!res.ok) {
-    let errDetail = `API Error ${res.status}`;
-    try {
-      const errJson = await res.json();
-      errDetail = errJson.detail || errJson.message || errDetail;
-    } catch(e) {}
-    throw new Error(errDetail);
+  try {
+    const res = await fetch(endpoint, { ...options, headers });
+    return res;
+  } catch (err) {
+    console.warn(`[apiFetch] Network warning on ${endpoint}:`, err);
+    throw err;
   }
-  return res;
 }
 
 function showToast(message, isError = false) {

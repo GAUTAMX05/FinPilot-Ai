@@ -3,7 +3,7 @@
   "currency": "INR",
   "departments": {
     "Engineering": {
-      "allocated_budget": 5400000.0,
+      "allocated_budget": 5410000.0,
       "spent_amount": 2050600.0,
       "pending_approvals": 0.0,
       "manager": "Rahul Sharma",
@@ -37,7 +37,7 @@
       }
     },
     "Operations": {
-      "allocated_budget": 1680000.0,
+      "allocated_budget": 1670000.0,
       "spent_amount": 750800.0,
       "pending_approvals": 0.0,
       "manager": "Gurpreet Kaur",
