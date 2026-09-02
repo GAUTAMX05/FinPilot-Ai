@@ -69,7 +69,7 @@ class MerchantCommerceService:
                 "product_ids": ["PROD-API-01", "PROD-VPC-02"],
                 "projected_roas": "3.8x",
                 "incremental_revenue_projected": 570000.0,
-                "razorpay_promo_link": None,
+                "razorpay_promo_link": "https://rzp.io/i/plink_promo_growth26",
                 "status": "ACTIVE",
                 "created_at": "2026-08-20T10:00:00"
             }
