@@ -3,7 +3,7 @@
   "currency": "INR",
   "departments": {
     "Engineering": {
-      "allocated_budget": 5420000.0,
+      "allocated_budget": 5440000.0,
       "spent_amount": 2050600.0,
       "pending_approvals": 0.0,
       "manager": "Rahul Sharma",
@@ -15,7 +15,7 @@
       }
     },
     "Marketing": {
-      "allocated_budget": 2910000.0,
+      "allocated_budget": 2890000.0,
       "spent_amount": 2240000.0,
       "pending_approvals": 75000.0,
       "manager": "Priya Verma",
@@ -29,33 +29,33 @@
       "allocated_budget": 2500000.0,
       "spent_amount": 920000.0,
       "pending_approvals": 45000.0,
-      "manager": "Amanpreet Singh",
+      "manager": "Aman Mehra",
       "categories": {
-        "Client Entertainment & Travel": 1200000.0,
+        "Travel & Client Entertainment": 1200000.0,
         "CRM & Sales Tools": 800000.0,
-        "Incentives": 500000.0
+        "Collateral & Enablement": 500000.0
       }
     },
     "Operations": {
       "allocated_budget": 1670000.0,
       "spent_amount": 750800.0,
       "pending_approvals": 0.0,
-      "manager": "Gurpreet Kaur",
+      "manager": "Aditi Verma",
       "categories": {
-        "Logistics & Freight": 1000000.0,
-        "Office & Utilities": 600000.0,
-        "Legal & Compliance": 400000.0
+        "Office Rent & Utilities": 1000000.0,
+        "Logistics & Shipping": 400000.0,
+        "Vendor Management": 270000.0
       }
     },
     "HR": {
       "allocated_budget": 1500000.0,
       "spent_amount": 410000.0,
       "pending_approvals": 15000.0,
-      "manager": "Simran Johal",
+      "manager": "Vikramaditya S.",
       "categories": {
-        "Recruitment": 700000.0,
-        "Employee Welfare": 500000.0,
-        "Health & Insurance": 300000.0
+        "Recruitment & Job Boards": 600000.0,
+        "Employee Benefits & Insurance": 600000.0,
+        "Learning & Development": 300000.0
       }
     }
   }

@@ -5,6 +5,8 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime
 
 from src.app.services.audit_service import audit_service
+from src.app.core.validators import validate_monetary_amount, validate_department, validate_email_address, sanitize_text
+from fastapi import HTTPException
 
 logger = logging.getLogger("EmployeeFinanceService")
 
@@ -430,20 +432,29 @@ class EmployeeFinancialControlService:
         user_role: str,
     ) -> Dict[str, Any]:
         """Creates a new employee record and logs to audit trail."""
-        emp_id = data.get("employee_id", f"EMP-{len(self._employees) + 101}")
+        raw_id = data.get("employee_id") or f"EMP-{len(self._employees) + 101}"
+        emp_id = sanitize_text(raw_id, field_name="Employee ID", max_length=30, allow_empty=False)
         
-        # Check uniqueness
-        if any(e["employee_id"] == emp_id for e in self._employees):
-            raise ValueError(f"Employee ID '{emp_id}' already exists.")
+        # Check uniqueness of ID and Email
+        if any(e["employee_id"].lower() == emp_id.lower() for e in self._employees):
+            raise HTTPException(status_code=400, detail=f"Duplicate conflict: Employee ID '{emp_id}' already exists.")
 
-        basic = float(data.get("monthly_basic", 50000.0))
+        clean_name = sanitize_text(data.get("name", "New Employee"), field_name="Employee Name", max_length=100, allow_empty=False)
+        clean_email = validate_email_address(data.get("email") or f"{emp_id.lower()}@aifinance.local")
+        if any(e.get("email", "").lower() == clean_email.lower() for e in self._employees):
+            raise HTTPException(status_code=400, detail=f"Duplicate conflict: Email address '{clean_email}' already assigned to an employee.")
+
+        valid_dept = validate_department(data.get("department", "Engineering"))
+        clean_desig = sanitize_text(data.get("designation", "Software Engineer"), field_name="Designation", max_length=100)
+        basic = validate_monetary_amount(data.get("monthly_basic", 50000.0), field_name="Monthly Basic Salary", min_amount=1000.0)
+        allow_cap = validate_monetary_amount(data.get("monthly_allowance_limit", 10000.0), field_name="Monthly Allowance Limit", min_amount=0.0, allow_zero=True)
         new_emp = {
             "employee_id": emp_id,
-            "name": data.get("name", "New Employee"),
-            "email": data.get("email", f"{emp_id.lower()}@aifinance.local"),
-            "phone": data.get("phone", "+91 98000 00000"),
-            "department": data.get("department", "Engineering"),
-            "designation": data.get("designation", "Software Engineer"),
+            "name": clean_name,
+            "email": clean_email,
+            "phone": sanitize_text(data.get("phone", "+91 98000 00000"), field_name="Phone", max_length=25),
+            "department": valid_dept,
+            "designation": clean_desig,
             "salary_band": data.get("salary_band", "₹8–12 LPA"),
             "annual_ctc": float(data.get("annual_ctc", basic * 14)),
             "monthly_basic": basic,
@@ -601,8 +612,31 @@ class EmployeeFinancialControlService:
         user_role: str,
     ) -> Dict[str, Any]:
         """Executes an authorized salary revision and logs to audit trail."""
+        valid_basic = validate_monetary_amount(new_basic, field_name="New Basic Salary", min_amount=1000.0)
+        clean_reason = sanitize_text(reason, field_name="Revision Reason", max_length=500, allow_empty=False)
+        clean_date = sanitize_text(effective_date, field_name="Effective Date", max_length=30) or datetime.now().strftime("%Y-%m-%d")
+
         for emp in self._employees:
             if emp["employee_id"].lower() == employee_id.lower():
+                current_basic = emp["monthly_basic"]
+                increase_amount = round(valid_basic - current_basic, 2)
+                increase_pct = round((increase_amount / current_basic) * 100, 2) if current_basic > 0 else 0.0
+
+                rev_entry = {
+                    "effective_date": clean_date,
+                    "previous_salary": current_basic,
+                    "new_salary": valid_basic,
+                    "increase_pct": increase_pct,
+                    "increase_amount": increase_amount,
+                    "reason": clean_reason,
+                    "approved_by": f"{user_name} ({user_role})",
+                    "timestamp": datetime.now().isoformat(),
+                }
+
+                emp.setdefault("salary_history", []).append(rev_entry)
+                emp["monthly_basic"] = valid_basic
+                emp["hra"] = round(valid_basic * 0.40, 2)
+                emp["pf_deduction"] = round(valid_basic * 0.12, 2)
                 current_basic = emp["monthly_basic"]
                 increase_amount = new_basic - current_basic
                 increase_pct = round((increase_amount / current_basic) * 100, 2) if current_basic > 0 else 0.0

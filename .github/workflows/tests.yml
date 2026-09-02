@@ -30,6 +30,9 @@ jobs:
       - name: Run Reproducible Benchmark Evaluation CLI
         run: python -m src.app.benchmarks.run_controller
 
+      - name: Run Security & Abuse Resistance Test Suite
+        run: pytest tests/test_abuse_resistance.py -v
+
       - name: Run Bulletproof Controller & HITL Test Suite
         run: pytest tests/test_bulletproof_controller_and_hitl.py -v
 
@@ -47,3 +50,6 @@ jobs:
 
       - name: Run AI Chat & Reasoning Pipeline
         run: python tests/test_ai_chat_pipeline.py
+
+      - name: Run Full Pytest Suite (All 60 Tests)
+        run: pytest -v
