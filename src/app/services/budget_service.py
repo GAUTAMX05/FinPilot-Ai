@@ -210,4 +210,14 @@ class BudgetService:
         }
 
 
+    def record_expense(self, department: str, amount: float) -> bool:
+        """Records an authorized expense against a department budget."""
+        depts = self._data.get("departments", {})
+        for k, v in depts.items():
+            if k.lower() == department.lower():
+                v["spent_amount"] = round(v.get("spent_amount", 0.0) + amount, 2)
+                self._save_data()
+                return True
+        return False
+
 budget_service = BudgetService()

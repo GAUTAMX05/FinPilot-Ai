@@ -637,25 +637,6 @@ class EmployeeFinancialControlService:
                 emp["monthly_basic"] = valid_basic
                 emp["hra"] = round(valid_basic * 0.40, 2)
                 emp["pf_deduction"] = round(valid_basic * 0.12, 2)
-                current_basic = emp["monthly_basic"]
-                increase_amount = new_basic - current_basic
-                increase_pct = round((increase_amount / current_basic) * 100, 2) if current_basic > 0 else 0.0
-
-                rev_entry = {
-                    "effective_date": effective_date or datetime.now().strftime("%Y-%m-%d"),
-                    "previous_salary": current_basic,
-                    "new_salary": new_basic,
-                    "increase_pct": increase_pct,
-                    "increase_amount": increase_amount,
-                    "reason": reason,
-                    "approved_by": f"{user_name} ({user_role})",
-                    "timestamp": datetime.now().isoformat(),
-                }
-
-                emp.setdefault("salary_history", []).append(rev_entry)
-                emp["monthly_basic"] = new_basic
-                emp["hra"] = new_basic * 0.40
-                emp["pf_deduction"] = new_basic * 0.12
 
                 audit_service.log_action(
                     user_id=user_id,
@@ -664,14 +645,14 @@ class EmployeeFinancialControlService:
                     action="REVISE_EMPLOYEE_SALARY",
                     entity="EMPLOYEE_SALARY",
                     entity_id=employee_id,
-                    new_value=f"₹{new_basic:,.2f}",
-                    details=f"Revised basic salary for {emp['name']} from ₹{current_basic:,.2f} to ₹{new_basic:,.2f} (+{increase_pct}%). Reason: {reason}",
+                    new_value=f"₹{valid_basic:,.2f}",
+                    details=f"Revised basic salary for {emp['name']} from ₹{current_basic:,.2f} to ₹{valid_basic:,.2f} (+{increase_pct}%). Reason: {clean_reason}",
                     risk_level="HIGH",
                 )
 
                 return {
                     "success": True,
-                    "message": f"Salary for {emp['name']} successfully revised to ₹{new_basic:,.2f} (+{increase_pct}%).",
+                    "message": f"Salary for {emp['name']} successfully revised to ₹{valid_basic:,.2f} (+{increase_pct}%).",
                     "salary_revision": rev_entry,
                 }
 
