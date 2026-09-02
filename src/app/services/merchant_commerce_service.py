@@ -11,6 +11,7 @@ from src.app.services.budget_service import budget_service
 from src.app.services.razorpay_service import razorpay_service
 from src.app.services.audit_service import audit_service
 from src.app.services.notification_service import notification_service
+from src.app.core.constants import GST_RATE_STANDARD, MAX_NEGOTIATION_DISCOUNT_PERCENT, MIN_BULK_UNITS_FOR_DISCOUNT, AUTONOMOUS_CHECKOUT_CAP_INR
 
 logger = logging.getLogger("MerchantCommerceService")
 
@@ -68,7 +69,7 @@ class MerchantCommerceService:
                 "product_ids": ["PROD-API-01", "PROD-VPC-02"],
                 "projected_roas": "3.8x",
                 "incremental_revenue_projected": 570000.0,
-                "razorpay_promo_link": "https://rzp.io/l/cloudnova_q3_blitz",
+                "razorpay_promo_link": None,
                 "status": "ACTIVE",
                 "created_at": "2026-08-20T10:00:00"
             }
