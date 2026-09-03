@@ -3,7 +3,7 @@
   "currency": "INR",
   "departments": {
     "Engineering": {
-      "allocated_budget": 5470000.0,
+      "allocated_budget": 5480000.0,
       "spent_amount": 2050600.0,
       "pending_approvals": 0.0,
       "manager": "Rahul Sharma",
@@ -15,8 +15,8 @@
       }
     },
     "Marketing": {
-      "allocated_budget": 2860000.0,
-      "spent_amount": 2490000.0,
+      "allocated_budget": 2850000.0,
+      "spent_amount": 2540000.0,
       "pending_approvals": 75000.0,
       "manager": "Priya Verma",
       "categories": {
