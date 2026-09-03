@@ -1,3 +1,4 @@
+from src.app.core.config import settings
 # -*- coding: utf-8 -*-
 """
 FinPilot AI — Provider-Agnostic LLM Layer (OpenCode / OpenAI-compatible)
@@ -75,12 +76,12 @@ def get_llm_config(purpose: str = "supervisor") -> Dict[str, Any]:
     generic_base = _clean(os.getenv("LLM_BASE_URL", ""))
     generic_model = _clean(os.getenv("LLM_MODEL", ""))
 
-    openai_key = os.getenv("OPENAI_API_KEY", "")
+    openai_key = os.getenv("OPENAI_API_KEY", "") or settings.OPENAI_API_KEY
     openai_base = _clean(os.getenv("OPENAI_BASE_URL", ""))
     openai_model = _clean(os.getenv("OPENAI_MODEL", "")) or _clean(os.getenv("SUPERVISOR_MODEL" if purpose == "supervisor" else "SUB_AGENT_MODEL", "")) or "gpt-4o-mini"
 
-    opencode_key = os.getenv("OPENCODE_API_KEY", "")
-    opencode_base = _clean(os.getenv("OPENCODE_BASE_URL", "")) or "https://opencode.ai/zen/v1"
+    opencode_key = os.getenv("OPENCODE_API_KEY", "") or settings.OPENCODE_API_KEY
+    opencode_base = _clean(os.getenv("OPENCODE_BASE_URL", "")) or settings.OPENCODE_BASE_URL or "https://opencode.ai/zen/v1"
     opencode_model = _clean(os.getenv("OPENCODE_MODEL", "")) or generic_model or openai_model
 
     groq_key = os.getenv("GROQ_API_KEY", "")
