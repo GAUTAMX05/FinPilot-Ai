@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="FinPilot AI — Autonomous Finance Controller: deterministic reconciliation, AI root-cause diagnostics, HITL approvals and audit-grade ledger for Razorpay merchants.">
+  <meta name="theme-color" content="#050B18">
   <title>FinPilot AI — Autonomous Finance Controller for Razorpay Merchants</title>
   <link rel="icon" type="image/png" href="/static/assets/logo.png">
   
@@ -98,11 +100,20 @@
       -webkit-appearance: none;
       margin: 0;
     }
+
+    /* Accessibility polish: visible focus + reduced motion + skip link */
+    :focus-visible { outline: 2px solid #3B82F6; outline-offset: 2px; border-radius: 6px; }
+    .skip-link { position: absolute; left: -9999px; top: 0; background: #2563EB; color: #fff; padding: 0.6rem 1rem; z-index: 100; border-radius: 0 0 12px 0; font-weight: 700; }
+    .skip-link:focus { left: 0; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+    }
   </style>
 
     
 </head>
 <body class="min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white bg-[#050B18] text-slate-100">
+  <a href="#mainDashboard" class="skip-link">Skip to dashboard</a>
 
   <!-- ===================================================================== -->
   <!-- 1. LOGIN SCREEN -->

@@ -103,7 +103,7 @@ def request_ai_quote(req: AIQuoteRequest):
     res = merchant_commerce_service.process_ai_to_ai_purchase(
         buyer_agent_id=clean_buyer,
         spending_token_limit_inr=valid_token,
-        requested_items=[item.dict() for item in req.items],
+        requested_items=[item.model_dump() for item in req.items],
         negotiation_requested=req.request_volume_discount or True
     )
     return res
@@ -142,7 +142,7 @@ def execute_ai_buy(
     res = merchant_commerce_service.process_ai_to_ai_purchase(
         buyer_agent_id=buyer_id,
         spending_token_limit_inr=token_limit,
-        requested_items=[item.dict() for item in req.items],
+        requested_items=[item.model_dump() for item in req.items],
         negotiation_requested=req.negotiation_requested or True,
         idempotency_key=idemp_key
     )

@@ -15,6 +15,7 @@ from src.app.api.endpoints.simulation import router as simulation_router
 from src.app.api.endpoints.commerce import router as commerce_router
 from src.app.api.endpoints.dataset import router as dataset_router
 from src.app.api.endpoints.controller import router as controller_router
+from src.app.api.endpoints.ai_status import router as ai_status_router
 
 __all__ = [
     "auth_router",
@@ -34,4 +35,5 @@ __all__ = [
     "commerce_router",
     "dataset_router",
     "controller_router",
+    "ai_status_router",
 ]

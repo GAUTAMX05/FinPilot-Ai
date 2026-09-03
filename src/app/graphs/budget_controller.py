@@ -1,6 +1,5 @@
 import logging
 from typing import Dict, Any
-from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage
 from src.app.graphs.state import FinanceControllerState
 from src.app.tools.finance_tools import (
@@ -11,20 +10,29 @@ from src.app.tools.finance_tools import (
     recommend_budget_reallocation,
 )
 from src.app.core.config import settings
+from src.app.services.llm_provider import build_chat_llm
 
 logger = logging.getLogger("BudgetControllerAgent")
 
-budget_llm = ChatOpenAI(
-    model=settings.SUB_AGENT_MODEL,
-    temperature=0.1,
-    api_key=settings.OPENAI_API_KEY if settings.OPENAI_API_KEY else "sk-placeholder"
-).bind_tools([
-    check_department_budget,
-    forecast_department_budget,
-    simulate_expense_affordability,
-    get_company_financial_health_score,
-    recommend_budget_reallocation,
-])
+
+def _build_budget_llm():
+    llm = build_chat_llm(purpose="subagent", temperature=0.1)
+    if llm is None:
+        return None
+    try:
+        return llm.bind_tools([
+            check_department_budget,
+            forecast_department_budget,
+            simulate_expense_affordability,
+            get_company_financial_health_score,
+            recommend_budget_reallocation,
+        ])
+    except Exception as e:
+        logger.warning(f"[BudgetController] bind_tools failed, using unbound LLM: {e}")
+        return llm
+
+
+budget_llm = _build_budget_llm()
 
 
 BUDGET_PROMPT = """
@@ -40,6 +48,9 @@ Your responsibilities:
 
 async def budget_controller_agent(state: FinanceControllerState) -> Dict[str, Any]:
     messages = state.get("messages", [])
+    if budget_llm is None:
+        logger.info("[BudgetController] No LLM configured; skipping to deterministic controller.")
+        return {"next": "finance_controller_agent"}
     try:
         response = await budget_llm.ainvoke([SystemMessage(content=BUDGET_PROMPT)] + messages)
         return {

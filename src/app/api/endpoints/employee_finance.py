@@ -66,7 +66,7 @@ def add_employee(
     """Creates a new employee profile in the financial governance register."""
     try:
         res = employee_finance_service.add_employee(
-            data=payload.dict(),
+            data=payload.model_dump(),
             user_id=current_user["id"],
             user_name=current_user["name"],
             user_role=current_user["role"],

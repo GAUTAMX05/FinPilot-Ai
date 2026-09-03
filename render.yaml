@@ -5,14 +5,49 @@ services:
     buildCommand: "pip install -r requirements.txt && pip install -e ."
     startCommand: "python run_server.py"
     plan: free
+    healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
+      - key: ENVIRONMENT
+        value: production
       - key: SUPERVISOR_MODEL
         value: gpt-4o-mini
       - key: SUB_AGENT_MODEL
         value: gpt-4o-mini
+      - key: LLM_PROVIDER
+        value: auto
       - key: HITL_APPROVAL_THRESHOLD_INR
         value: "50000.0"
       - key: AUTONOMOUS_PAYOUT_LIMIT_INR
         value: "10000.0"
+      # --- Production Postgres (Supabase / Neon / Render). Set ONE of these. ---
+      # Option A: Render-managed Postgres (recommended if staying on Render)
+      # - key: DATABASE_URL
+      #   fromDatabase:
+      #     name: finpilot-postgres
+      #     property: connectionString
+      # Option B: External Supabase/Neon URL (paste in Render dashboard -> Environment)
+      - key: DATABASE_URL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_BASE_URL
+        sync: false
+      - key: OPENCODE_API_KEY
+        sync: false
+      - key: OPENCODE_BASE_URL
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        value: "*"
+#databases:
+#  - name: finpilot-postgres
+#    databaseName: finpilot
+#    user: finpilot
+#    plan: free

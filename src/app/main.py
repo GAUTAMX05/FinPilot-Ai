@@ -8,7 +8,8 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from src.app.core.config import settings
-from src.app.core.database import init_db, get_db_connection
+from src.app.core.database import init_db, get_db_connection, get_db_stats
+from src.app.services.llm_provider import llm_status
 from src.app.services.razorpay_service import razorpay_service
 from src.app.api import api_router
 
@@ -30,10 +31,14 @@ app = FastAPI(
 )
 
 # Cross-Origin Resource Sharing (CORS)
+# Note: allow_credentials=True is invalid with allow_origins=["*"] in browsers.
+# Use CORS_ORIGINS env (comma-separated) in production, e.g. your frontend domain.
+_cors_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]
+_allow_credentials = False if _cors_origins == ["*"] else True
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_cors_origins,
+    allow_credentials=_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -82,28 +87,19 @@ def health_check():
 def readiness_check():
     """
     Readiness probe validating database connectivity, benchmark dataset integrity,
-    and gateway status without leaking credentials.
+    AI provider status, and gateway status without leaking credentials.
     """
     try:
-        conn = get_db_connection()
-        c = conn.cursor()
-        c.execute("SELECT COUNT(*) FROM benchmark_records")
-        bench_count = c.fetchone()[0]
-        c.execute("SELECT COUNT(*) FROM reconciliation_runs")
-        runs_count = c.fetchone()[0]
-        conn.close()
-
+        db_stats = get_db_stats()
         gw_status = razorpay_service.get_gateway_status()
+        ai = llm_status()
 
         return {
-            "status": "ready",
+            "status": "ready" if db_stats.get("connected") else "degraded",
             "app": "FinPilot AI — Autonomous Finance Controller",
-            "database": {
-                "engine": "SQLite",
-                "connected": True,
-                "benchmark_records_seeded": bench_count,
-                "reconciliation_runs_executed": runs_count
-            },
+            "database": db_stats,
+            "ai": {"ai_ready": ai.get("ai_ready"), "provider": ai.get("supervisor", {}).get("provider"),
+                   "model": ai.get("supervisor", {}).get("model")},
             "gateway": {
                 "mode": gw_status["gateway_mode"],
                 "is_configured": gw_status["is_configured"],

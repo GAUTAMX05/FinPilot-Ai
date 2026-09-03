@@ -17,6 +17,7 @@ from src.app.api.endpoints import (
     commerce_router,
     dataset_router,
     controller_router,
+    ai_status_router,
 )
 
 api_router = APIRouter()
@@ -37,5 +38,6 @@ api_router.include_router(notifications_router, prefix="/notifications", tags=["
 api_router.include_router(simulation_router)
 api_router.include_router(commerce_router)
 api_router.include_router(dataset_router)
+api_router.include_router(ai_status_router)
 
 __all__ = ["api_router"]

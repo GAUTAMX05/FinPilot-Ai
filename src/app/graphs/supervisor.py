@@ -3,7 +3,6 @@ import re
 import logging
 from typing import Dict, Any, List
 from pydantic import BaseModel, Field
-from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, ToolMessage
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
@@ -14,22 +13,15 @@ from src.app.graphs.budget_controller import budget_controller_agent
 from src.app.tools.finance_tools import create_expense_request
 from src.app.services.ai_reasoning_engine import ai_reasoning_engine
 from src.app.core.config import settings
+from src.app.services.llm_provider import build_chat_llm, get_llm_config
 
 logger = logging.getLogger("FinanceSupervisor")
 
-model_name = settings.SUPERVISOR_MODEL
-has_openai_key = bool(settings.OPENAI_API_KEY and not settings.OPENAI_API_KEY.startswith("sk-placeholder") and len(settings.OPENAI_API_KEY) > 15)
+model_name = settings.SUPERVISOR_MODEL or settings.OPENAI_MODEL or settings.LLM_MODEL or "gpt-4o-mini"
 
-llm = None
-if has_openai_key:
-    try:
-        llm = ChatOpenAI(
-            model=model_name,
-            temperature=0.2,
-            api_key=settings.OPENAI_API_KEY
-        )
-    except Exception as e:
-        logger.warning(f"Could not initialize OpenAI LLM: {e}")
+llm = build_chat_llm(purpose="supervisor", temperature=0.2)
+if llm is None:
+    logger.info(f"[FinanceSupervisor] No LLM key configured ({get_llm_config('supervisor').get('reason')}); using deterministic fallback.")
 
 
 class SupervisorDecision(BaseModel):
