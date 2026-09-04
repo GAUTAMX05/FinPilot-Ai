@@ -52,7 +52,7 @@ jobs:
         run: python tests/test_ai_chat_pipeline.py
 
       - name: Run Data-Backed Endpoints Smoke Test (empty-widget guard)
-        run: pytest tests/test_data_backed_endpoints_smoke.py tests/test_copilot_whatif_regression.py -v
+        run: pytest tests/test_data_backed_endpoints_smoke.py tests/test_copilot_whatif_regression.py tests/test_grounded_copilot_regression.py -v
 
       - name: Run Full Pytest Suite
         run: pytest -v

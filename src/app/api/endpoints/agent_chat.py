@@ -9,13 +9,11 @@ from pydantic import BaseModel, Field
 from src.app.core.auth_middleware import get_current_user
 from src.app.core.rate_limiter import rate_limiter
 from src.app.core.validators import sanitize_text
-from src.app.services.multi_agent_orchestrator import MultiAgentFinancialOrchestrator
-from src.app.services.ai_reasoning_engine import ai_reasoning_engine
+from src.app.services.copilot_service import grounded_copilot
 from src.app.services.audit_service import audit_service
 
 logger = logging.getLogger("AgentChatApi")
 router = APIRouter(prefix="/agent", tags=["Finance Agent Chat"])
-orchestrator = MultiAgentFinancialOrchestrator()
 
 # Known prompt injection attack signatures
 PROMPT_INJECTION_KEYWORDS = [
@@ -116,38 +114,30 @@ async def chat_endpoint(req: ChatRequest, current_user: dict = Depends(get_curre
             "thread_id": req.thread_id,
         }
 
-    # 4. Execute Multi-Agent Financial Orchestrator with Tagged Untrusted Data
+    # 4. Grounded Copilot: real retrieval + (scenario sims | grounded LLM call).
+    # Failures return explicit retry text — never a fabricated scenario.
     try:
-        sandboxed_query = f"<untrusted_user_query>{cleaned_msg}</untrusted_user_query>"
-        res = orchestrator.process_query(
-            query=cleaned_msg,
+        res = grounded_copilot.analyze(
+            question=cleaned_msg,
+            user_id=user_id,
             user_role=user_role,
             user_name=user_name,
             user_department=user_department,
         )
-
-        # Orchestrator returns {"response": {"text"|"formatted_text"}, ...} — unwrap to str.
-        # (Passing the raw dict to .upper()/frontend caused AttributeError → canned fallback.)
-        raw_response = res.get("response")
-        if isinstance(raw_response, dict):
-            response_text = (
-                raw_response.get("text")
-                or raw_response.get("formatted_text")
-                or "Analysis completed successfully."
-            )
-        else:
-            response_text = raw_response or "Analysis completed successfully."
+        response_text = res.get("response") or "Analysis completed."
         suggested_actions = res.get("suggested_actions") or [
             "Run 90-Day Digital Twin Simulation",
             "View Company Decision Map",
             "Inspect Department Budgets",
         ]
 
-        status = "completed"
-        if "pending_approval" in res or "THRESHOLD BREACH" in response_text.upper():
+        status = res.get("status") or "completed"
+        if status == "completed" and (
+            "pending_approval" in res or "THRESHOLD BREACH" in response_text.upper()
+        ):
             status = "pending_approval"
 
-        return {
+        out = {
             "success": True,
             "status": status,
             "response": response_text,
@@ -156,13 +146,21 @@ async def chat_endpoint(req: ChatRequest, current_user: dict = Depends(get_curre
             "suggested_actions": suggested_actions,
             "thread_id": req.thread_id,
         }
+        if res.get("simulation") is not None:
+            out["simulation"] = res["simulation"]
+        return out
 
     except Exception as e:
-        logger.error(f"Error in multi-agent chat pipeline: {e}")
+        logger.error(f"Error in grounded copilot pipeline: {type(e).__name__}: {e}")
         return {
             "success": True,
-            "status": "completed",
-            "response": f"### Financial Copilot Response\n\nProcessed inquiry: *{cleaned_msg}*\n\n* Analysis: Data retrieved and evaluated against company ledgers.\n* Policy Status: All operations within safe budget guidelines.",
-            "suggested_actions": ["View Department Budgets", "Run What-If Simulation"],
+            "status": "llm_unavailable",
+            "response": (
+                "## Analysis Couldn't Complete — Please Retry\n\n"
+                "The Copilot hit an unexpected error before producing an answer. "
+                "No partial or estimated figures are shown because they could be wrong.\n\n"
+                "Please retry in a moment."
+            ),
+            "suggested_actions": ["Retry analysis", "Check AI status"],
             "thread_id": req.thread_id,
         }
