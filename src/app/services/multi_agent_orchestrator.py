@@ -3,7 +3,7 @@ import logging
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
-from src.app.services.digital_twin_service import digital_twin_service
+from src.app.services.digital_twin_service import digital_twin_service, PAYROLL_LOAD_FACTOR
 from src.app.services.budget_service import budget_service
 from src.app.services.invoice_service import invoice_service
 from src.app.services.employee_finance_service import employee_finance_service
@@ -140,7 +140,7 @@ class MultiAgentFinancialOrchestrator:
         )
         agent_steps.append({
             "agent": "SimulationAgent",
-            "simulation_horizon": "90 Days",
+            "simulation_horizon": f"{sim_result.get('horizon_days', 90)} Days",
             "projected_liquidity_delta": sim_result["deltas"]["liquidity_change"],
             "projected_runway_delta": sim_result["deltas"]["runway_days_change"],
             "verdict": sim_result["verdict"],
@@ -248,6 +248,96 @@ class MultiAgentFinancialOrchestrator:
                 "recommended_fix": "Maintain current liquidity reserves and monitor 30-day runway curves.",
             }
 
+    def _build_scenario_block(
+        self,
+        sim_result: Dict[str, Any],
+        twin_state: Dict[str, Any],
+    ) -> str:
+        """Deterministic, scenario-specific arithmetic echoed in every narrative.
+
+        Shows the parsed inputs and the exact figures computed from live data
+        so two different what-ifs can never render identical text.
+        """
+        action = sim_result.get("action", {}) or {}
+        a_type = action.get("type", "EXPENSE")
+        horizon = sim_result.get("horizon_days", 90)
+        deltas = sim_result.get("deltas", {})
+        before = sim_result.get("before", {})
+        after = sim_result.get("after", {})
+
+        if a_type == "BURN_RATE_SHIFT":
+            dept = action.get("department", "Engineering")
+            mult = float(action.get("multiplier", 1.12))
+            d = twin_state["budget_position"]["departments"].get(dept, {})
+            monthly = float(d.get("monthly_burn_rate", 0.0))
+            daily = monthly / 30.0
+            proj_current = daily * horizon
+            proj_shifted = daily * mult * horizon
+            remaining = float(d.get("remaining_budget", 0.0))
+            coverage = (remaining / daily) if daily > 0 else 0
+            return (
+                f"**Scenario Inputs:** {dept} spend continues for **{horizon} days** "
+                f"at **{mult:.2f}x** benchmark pace.\n"
+                f"- **Current {dept} burn:** ₹{monthly:,.0f}/month (₹{daily:,.0f}/day).\n"
+                f"- **{horizon}-day projected spend:** ₹{proj_current:,.0f} at current pace; "
+                f"₹{proj_shifted:,.0f} at shifted pace "
+                f"(extra ₹{proj_shifted - proj_current:,.0f}).\n"
+                f"- **{dept} remaining budget:** ₹{remaining:,.0f} ≈ {coverage:.0f} days of cover at current burn.\n"
+                f"- **Model impact ({horizon}d):** liquidity {before.get('liquidity_90d', 0):,.0f} → "
+                f"{after.get('liquidity_90d', 0):,.0f} ({deltas.get('liquidity_change', 0):+,.0f}); "
+                f"runway {before.get('runway_days', 0)} → {after.get('runway_days', 0)} days."
+            )
+
+        if a_type == "HEADCOUNT_GROWTH":
+            count = int(action.get("headcount", 3))
+            salary = float(action.get("avg_salary", 85000.0))
+            monthly_basic = count * salary
+            monthly_loaded = monthly_basic * PAYROLL_LOAD_FACTOR
+            current_gross = float(twin_state["payroll_position"]["monthly_gross_total"])
+            new_gross = current_gross + monthly_loaded
+            window_cost = monthly_loaded * (horizon / 30.0)
+            return (
+                f"**Scenario Inputs:** hire **{count}** engineers at **₹{salary:,.0f}/mo basic** "
+                f"over a **{horizon}-day** window.\n"
+                f"- **Monthly cost added:** {count} × ₹{salary:,.0f} = **₹{monthly_basic:,.0f}/mo basic**; "
+                f"employer-loaded (×{PAYROLL_LOAD_FACTOR}) = **₹{monthly_loaded:,.0f}/mo**.\n"
+                f"- **Payroll burn:** ₹{current_gross:,.0f}/mo → **₹{new_gross:,.0f}/mo** "
+                f"(+{monthly_loaded / current_gross * 100:.1f}%).\n"
+                f"- **{horizon}-day payroll cost of this hire:** ₹{window_cost:,.0f}.\n"
+                f"- **Model impact ({horizon}d):** liquidity {before.get('liquidity_90d', 0):,.0f} → "
+                f"{after.get('liquidity_90d', 0):,.0f} ({deltas.get('liquidity_change', 0):+,.0f}); "
+                f"runway {before.get('runway_days', 0)} → {after.get('runway_days', 0)} days."
+            )
+
+        if a_type == "PAYMENT_DELAY":
+            days = int(action.get("days", 14))
+            return (
+                f"**Scenario Inputs:** delay non-essential vendor disbursements by **{days} days** "
+                f"(payroll keeps flowing), projected over **{horizon} days**.\n"
+                f"- **Model impact ({horizon}d):** liquidity {before.get('liquidity_90d', 0):,.0f} → "
+                f"{after.get('liquidity_90d', 0):,.0f} ({deltas.get('liquidity_change', 0):+,.0f}); "
+                f"runway {before.get('runway_days', 0)} → {after.get('runway_days', 0)} days."
+            )
+
+        if a_type == "REALLOCATION":
+            amt = float(action.get("amount", 250000.0))
+            return (
+                f"**Scenario Inputs:** reallocate **₹{amt:,.0f}** from "
+                f"{action.get('from_department', 'Operations')} to {action.get('to_department', 'Engineering')}.\n"
+                f"- **Model impact ({horizon}d):** liquidity {before.get('liquidity_90d', 0):,.0f} → "
+                f"{after.get('liquidity_90d', 0):,.0f} ({deltas.get('liquidity_change', 0):+,.0f})."
+            )
+
+        amt = float(action.get("amount", 0.0))
+        dept = action.get("department", "Operations")
+        return (
+            f"**Scenario Inputs:** one-time expense of **₹{amt:,.0f}** in {dept}, "
+            f"projected over **{horizon} days**.\n"
+            f"- **Model impact ({horizon}d):** liquidity {before.get('liquidity_90d', 0):,.0f} → "
+            f"{after.get('liquidity_90d', 0):,.0f} ({deltas.get('liquidity_change', 0):+,.0f}); "
+            f"runway {before.get('runway_days', 0)} → {after.get('runway_days', 0)} days."
+        )
+
     def _generate_role_narrative(
         self,
         query: str,
@@ -264,6 +354,8 @@ class MultiAgentFinancialOrchestrator:
         before = sim_result["before"]
         after = sim_result["after"]
         action_desc = sim_result["action_description"]
+        horizon = sim_result.get("horizon_days", 90)
+        scenario_block = self._build_scenario_block(sim_result, twin_state)
 
         is_auditor = user_role == "AUDITOR"
         is_dept_head = user_role == "DEPARTMENT_HEAD"
@@ -271,9 +363,12 @@ class MultiAgentFinancialOrchestrator:
 
         # Formulate Enterprise Decision Framework:
         # WHAT HAPPENED -> WHY IT MATTERS -> WHAT SHOULD BE DONE -> WHO NEEDS TO ACT -> WHAT HAPPENS NEXT
-        what_happened = f"Simulated '{action_desc}' against the Financial Digital Twin (90-Day Forward Model)."
+        what_happened = (
+            f"Simulated '{action_desc}' against the Financial Digital Twin ({horizon}-Day Forward Model).\n\n"
+            f"{scenario_block}"
+        )
         why_it_matters = (
-            f"**90-Day Liquidity Shift:** ₹{before['liquidity_90d']:,.0f} $\\longrightarrow$ ₹{after['liquidity_90d']:,.0f} "
+            f"**{horizon}-Day Liquidity Shift:** ₹{before['liquidity_90d']:,.0f} $\\longrightarrow$ ₹{after['liquidity_90d']:,.0f} "
             f"(**{'+' if deltas['liquidity_change'] >= 0 else ''}₹{deltas['liquidity_change']:,.0f}**).\n"
             f"- **Runway Impact:** {before['runway_days']} days $\\longrightarrow$ {after['runway_days']} days ({'+' if deltas['runway_days_change'] >= 0 else ''}{deltas['runway_days_change']} days).\n"
             f"- **Budget Utilization:** {before['budget_utilization_pct']}% $\\longrightarrow$ {after['budget_utilization_pct']}%.\n"

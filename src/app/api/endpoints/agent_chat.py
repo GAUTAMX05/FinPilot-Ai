@@ -126,7 +126,17 @@ async def chat_endpoint(req: ChatRequest, current_user: dict = Depends(get_curre
             user_department=user_department,
         )
 
-        response_text = res.get("response") or "Analysis completed successfully."
+        # Orchestrator returns {"response": {"text"|"formatted_text"}, ...} — unwrap to str.
+        # (Passing the raw dict to .upper()/frontend caused AttributeError → canned fallback.)
+        raw_response = res.get("response")
+        if isinstance(raw_response, dict):
+            response_text = (
+                raw_response.get("text")
+                or raw_response.get("formatted_text")
+                or "Analysis completed successfully."
+            )
+        else:
+            response_text = raw_response or "Analysis completed successfully."
         suggested_actions = res.get("suggested_actions") or [
             "Run 90-Day Digital Twin Simulation",
             "View Company Decision Map",

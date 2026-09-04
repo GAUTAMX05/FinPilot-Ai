@@ -1,5 +1,6 @@
 import copy
 import logging
+import re
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 
@@ -10,6 +11,118 @@ from src.app.services.payroll_service import payroll_service
 from src.app.services.cash_flow_service import cash_flow_service
 
 logger = logging.getLogger("FinancialDigitalTwin")
+
+# Employer-loaded cost factor applied to monthly basic to reach gross payroll
+# (PF 12% + allowances/overheads), consistent with simulate_forward grossing.
+PAYROLL_LOAD_FACTOR = 1.4
+
+_WORD_NUMBERS = {
+    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+    "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
+    "twelve": 12, "fifteen": 15, "twenty": 20, "thirty": 30, "fifty": 50,
+}
+
+
+def _parse_horizon_days(text: str, default: int = 90) -> int:
+    """Extracts a projection horizon (days) from natural language. Clamped 14–180."""
+    t = text.lower()
+    m = re.search(r"(\d+)\s*(?:more\s+)?days?\b", t)
+    if m:
+        try:
+            return max(14, min(180, int(m.group(1))))
+        except ValueError:
+            pass
+    m = re.search(r"(\d+)\s*weeks?\b", t)
+    if m:
+        try:
+            return max(14, min(180, int(m.group(1)) * 7))
+        except ValueError:
+            pass
+    m = re.search(r"(\d+)\s*months?\b", t)
+    if m:
+        try:
+            return max(14, min(180, int(m.group(1)) * 30))
+        except ValueError:
+            pass
+    return default
+
+
+def _parse_headcount(text: str, default: int = 3) -> int:
+    """Extracts a headcount figure using anchored regex (never bare substring match)."""
+    t = text.lower()
+    for pattern in (
+        r"(\d+)\s+(?:senior\s+|junior\s+)?engineers?\b",
+        r"\bhir(?:e|es|ing)\s+(\d+)\b",
+        r"headcount[^0-9\n]{0,40}?(\d+)\b",
+        r"team\s+of\s+(\d+)\b",
+        r"add\s+(\d+)\s+\w+",
+    ):
+        m = re.search(pattern, t)
+        if m:
+            try:
+                return max(1, min(500, int(m.group(1))))
+            except ValueError:
+                continue
+    for word, val in _WORD_NUMBERS.items():
+        if re.search(rf"\b{word}\b\s+(?:senior\s+|junior\s+)?engineers?\b", t):
+            return val
+    return default
+
+
+def _parse_monthly_salary(text: str, default: float = 85000.0) -> float:
+    """Extracts a monthly-basic salary figure (supports ₹/Rs./lakh/k suffixes)."""
+    t = text.lower()
+    for pattern in (
+        r"₹\s*([\d,]+(?:\.\d+)?)\s*(k|lakh|lakhs|lac|m)?\b",
+        r"\brs\.?\s*([\d,]+(?:\.\d+)?)\s*(k|lakh|lakhs|lac|m)?\b",
+        r"([\d,]+(?:\.\d+)?)\s*(k|lakh|lakhs|lac|m)?\s*(?:per\s+month\s+)?monthly\s+basic\b",
+        r"basic[^0-9\n]{0,20}?([\d,]+(?:\.\d+)?)\b",
+    ):
+        m = re.search(pattern, t)
+        if m:
+            try:
+                val = float(m.group(1).replace(",", ""))
+                unit = (m.group(2) or "").strip() if len(m.groups()) > 1 else ""
+                if unit == "k":
+                    val *= 1000.0
+                elif unit in ("lakh", "lakhs", "lac"):
+                    val *= 100000.0
+                elif unit == "m":
+                    val *= 1000000.0
+                if 5000.0 <= val <= 5000000.0:
+                    return val
+            except ValueError:
+                continue
+    return default
+
+
+def _parse_department(text: str, default: str = "Operations") -> str:
+    t = text.lower()
+    for dept in ("engineering", "marketing", "sales", "operations", "hr"):
+        if re.search(rf"\b{dept}\b", t):
+            return dept.capitalize() if dept != "hr" else "HR"
+    if "eng" in t:
+        return "Engineering"
+    if "market" in t:
+        return "Marketing"
+    return default
+
+
+def _parse_delay_days(text: str, default: int = 14) -> int:
+    t = text.lower()
+    m = re.search(r"(\d+)\s*weeks?\b", t)
+    if m:
+        try:
+            return max(1, min(90, int(m.group(1)) * 7))
+        except ValueError:
+            pass
+    m = re.search(r"(\d+)\s*days?\b", t)
+    if m:
+        try:
+            return max(1, min(90, int(m.group(1))))
+        except ValueError:
+            pass
+    return default
 
 
 class FinancialDigitalTwin:
@@ -256,6 +369,9 @@ class FinancialDigitalTwin:
         before_state = self.get_live_state()
         action_type = action.get("type", "EXPENSE")  # EXPENSE, REALLOCATION, SALARY_REVISION, ALLOWANCE_CHANGE, PAYMENT_DELAY
         action_desc = action.get("description", "Proposed Financial Action")
+        # Projection window in days (parsed from the user's scenario, default 90).
+        horizon = int(action.get("horizon_days", 90) or 90)
+        horizon = max(14, min(365, horizon))
 
         modifiers: Dict[str, Any] = {}
         if action_type == "EXPENSE":
@@ -281,10 +397,10 @@ class FinancialDigitalTwin:
             if to_dept in before_state["budget_position"]["departments"]:
                 before_state["budget_position"]["departments"][to_dept]["allocated_budget"] += amt
 
-        # Run 90-day baseline simulation (Before)
-        baseline_sim = self.simulate_forward(days=90, modifiers={}, base_state=before_state)
-        # Run 90-day proposed simulation (After)
-        proposed_sim = self.simulate_forward(days=90, modifiers=modifiers, base_state=before_state)
+        # Run baseline simulation (Before) and proposed simulation (After)
+        baseline_sim = self.simulate_forward(days=horizon, modifiers={}, base_state=before_state)
+        # Run proposed simulation (After)
+        proposed_sim = self.simulate_forward(days=horizon, modifiers=modifiers, base_state=before_state)
 
         # Compute explicit deltas
         liquidity_before = baseline_sim["final_liquidity"]
@@ -303,6 +419,10 @@ class FinancialDigitalTwin:
         score_penalty = 0.0
         if liquidity_delta < -200000:
             score_penalty += 3.5
+        # Scale penalty with shock size so extreme scenarios (e.g. mass hiring)
+        # reach REJECT_RISK instead of sharing a badge with mild scenarios.
+        if liquidity_delta < -1000000:
+            score_penalty += min(20.0, abs(liquidity_delta) / 1000000.0 * 2.0)
         if utilization_delta > 5.0:
             score_penalty += 4.0
         if proposed_sim["deficit_detected_day"]:
@@ -328,6 +448,7 @@ class FinancialDigitalTwin:
         return {
             "action": action,
             "action_description": action_desc,
+            "horizon_days": horizon,
             "verdict": verdict,
             "verdict_badge": verdict_badge,
             "verdict_summary": verdict_summary,
@@ -368,36 +489,39 @@ class FinancialDigitalTwin:
 
         # 1. Check for payment delay scenario
         if "delay" in s_lower and any(w in s_lower for w in ["vendor", "payment", "bill", "invoice", "week", "days"]):
-            days = 14
-            if "week" in s_lower:
-                days = 14 if "2" in s_lower or "two" in s_lower else (21 if "3" in s_lower else 7)
+            days = _parse_delay_days(scenario_text)
             action = {
                 "type": "PAYMENT_DELAY",
                 "days": days,
+                "horizon_days": _parse_horizon_days(scenario_text),
                 "description": f"Delay vendor non-essential disbursements by {days} days",
             }
 
         # 2. Check for spending rate / burn rate continuation
         elif any(w in s_lower for w in ["stay", "rate", "pace", "same", "continue"]) and any(w in s_lower for w in ["engineering", "marketing", "burn"]):
-            dept = "Engineering" if "engineering" in s_lower else ("Marketing" if "marketing" in s_lower else "Operations")
+            dept = _parse_department(scenario_text, default="Operations")
+            if dept == "Operations" and "burn" in s_lower and "engineering" in s_lower:
+                dept = "Engineering"
+            horizon = _parse_horizon_days(scenario_text)
             action = {
                 "type": "BURN_RATE_SHIFT",
                 "department": dept,
                 "multiplier": 1.12,
-                "description": f"{dept} spending rate continues at +12% above benchmark pace for 60-90 days",
+                "horizon_days": horizon,
+                "description": f"{dept} spending rate continues at +12% above benchmark pace for {horizon} days",
             }
 
         # 3. Check for headcount hiring
         elif any(w in s_lower for w in ["hire", "headcount", "recruit", "engineers", "employee", "team"]):
-            count = 3
-            if "1" in s_lower or "one" in s_lower: count = 1
-            elif "2" in s_lower or "two" in s_lower: count = 2
-            elif "5" in s_lower or "five" in s_lower: count = 5
+            count = _parse_headcount(scenario_text)
+            salary = _parse_monthly_salary(scenario_text)
+            horizon = _parse_horizon_days(scenario_text)
             action = {
                 "type": "HEADCOUNT_GROWTH",
                 "headcount": count,
-                "avg_salary": 85000.0,
-                "description": f"Hire {count} senior engineers at ₹85,000/mo basic",
+                "avg_salary": salary,
+                "horizon_days": horizon,
+                "description": f"Hire {count} senior engineers at ₹{salary:,.0f}/mo basic",
             }
 
         # 4. Check for budget reallocation
@@ -413,7 +537,6 @@ class FinancialDigitalTwin:
         # 5. Default: Expense injection
         else:
             amt = 500000.0
-            import re
             match = re.search(r"(\d+(?:,\d+)*(?:\.\d+)?)\s*(k|lakh|lakhs|m)?", s_lower)
             if match:
                 val = float(match.group(1).replace(",", ""))
@@ -424,11 +547,12 @@ class FinancialDigitalTwin:
                 elif val < 1000: amt = val * 100000.0
                 else: amt = val
 
-            dept = "Engineering" if "eng" in s_lower else ("Marketing" if "market" in s_lower else "Operations")
+            dept = _parse_department(scenario_text)
             action = {
                 "type": "EXPENSE",
                 "amount": amt,
                 "department": dept,
+                "horizon_days": _parse_horizon_days(scenario_text),
                 "description": f"Disburse planned expense of ₹{amt:,.2f} for {dept}",
             }
 
