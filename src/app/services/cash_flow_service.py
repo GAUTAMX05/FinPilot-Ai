@@ -29,7 +29,9 @@ class CashFlowForecastingService:
         Calculates multi-horizon cash curves, burn velocities, and liquidity risk.
         """
         all_invoices = invoice_service.get_all_invoices(user_role, user_department)
-        pending_invoices_amt = sum(float(inv.get("total_amount", 0.0)) for inv in all_invoices if inv.get("status") == "pending_approval")
+        # Pending = same status set as InvoiceService.get_pending_invoices
+        # ("Pending Review" is the seeded status; "pending_approval" is legacy).
+        pending_invoices_amt = sum(float(inv.get("total_amount", 0.0)) for inv in all_invoices if str(inv.get("status", "")).lower() in ("pending review", "pending_approval", "pending"))
 
         # 1. 7-Day Horizon
         inflow_7d = self.weekly_inflow_avg * 1.0

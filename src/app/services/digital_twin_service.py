@@ -183,10 +183,12 @@ class FinancialDigitalTwin:
         total_monthly_gross = sum(emp.get("computed_compensation", {}).get("gross_salary", emp.get("monthly_basic", 0.0) * 1.4) for emp in employees_raw)
         total_headcount = len(employees_raw)
 
-        # 4. Invoices & Commitments
+        # 4. Invoices & Commitments (status match is case-insensitive: seeded
+        # statuses are "Pending Review"/"Approved"/"Paid", legacy code used
+        # "pending_approval"/"approved").
         invoices_raw = invoice_service.get_all_invoices()
-        pending_invoices = [inv for inv in invoices_raw if inv.get("status") == "pending_approval"]
-        approved_invoices = [inv for inv in invoices_raw if inv.get("status") == "approved"]
+        pending_invoices = [inv for inv in invoices_raw if str(inv.get("status", "")).lower() in ("pending review", "pending_approval", "pending")]
+        approved_invoices = [inv for inv in invoices_raw if str(inv.get("status", "")).lower() in ("approved", "paid")]
         total_pending_amount = sum(float(inv.get("total_amount", 0.0)) for inv in pending_invoices)
 
         # 5. Composite Decision Score Calculation

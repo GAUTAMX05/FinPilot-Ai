@@ -71,6 +71,11 @@ def test_cash_flow_forecast_has_horizons_and_drivers():
         for field in ("name", "frequency", "department", "amount"):
             assert field in d, f"driver missing '{field}': {d}"
         assert isinstance(d["amount"], (int, float)), f"driver amount not numeric: {d}"
+    by_name = {d["name"]: d["amount"] for d in drivers}
+    assert by_name.get("Monthly Corporate Payroll", 0) > 0, "payroll driver is zero"
+    assert by_name.get("Pending Vendor Disbursements", 0) > 0, (
+        "pending-vendor driver is zero: invoice pending-status filter mismatch"
+    )
     assert len(fc.get("daily_curve", [])) >= 10
     print("[PASSED] cash-flow forecast incl. recurring_drivers")
 
@@ -134,6 +139,9 @@ def test_controller_and_simulation_nonempty():
 
     twin = _get("/v1/simulation/digital-twin-state")
     assert twin["state"]["cash_position"]["liquid_reserves"] > 0
+    assert twin["state"]["commitments"]["pending_invoices_count"] > 0, (
+        "twin pending_invoices_count is zero: invoice pending-status filter mismatch"
+    )
     assert len(twin["baseline_90d_trajectory"]["cash_trajectory"]) >= 5
 
     cal = _get("/v1/simulation/policy-calibrations")
