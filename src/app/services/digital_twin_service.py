@@ -266,14 +266,17 @@ class FinancialDigitalTwin:
 
         # Modifier extractions
         dept_burn_multipliers = mods.get("dept_burn_multipliers", {})  # e.g. {"Engineering": 1.15}
-        payment_delay_days = mods.get("payment_delay_days", 0)  # e.g. 14 days
+        payment_delay_days = mods.get("payment_delay_days", 0)  # vendor opex outflow freeze, e.g. 14 days
+        inflow_delay_days = mods.get("inflow_delay_days", 0)  # receivables/inflow hold, e.g. client pays 45 days late
         injected_expenses = mods.get("injected_expenses", [])  # e.g. [{"department": "Engineering", "amount": 250000, "day": 5}]
         headcount_delta = mods.get("headcount_delta", 0)  # e.g. +3 engineers
         headcount_avg_salary = mods.get("headcount_avg_salary", 75000.0)
 
         # Baseline parameters
         cash = state["cash_position"]["liquid_reserves"]
+        start_liquidity = round(cash, 2)
         daily_inflow = state["cash_position"]["inflows_daily_avg"]
+        safe_threshold = state["cash_position"]["safe_liquidity_threshold"]
         depts = copy.deepcopy(state["budget_position"]["departments"])
 
         # Adjust headcount payroll
@@ -292,6 +295,7 @@ class FinancialDigitalTwin:
         start_date = datetime.utcnow()
         deficit_detected_day: Optional[int] = None
         deficit_department: Optional[str] = None
+        cash_breach_day: Optional[int] = None
 
         for day in range(1, days + 1):
             curr_date = start_date + timedelta(days=day)
@@ -321,8 +325,12 @@ class FinancialDigitalTwin:
                     cash -= e_amt
 
             # 3. Cash flow balance
-            # Inflows occur daily
-            cash += daily_inflow
+            # Inflows occur daily unless held by a receivables delay
+            # (e.g. a major client paying late).
+            if inflow_delay_days > 0 and day <= inflow_delay_days:
+                cash += 0.0
+            else:
+                cash += daily_inflow
 
             # Outflows: OpEx + Payroll
             # Delayed payments push out non-payroll OpEx
@@ -331,6 +339,10 @@ class FinancialDigitalTwin:
                 cash -= daily_payroll_outflow
             else:
                 cash -= (daily_dept_burn_total + daily_payroll_outflow)
+
+            # First day cash drops below the safety threshold (cash breach).
+            if cash_breach_day is None and cash < safe_threshold:
+                cash_breach_day = day
 
             # Record step
             if day % (1 if days <= 14 else (5 if days <= 30 else 10)) == 0 or day == days or day == 1:
@@ -344,11 +356,17 @@ class FinancialDigitalTwin:
         total_alloc = sum(d["allocated_budget"] for d in depts.values())
         final_utilization = round((total_final_spent / total_alloc * 100), 2) if total_alloc > 0 else 0
 
-        # Calculate projected runway in days (time until cash hits safety threshold)
-        safe_threshold = state["cash_position"]["safe_liquidity_threshold"]
+        # Runway: days of cover from TODAY at the simulated daily net burn,
+        # and the first simulated day cash breaches the safety threshold.
+        # (Computed from current liquidity — never from end-of-window cash,
+        # which saturates at zero for every scenario once projections go deep.)
         daily_net_burn = (daily_dept_burn_total + daily_payroll_outflow) - daily_inflow
-        runway_days = round((final_liquidity - safe_threshold) / daily_net_burn) if daily_net_burn > 0 else 999
-        runway_days = max(1, min(999, int(runway_days)))
+        if daily_net_burn > 0:
+            starting_runway_days = int((start_liquidity - safe_threshold) / daily_net_burn)
+        else:
+            starting_runway_days = 999
+        starting_runway_days = max(0, min(999, starting_runway_days))
+        runway_days = cash_breach_day if cash_breach_day is not None else starting_runway_days
 
         return {
             "simulation_days": days,
@@ -358,6 +376,9 @@ class FinancialDigitalTwin:
             "final_liquidity": final_liquidity,
             "final_utilization_pct": final_utilization,
             "projected_runway_days": runway_days,
+            "starting_runway_days": starting_runway_days,
+            "cash_breach_day": cash_breach_day,
+            "daily_net_burn": round(daily_net_burn, 2),
             "deficit_detected_day": deficit_detected_day,
             "deficit_department": deficit_department,
             "departments_after": depts,
@@ -382,6 +403,9 @@ class FinancialDigitalTwin:
             modifiers["injected_expenses"] = [{"department": dept, "amount": amt, "day": 1}]
         elif action_type == "PAYMENT_DELAY":
             modifiers["payment_delay_days"] = int(action.get("days", 14))
+        elif action_type == "RECEIVABLE_DELAY":
+            # A client/customer pays late: daily inflows held for N days.
+            modifiers["inflow_delay_days"] = int(action.get("days", 45))
         elif action_type == "BURN_RATE_SHIFT":
             dept = action.get("department", "Engineering")
             mult = float(action.get("multiplier", 1.15))
@@ -464,6 +488,7 @@ class FinancialDigitalTwin:
             "before": {
                 "liquidity_90d": liquidity_before,
                 "runway_days": runway_before,
+                "cash_breach_day": baseline_sim.get("cash_breach_day"),
                 "budget_utilization_pct": utilization_before,
                 "decision_score": score_before,
                 "deficit_risk": "None projected" if not baseline_sim["deficit_detected_day"] else f"Day {baseline_sim['deficit_detected_day']} ({baseline_sim['deficit_department']})",
@@ -471,6 +496,7 @@ class FinancialDigitalTwin:
             "after": {
                 "liquidity_90d": liquidity_after,
                 "runway_days": runway_after,
+                "cash_breach_day": proposed_sim.get("cash_breach_day"),
                 "budget_utilization_pct": utilization_after,
                 "decision_score": score_after,
                 "deficit_risk": "None projected" if not proposed_sim["deficit_detected_day"] else f"Day {proposed_sim['deficit_detected_day']} ({proposed_sim['deficit_department']})",
@@ -496,8 +522,21 @@ class FinancialDigitalTwin:
         s_lower = scenario_text.lower()
         action: Dict[str, Any] = {"type": "EXPENSE", "description": scenario_text}
 
-        # 1. Check for payment delay scenario
-        if "delay" in s_lower and any(w in s_lower for w in ["vendor", "payment", "bill", "invoice", "week", "days"]):
+        # 1a. Check for RECEIVABLES delay (a client/customer pays late: inflows
+        # held). Must precede the vendor-disbursement branch — opposite direction.
+        if "delay" in s_lower and any(w in s_lower for w in ["client", "customer", "receivable", "receivables", "collection", "inflow", "gateway settlement"]):
+            days = _parse_delay_days(scenario_text, default=45)
+            horizon = _parse_horizon_days(scenario_text)
+            horizon = max(horizon, min(180, days + 45))
+            action = {
+                "type": "RECEIVABLE_DELAY",
+                "days": days,
+                "horizon_days": horizon,
+                "description": f"Major client delays receivable collection by {days} days (daily inflows held)",
+            }
+
+        # 1b. Check for vendor payment delay scenario (outflow freeze)
+        elif "delay" in s_lower and any(w in s_lower for w in ["vendor", "payment", "bill", "invoice", "week", "days"]):
             days = _parse_delay_days(scenario_text)
             action = {
                 "type": "PAYMENT_DELAY",

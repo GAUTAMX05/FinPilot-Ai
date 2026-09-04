@@ -168,7 +168,7 @@ def retrieve_context(
     # Deterministic anchors (the numbers the model must not contradict).
     reserves = float(cash["liquid_reserves"])
     safe = float(cash["safe_liquidity_threshold"])
-    daily_net = round((budgets["total_monthly_burn"] + payroll["monthly_gross_total"] / 30.0)
+    daily_net = round((budgets["total_monthly_burn"] / 30.0 + payroll["monthly_gross_total"] / 30.0)
                       - cash["inflows_daily_avg"], 2)
     runway = int((reserves - safe) / daily_net) if daily_net > 0 else 999
     runway = max(0, min(999, runway))

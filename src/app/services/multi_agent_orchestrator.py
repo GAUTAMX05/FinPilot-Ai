@@ -326,6 +326,20 @@ class MultiAgentFinancialOrchestrator:
                 f"runway {before.get('runway_days', 0)} → {after.get('runway_days', 0)} days."
             )
 
+        if a_type == "RECEIVABLE_DELAY":
+            days = int(action.get("days", 45))
+            held = round(float(twin_state["cash_position"]["inflows_daily_avg"]) * days, 2)
+            return (
+                f"**Scenario Inputs:** a major client delays receivable collection by **{days} days** "
+                f"(daily gateway inflows held), projected over **{horizon} days**. "
+                f"This is a collections-timing shock, not new spending.\n"
+                f"- **Inflows held:** ~₹{twin_state['cash_position']['inflows_daily_avg']:,.0f}/day × {days} days "
+                f"= **₹{held:,.0f}** of receipts arriving late.\n"
+                f"- **Model impact ({horizon}d):** liquidity {before.get('liquidity_90d', 0):,.0f} → "
+                f"{after.get('liquidity_90d', 0):,.0f} ({deltas.get('liquidity_change', 0):+,.0f}); "
+                f"runway {before.get('runway_days', 0)} → {after.get('runway_days', 0)} days."
+            )
+
         if a_type == "PAYMENT_DELAY":
             days = int(action.get("days", 14))
             return (

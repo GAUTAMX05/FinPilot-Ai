@@ -128,6 +128,61 @@ def test_fire_scenario_reduces_payroll_not_expense():
     print("[PASSED] firing reduces payroll; no fabricated expense")
 
 
+RECV_PROMPT = "What if a major client delays payment by 45 days?"
+
+
+def test_runway_math_matches_hand_computation():
+    """Step-5 pin: runway = first day cash breaches threshold, hand-verified."""
+    from src.app.services.digital_twin_service import digital_twin_service as twin
+    state = twin.get_live_state(force_refresh=True)
+    cash = float(state["cash_position"]["liquid_reserves"])
+    safe = float(state["cash_position"]["safe_liquidity_threshold"])
+    inflow = float(state["cash_position"]["inflows_daily_avg"])
+    daily_out = (float(state["budget_position"]["total_monthly_burn"])
+                 + float(state["payroll_position"]["monthly_gross_total"])) / 30.0
+    c, expected_breach = cash, None
+    for day in range(1, 91):
+        c += inflow
+        c -= daily_out
+        if expected_breach is None and c < safe:
+            expected_breach = day
+            break
+    sim = twin.simulate_forward(days=90, modifiers={})
+    assert expected_breach is not None and expected_breach > 1
+    assert sim["cash_breach_day"] == expected_breach, (
+        f"fn={sim['cash_breach_day']} hand={expected_breach}")
+    assert sim["projected_runway_days"] == expected_breach
+    print(f"[PASSED] runway matches hand computation (breach day {expected_breach})")
+
+
+def test_runway_moves_with_scenario_direction():
+    """Savings must extend runway; massive hiring must shorten it. Never 1->1."""
+    from src.app.services.digital_twin_service import digital_twin_service as twin
+    base = twin.simulate_forward(days=90, modifiers={})
+    fire = twin.run_what_if_scenario("What if we fire 4 engineer")
+    assert fire["after"]["runway_days"] >= base["projected_runway_days"], (
+        "firing must not shorten runway")
+    extreme = twin.run_what_if_scenario(
+        "What if we hire 30 senior engineers at Rs.200000 monthly basic for 200 days?")
+    assert extreme["after"]["runway_days"] < base["projected_runway_days"], (
+        "mass hiring must shorten runway")
+    print("[PASSED] runway moves with scenario direction")
+
+
+def test_client_payment_delay_is_receivables_not_expense():
+    """A client paying late holds INFLOWS (opposite of a vendor delay)."""
+    from src.app.services.digital_twin_service import digital_twin_service as twin
+    recv = twin.run_what_if_scenario(RECV_PROMPT)
+    assert recv["action"]["type"] == "RECEIVABLE_DELAY", recv["action"]
+    assert recv["action"]["days"] == 45
+    assert recv["deltas"]["liquidity_change"] < 0, "held inflows must hurt liquidity"
+    text = _chat(RECV_PROMPT)
+    assert "receivable" in text.lower()
+    assert "45 days" in text
+    assert "Disburse planned expense" not in text
+    print("[PASSED] client delay modeled as inflow hold")
+
+
 def test_reasoning_quick_buttons_all_distinct():
     """All five Reasoning Queries quick-buttons must return distinct grounded text."""
     prompts = [
@@ -149,5 +204,9 @@ if __name__ == "__main__":
     test_burn_and_hire_responses_are_distinct_and_grounded()
     test_extreme_scenario_gets_different_policy_status()
     test_scenario_parser_extracts_real_numbers()
+    test_fire_scenario_reduces_payroll_not_expense()
+    test_runway_math_matches_hand_computation()
+    test_runway_moves_with_scenario_direction()
+    test_client_payment_delay_is_receivables_not_expense()
     test_reasoning_quick_buttons_all_distinct()
     print("ALL COPILOT WHAT-IF REGRESSION TESTS PASSED")
