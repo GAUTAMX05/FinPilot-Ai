@@ -51,5 +51,8 @@ jobs:
       - name: Run AI Chat & Reasoning Pipeline
         run: python tests/test_ai_chat_pipeline.py
 
-      - name: Run Full Pytest Suite (All 60 Tests)
+      - name: Run Data-Backed Endpoints Smoke Test (empty-widget guard)
+        run: pytest tests/test_data_backed_endpoints_smoke.py tests/test_copilot_whatif_regression.py -v
+
+      - name: Run Full Pytest Suite
         run: pytest -v

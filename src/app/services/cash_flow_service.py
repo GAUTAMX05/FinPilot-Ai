@@ -127,6 +127,34 @@ class CashFlowForecastingService:
             "risk_badge": risk_badge,
             "ai_explanation": explanation,
             "daily_curve": daily_curve,
+            # Structured driver records for the "Key Outflow & Liquidity Drivers"
+            # dashboard card (frontend reads forecast.recurring_drivers).
+            "recurring_drivers": [
+                {
+                    "name": "Monthly Corporate Payroll",
+                    "frequency": "Monthly",
+                    "department": "All Departments",
+                    "amount": round(self.monthly_payroll, 2),
+                },
+                {
+                    "name": "Pending Vendor Disbursements",
+                    "frequency": "On approval",
+                    "department": "Finance",
+                    "amount": round(pending_invoices_amt, 2),
+                },
+                {
+                    "name": "Statutory Tax Remittance Reserve",
+                    "frequency": "Monthly",
+                    "department": "Finance",
+                    "amount": round(self.monthly_tax_reserve, 2),
+                },
+                {
+                    "name": "Operational Overhead & Vendor Clearing",
+                    "frequency": "Monthly",
+                    "department": "Operations",
+                    "amount": 240000.0,
+                },
+            ],
             "key_drivers": [
                 f"Monthly Corporate Payroll: ₹{self.monthly_payroll:,.2f}/month",
                 f"Pending Vendor Disbursements: ₹{pending_invoices_amt:,.2f}",

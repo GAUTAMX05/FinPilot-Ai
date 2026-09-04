@@ -19,15 +19,19 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "production" if os.getenv("RENDER") else "development")
 
     # Database Configuration (PostgreSQL / Supabase / Render Postgres / SQLite fallback)
+    # NOTE: No credentials are defaulted here. Set DATABASE_URL (or POSTGRES_URL /
+    # SUPABASE_DB_URL) in the environment (.env locally, Render dashboard in prod).
+    # Empty default => deterministic local SQLite fallback.
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
-        os.getenv("POSTGRES_URL", os.getenv("SUPABASE_DB_URL", "postgresql://postgres:%40BEKGC3110G@db.eymvupzaiqvhfawunyoa.supabase.co:5432/postgres"))
+        os.getenv("POSTGRES_URL", os.getenv("SUPABASE_DB_URL", ""))
     )
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "https://eymvupzaiqvhfawunyoa.supabase.co")
     SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "")
 
     # LLM Provider Credentials & Base URLs (OpenCode AI / OpenAI)
-    OPENCODE_API_KEY: str = os.getenv("OPENCODE_API_KEY", "sk-Q3vnm6Gopk1NDw8C8sQraq78DXDENefVcsASnbk9xVcMoaIdVo6On2MECRfTswbK")
+    # NOTE: API keys must come from the environment. Never commit real keys.
+    OPENCODE_API_KEY: str = os.getenv("OPENCODE_API_KEY", "")
     OPENCODE_BASE_URL: str = os.getenv("OPENCODE_BASE_URL", "https://opencode.ai/zen/v1")
     OPENCODE_MODEL: str = os.getenv("OPENCODE_MODEL", "gpt-4o-mini")
     

@@ -11,6 +11,7 @@ Provides unified database abstraction supporting:
 
 import os
 import json
+import re
 import time
 import sqlite3
 import hashlib
@@ -94,17 +95,27 @@ class PostgresCursorWrapper:
         adapted = query.replace("?", "%s")
         if "INSERT OR REPLACE INTO" in adapted:
             adapted = adapted.replace("INSERT OR REPLACE INTO", "INSERT INTO")
+        # SQLite exposes an implicit ROWID for insertion-order sorting; the
+        # PostgreSQL equivalent is the system column CTID. Translate it so
+        # ORDER BY rowid ... LIMIT n queries work on both engines.
+        if re.search(r"\browid\b", adapted, flags=re.IGNORECASE):
+            adapted = re.sub(r"\browid\b", "ctid", adapted)
         return adapted
 
     def execute(self, query: str, params: Optional[Tuple] = None):
         adapted = self._adapt_query(query)
         if params is not None:
-            return self.raw_cursor.execute(adapted, params)
-        return self.raw_cursor.execute(adapted)
+            self.raw_cursor.execute(adapted, params)
+        else:
+            self.raw_cursor.execute(adapted)
+        # Return the wrapper (not the raw result) so chained calls like
+        # cursor.execute(...).fetchone() work on both engines.
+        return self
 
     def executemany(self, query: str, seq_of_params):
         adapted = self._adapt_query(query)
-        return self.raw_cursor.executemany(adapted, seq_of_params)
+        self.raw_cursor.executemany(adapted, seq_of_params)
+        return self
 
     def fetchone(self):
         res = self.raw_cursor.fetchone()
@@ -131,11 +142,16 @@ class SQLiteCursorWrapper:
 
     def execute(self, query: str, params: Optional[Tuple] = None):
         if params is not None:
-            return self.raw_cursor.execute(query, params)
-        return self.raw_cursor.execute(query)
+            self.raw_cursor.execute(query, params)
+        else:
+            self.raw_cursor.execute(query)
+        # Return the wrapper (not the raw result) so chained calls like
+        # cursor.execute(...).fetchone() behave identically on both engines.
+        return self
 
     def executemany(self, query: str, seq_of_params):
-        return self.raw_cursor.executemany(query, seq_of_params)
+        self.raw_cursor.executemany(query, seq_of_params)
+        return self
 
     def fetchone(self):
         res = self.raw_cursor.fetchone()
@@ -178,23 +194,40 @@ def get_db_connection() -> DBConnectionWrapper:
         except Exception as e:
             logger.warning(f"[DatabaseService] PostgreSQL connection failed ({e}). Falling back to SQLite.")
 
-    # SQLite Fallback
+    # SQLite Fallback (also the default when DATABASE_URL is unset)
     os.makedirs(DB_DIR, exist_ok=True)
     conn = sqlite3.connect(DB_PATH, timeout=10.0)
     conn.row_factory = sqlite3.Row
-    return DBConnectionWrapper(conn, "SQLITE")
+    wrapper = DBConnectionWrapper(conn, "SQLITE")
+    if "SQLITE" not in _db_initialized_engines:
+        # Ensure schema + seed exist on fallback DBs too (fresh checkout, or
+        # Postgres was reachable at startup but is unreachable now), so the
+        # app serves seeded demo data instead of empty missing-table errors.
+        init_db(existing_conn=wrapper)
+        fresh = sqlite3.connect(DB_PATH, timeout=10.0)
+        fresh.row_factory = sqlite3.Row
+        return DBConnectionWrapper(fresh, "SQLITE")
+    return wrapper
 
 
-_db_initialized = False
+_db_initialized_engines = set()
 
-def init_db():
-    """Initializes PostgreSQL / SQLite database schema and seeds benchmark dataset."""
-    global _db_initialized
-    if _db_initialized:
+def init_db(existing_conn=None):
+    """Initializes database schema and seeds benchmark dataset.
+
+    Idempotent per engine (POSTGRES / SQLITE). Accepts an optional existing
+    connection (used by the SQLite fallback path); otherwise opens one.
+    """
+    global _db_initialized_engines
+
+    owns_conn = existing_conn is None
+    conn = existing_conn or get_db_connection()
+    if conn.engine_type in _db_initialized_engines:
+        if owns_conn:
+            conn.close()
         return
 
     os.makedirs(DB_DIR, exist_ok=True)
-    conn = get_db_connection()
     cursor = conn.cursor()
 
     is_postgres = conn.engine_type == "POSTGRES"
@@ -395,7 +428,7 @@ def init_db():
 
     conn.commit()
     conn.close()
-    _db_initialized = True
+    _db_initialized_engines.add(conn.engine_type)
 
 
 def get_database_status() -> Dict[str, Any]:
