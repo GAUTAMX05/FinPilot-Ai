@@ -50,9 +50,11 @@ class _FakeResp:
 
 
 def _no_keys(monkeypatch):
-    for var in ("OPENAI_API_KEY", "OPENCODE_API_KEY", "GROQ_API_KEY",
+    for var in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "GEMINI_MODEL", "GEMINI_BASE_URL",
+                "OPENAI_API_KEY", "OPENCODE_API_KEY", "GROQ_API_KEY",
                 "ANTHROPIC_API_KEY", "LLM_API_KEY", "LLM_PROVIDER"):
         monkeypatch.delenv(var, raising=False)
+    monkeypatch.setattr(copilot.settings, "GEMINI_API_KEY", "")
     monkeypatch.setattr(copilot.settings, "OPENAI_API_KEY", "")
     monkeypatch.setattr(copilot.settings, "OPENCODE_API_KEY", "")
     monkeypatch.setattr(copilot.settings, "GROQ_API_KEY", "")
@@ -182,18 +184,44 @@ def test_provider_rejection_hint_is_safe_and_specific(monkeypatch):
 
 
 def _clean_llm_env(monkeypatch):
-    for var in ("OPENAI_API_KEY", "OPENCODE_API_KEY", "GROQ_API_KEY",
+    for var in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "GEMINI_MODEL", "GEMINI_BASE_URL",
+                "OPENAI_API_KEY", "OPENCODE_API_KEY", "GROQ_API_KEY",
                 "ANTHROPIC_API_KEY", "LLM_API_KEY", "OPENAI_MODEL",
                 "OPENCODE_MODEL", "LLM_MODEL", "OPENAI_BASE_URL",
                 "OPENCODE_BASE_URL", "LLM_BASE_URL", "LLM_PROVIDER",
                 "SUPERVISOR_MODEL", "SUB_AGENT_MODEL"):
         monkeypatch.delenv(var, raising=False)
-    for attr in ("OPENAI_API_KEY", "OPENCODE_API_KEY", "GROQ_API_KEY",
+    for attr in ("GEMINI_API_KEY", "GEMINI_MODEL", "GEMINI_BASE_URL",
+                 "OPENAI_API_KEY", "OPENCODE_API_KEY", "GROQ_API_KEY",
                  "ANTHROPIC_API_KEY", "LLM_API_KEY", "OPENAI_MODEL",
                  "OPENCODE_MODEL", "LLM_MODEL", "OPENAI_BASE_URL",
                  "OPENCODE_BASE_URL", "LLM_BASE_URL", "SUPERVISOR_MODEL",
                  "SUB_AGENT_MODEL"):
         monkeypatch.setattr(copilot.settings, attr, "", raising=False)
+
+
+def test_gemini_provider_resolution(monkeypatch):
+    """Setting GEMINI_API_KEY configures Gemini provider with default model."""
+    from src.app.services.llm_provider import get_llm_config
+    _clean_llm_env(monkeypatch)
+    monkeypatch.setenv("GEMINI_API_KEY", "AIzaSyTestGeminiKey1234567890")
+    cfg = get_llm_config("supervisor")
+    assert cfg["provider"] == "gemini" and cfg["configured"] is True
+    assert cfg["model"] == "gemini-3.5-flash"
+    print("[PASSED] gemini provider resolution and default model verified")
+
+
+def test_gemini_endpoint_resolution(monkeypatch):
+    """Gemini endpoint points to Google generative language OpenAI-compatible API."""
+    _clean_llm_env(monkeypatch)
+    monkeypatch.setenv("GEMINI_API_KEY", "AIzaSyTestGeminiKey1234567890")
+    monkeypatch.setenv("LLM_PROVIDER", "gemini")
+    ep = copilot.resolve_chat_endpoint()
+    assert ep is not None
+    assert ep["provider"] == "gemini"
+    assert "googleapis.com" in ep["url"]
+    assert ep["key"] == "AIzaSyTestGeminiKey1234567890"
+    print("[PASSED] gemini chat completions endpoint verified")
 
 
 def test_opencode_default_model_is_zen_served(monkeypatch):

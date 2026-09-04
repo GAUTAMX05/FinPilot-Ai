@@ -18,7 +18,7 @@ logger = logging.getLogger("LLMProvider")
 
 _PLACEHOLDERS = ("", "your_openai_api_key_here", "your_groq_api_key_here",
                  "sk-placeholder", "rzp_test_placeholder", "secret_placeholder",
-                 "your_opencode_api_key_here", "changeme")
+                 "your_opencode_api_key_here", "your_gemini_api_key_here", "changeme")
 
 
 def _clean(v: Optional[str]) -> str:
@@ -30,11 +30,11 @@ def _is_real_key(v: Optional[str]) -> bool:
     if not v or len(v) < 8:
         return False
     low = v.lower()
+    if low.startswith("your_") or low.startswith("sk-placeholder") or (low.startswith("rzp_test_") and len(v) < 20):
+        return False
     for p in _PLACEHOLDERS:
         if p and low == p.lower():
             return False
-    if low.startswith("sk-placeholder") or (low.startswith("rzp_test_") and len(v) < 20):
-        return False
     return True
 
 
@@ -44,6 +44,11 @@ def get_llm_config(purpose: str = "supervisor") -> Dict[str, Any]:
     generic_key = os.getenv("LLM_API_KEY", "")
     generic_base = _clean(os.getenv("LLM_BASE_URL", ""))
     generic_model = _clean(os.getenv("LLM_MODEL", ""))
+
+    gemini_key = os.getenv("GEMINI_API_KEY", "") or os.getenv("GOOGLE_API_KEY", "") or settings.GEMINI_API_KEY
+    gemini_base = _clean(os.getenv("GEMINI_BASE_URL", "")) or settings.GEMINI_BASE_URL or "https://generativelanguage.googleapis.com/v1beta/openai/"
+    gemini_model = (_clean(os.getenv("GEMINI_MODEL", "")) or settings.GEMINI_MODEL
+                    or generic_model or "gemini-3.5-flash")
 
     openai_key = os.getenv("OPENAI_API_KEY", "") or settings.OPENAI_API_KEY
     openai_base = _clean(os.getenv("OPENAI_BASE_URL", "")) or settings.OPENAI_BASE_URL
@@ -72,6 +77,11 @@ def get_llm_config(purpose: str = "supervisor") -> Dict[str, Any]:
                 "reason": "LLM_PROVIDER=disabled", "base_url_set": False}
 
     # Explicit provider requests
+    if provider_pref in ("gemini", "google"):
+        if _is_real_key(gemini_key):
+            return _ok("gemini", gemini_model, gemini_base)
+        return {"provider": "gemini", "model": gemini_model, "configured": False,
+                "reason": "no GEMINI_API_KEY", "base_url_set": True}
     if provider_pref in ("openai", "openai_compatible"):
         if _is_real_key(openai_key) or (generic_base and _is_real_key(generic_key)):
             return _ok("openai", generic_model or openai_model, openai_base or generic_base)
@@ -97,7 +107,9 @@ def get_llm_config(purpose: str = "supervisor") -> Dict[str, Any]:
         return {"provider": "anthropic", "model": anthropic_model, "configured": False,
                 "reason": "no ANTHROPIC_API_KEY", "base_url_set": False}
 
-    # auto mode: prefer opencode > openai(+base) > generic > groq > anthropic
+    # auto mode: prefer gemini > opencode > openai(+base) > generic > groq > anthropic
+    if _is_real_key(gemini_key):
+        return _ok("gemini", gemini_model, gemini_base)
     if _is_real_key(opencode_key):
         return _ok("opencode", opencode_model, opencode_base)
     if _is_real_key(generic_key) and generic_base:
@@ -126,9 +138,12 @@ def build_chat_llm(purpose: str = "supervisor", temperature: float = 0.2) -> Opt
     provider = cfg["provider"]
     model = cfg["model"]
     try:
-        if provider in ("openai", "opencode", "openai_compatible"):
+        if provider in ("openai", "opencode", "openai_compatible", "gemini", "google"):
             from langchain_openai import ChatOpenAI
-            if provider == "opencode":
+            if provider in ("gemini", "google"):
+                api_key = _clean(os.getenv("GEMINI_API_KEY")) or _clean(os.getenv("GOOGLE_API_KEY")) or settings.GEMINI_API_KEY or _clean(os.getenv("LLM_API_KEY"))
+                base_url = _clean(os.getenv("GEMINI_BASE_URL")) or settings.GEMINI_BASE_URL or "https://generativelanguage.googleapis.com/v1beta/openai/"
+            elif provider == "opencode":
                 api_key = _clean(os.getenv("OPENCODE_API_KEY")) or settings.OPENCODE_API_KEY or _clean(os.getenv("OPENAI_API_KEY"))
                 base_url = _clean(os.getenv("OPENCODE_BASE_URL")) or settings.OPENCODE_BASE_URL or "https://opencode.ai/zen/v1"
             elif provider == "openai_compatible":
@@ -164,7 +179,7 @@ def llm_status() -> Dict[str, Any]:
         "supervisor": sup,
         "subagent": sub,
         "fallback": "deterministic-simulation",
-        "supported_providers": ["openai", "opencode", "openai_compatible", "groq", "anthropic", "disabled"],
-        "env_hints": ["LLM_PROVIDER", "OPENAI_API_KEY", "OPENAI_BASE_URL", "OPENCODE_API_KEY",
+        "supported_providers": ["gemini", "openai", "opencode", "openai_compatible", "groq", "anthropic", "disabled"],
+        "env_hints": ["LLM_PROVIDER", "GEMINI_API_KEY", "GEMINI_MODEL", "OPENAI_API_KEY", "OPENAI_BASE_URL", "OPENCODE_API_KEY",
                       "GROQ_API_KEY", "ANTHROPIC_API_KEY", "LLM_MODEL"],
     }

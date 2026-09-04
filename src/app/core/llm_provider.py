@@ -19,7 +19,7 @@ logger = logging.getLogger("LLMProvider")
 
 def mask_key(key: str) -> str:
     """Masks secret key safely for debugging and status responses (e.g. sk-Q3vn...swbK)."""
-    if not key or len(key) < 10:
+    if not key or len(key) < 10 or key.startswith("your_") or key.startswith("sk-placeholder"):
         return ""
     return f"{key[:7]}...{key[-5:]}"
 
@@ -33,7 +33,27 @@ class LLMProviderManager:
         self._initialize_llm()
 
     def _initialize_llm(self):
-        # 1. Check for OpenCode AI credentials
+        # 1. Check for Gemini credentials (free tier or paid)
+        gemini_key = (settings.GEMINI_API_KEY or "").strip()
+        if gemini_key and not gemini_key.startswith("sk-placeholder") and not gemini_key.startswith("your_") and len(gemini_key) > 10:
+            base_url = (settings.GEMINI_BASE_URL or "https://generativelanguage.googleapis.com/v1beta/openai/").strip()
+            model = settings.GEMINI_MODEL or "gemini-3.5-flash"
+            try:
+                self._llm = ChatOpenAI(
+                    model=model,
+                    api_key=gemini_key,
+                    base_url=base_url,
+                    temperature=0.2,
+                    timeout=30.0,
+                    max_retries=2,
+                )
+                self._active_provider = "Google Gemini"
+                logger.info(f"[LLMProvider] Initialized Google Gemini with model '{model}' at '{base_url}'")
+                return
+            except Exception as e:
+                logger.warning(f"[LLMProvider] Failed initializing Google Gemini: {e}")
+
+        # 2. Check for OpenCode AI credentials
         opencode_key = (settings.OPENCODE_API_KEY or "").strip()
         if opencode_key and not opencode_key.startswith("sk-placeholder") and len(opencode_key) > 15:
             base_url = (settings.OPENCODE_BASE_URL or "https://opencode.ai/zen/v1").strip()
@@ -53,7 +73,7 @@ class LLMProviderManager:
             except Exception as e:
                 logger.warning(f"[LLMProvider] Failed initializing OpenCode AI: {e}")
 
-        # 2. Check for OpenAI credentials
+        # 3. Check for OpenAI credentials
         openai_key = (settings.OPENAI_API_KEY or "").strip()
         if openai_key and not openai_key.startswith("sk-placeholder") and len(openai_key) > 15:
             base_url = (settings.OPENAI_BASE_URL or "").strip() or None
@@ -85,16 +105,20 @@ class LLMProviderManager:
 
     def get_status(self) -> Dict[str, Any]:
         """Returns AI readiness, provider details, and masked key preview."""
-        has_opencode = bool(settings.OPENCODE_API_KEY and len(settings.OPENCODE_API_KEY) > 15)
-        has_openai = bool(settings.OPENAI_API_KEY and len(settings.OPENAI_API_KEY) > 15)
-        active_key = settings.OPENCODE_API_KEY if has_opencode else (settings.OPENAI_API_KEY if has_openai else "")
+        has_gemini = bool(settings.GEMINI_API_KEY and not settings.GEMINI_API_KEY.startswith("your_") and len(settings.GEMINI_API_KEY) > 10)
+        has_opencode = bool(settings.OPENCODE_API_KEY and not settings.OPENCODE_API_KEY.startswith("your_") and not settings.OPENCODE_API_KEY.startswith("sk-placeholder") and len(settings.OPENCODE_API_KEY) > 15)
+        has_openai = bool(settings.OPENAI_API_KEY and not settings.OPENAI_API_KEY.startswith("your_") and not settings.OPENAI_API_KEY.startswith("sk-placeholder") and len(settings.OPENAI_API_KEY) > 15)
+        active_key = settings.GEMINI_API_KEY if has_gemini else (settings.OPENCODE_API_KEY if has_opencode else (settings.OPENAI_API_KEY if has_openai else ""))
+        active_model = settings.GEMINI_MODEL if has_gemini else (settings.SUPERVISOR_MODEL or "gpt-4o-mini")
+        active_base = settings.GEMINI_BASE_URL if has_gemini else (settings.OPENCODE_BASE_URL if has_opencode else (settings.OPENAI_BASE_URL or "https://api.openai.com/v1"))
 
         return {
             "ai_ready": self._llm is not None,
             "active_provider": self._active_provider,
-            "model": settings.SUPERVISOR_MODEL or "gpt-4o-mini",
-            "base_url": settings.OPENCODE_BASE_URL if has_opencode else (settings.OPENAI_BASE_URL or "https://api.openai.com/v1"),
+            "model": active_model,
+            "base_url": active_base,
             "providers_configured": {
+                "gemini": has_gemini,
                 "opencode_ai": has_opencode,
                 "openai": has_openai,
             },

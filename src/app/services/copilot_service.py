@@ -235,6 +235,12 @@ def resolve_chat_endpoint() -> Optional[Dict[str, str]]:
                 return v.strip('"').strip("'")
         return ""
 
+    if provider in ("gemini", "google"):
+        key = _env("GEMINI_API_KEY", "GOOGLE_API_KEY", "LLM_API_KEY")
+        base = _env("GEMINI_BASE_URL") or "https://generativelanguage.googleapis.com/v1beta/openai/"
+        return {"url": base.rstrip("/") + "/chat/completions",
+                "key": key, "model": model or _env("GEMINI_MODEL") or "gemini-3.5-flash",
+                "provider": "gemini"} if key else None
     if provider == "groq":
         key = _env("GROQ_API_KEY")
         return {"url": "https://api.groq.com/openai/v1/chat/completions",
@@ -379,7 +385,7 @@ def _failure_hint(exc: Exception, endpoint: Dict[str, str]) -> str:
     provider = (endpoint or {}).get("provider", "llm")
     msg = str(exc)
     if "not supported by provider" in msg:
-        return "(model not served — check the OPENCODE_MODEL setting)"
+        return "(model not served — check the GEMINI_MODEL or OPENCODE_MODEL setting)"
     if "CreditsError" in msg or "No payment method" in msg:
         return ("(account billing — the provider reports no payment method on file; "
                 "add one in the provider billing dashboard, then retry)")

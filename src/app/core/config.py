@@ -29,8 +29,12 @@ class Settings(BaseSettings):
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "https://eymvupzaiqvhfawunyoa.supabase.co")
     SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "")
 
-    # LLM Provider Credentials & Base URLs (OpenCode AI / OpenAI)
+    # LLM Provider Credentials & Base URLs (Gemini / OpenCode AI / OpenAI)
     # NOTE: API keys must come from the environment. Never commit real keys.
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", os.getenv("GOOGLE_API_KEY", ""))
+    GEMINI_BASE_URL: str = os.getenv("GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
+
     OPENCODE_API_KEY: str = os.getenv("OPENCODE_API_KEY", "")
     OPENCODE_BASE_URL: str = os.getenv("OPENCODE_BASE_URL", "https://opencode.ai/zen/v1")
     OPENCODE_MODEL: str = os.getenv("OPENCODE_MODEL", "")
