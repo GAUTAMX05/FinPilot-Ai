@@ -291,9 +291,26 @@ class MultiAgentFinancialOrchestrator:
         if a_type == "HEADCOUNT_GROWTH":
             count = int(action.get("headcount", 3))
             salary = float(action.get("avg_salary", 85000.0))
-            monthly_basic = count * salary
+            monthly_basic = abs(count) * salary
             monthly_loaded = monthly_basic * PAYROLL_LOAD_FACTOR
             current_gross = float(twin_state["payroll_position"]["monthly_gross_total"])
+            if count < 0:
+                n = abs(count)
+                new_gross = current_gross - monthly_loaded
+                pct = monthly_loaded / current_gross * 100 if current_gross else 0.0
+                window_saving = monthly_loaded * (horizon / 30.0)
+                return (
+                    f"**Scenario Inputs:** reduce **{n}** engineers at **₹{salary:,.0f}/mo basic** "
+                    f"over a **{horizon}-day** window.\n"
+                    f"- **Monthly saving:** {n} × ₹{salary:,.0f} = **₹{monthly_basic:,.0f}/mo basic**; "
+                    f"employer-loaded (×{PAYROLL_LOAD_FACTOR}) = **₹{monthly_loaded:,.0f}/mo**.\n"
+                    f"- **Payroll burn:** ₹{current_gross:,.0f}/mo → **₹{new_gross:,.0f}/mo** "
+                    f"(-{pct:.1f}%).\n"
+                    f"- **{horizon}-day payroll saving of this reduction:** ₹{window_saving:,.0f}.\n"
+                    f"- **Model impact ({horizon}d):** liquidity {before.get('liquidity_90d', 0):,.0f} → "
+                    f"{after.get('liquidity_90d', 0):,.0f} ({deltas.get('liquidity_change', 0):+,.0f}); "
+                    f"runway {before.get('runway_days', 0)} → {after.get('runway_days', 0)} days."
+                )
             new_gross = current_gross + monthly_loaded
             window_cost = monthly_loaded * (horizon / 30.0)
             return (

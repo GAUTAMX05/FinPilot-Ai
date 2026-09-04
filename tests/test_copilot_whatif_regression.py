@@ -111,6 +111,23 @@ def test_scenario_parser_extracts_real_numbers():
     print("[PASSED] parser extracts headcount/salary/horizon exactly")
 
 
+FIRE_PROMPT = "What if we fire 4 engineer"
+
+
+def test_fire_scenario_reduces_payroll_not_expense():
+    """Firing must parse as negative headcount (saving), never as an expense."""
+    fire = digital_twin_service.run_what_if_scenario(FIRE_PROMPT)
+    assert fire["action"]["headcount"] == -4, f"got {fire['action']['headcount']}"
+    assert fire["deltas"]["liquidity_change"] > 0, "firing must improve liquidity"
+
+    text = _chat(FIRE_PROMPT)
+    assert "Reduce 4" in text
+    assert "340,000" in text  # 4 x 85000 default basic
+    assert "Disburse planned expense" not in text
+    assert "tightens liquidity runway" not in text
+    print("[PASSED] firing reduces payroll; no fabricated expense")
+
+
 def test_reasoning_quick_buttons_all_distinct():
     """All five Reasoning Queries quick-buttons must return distinct grounded text."""
     prompts = [

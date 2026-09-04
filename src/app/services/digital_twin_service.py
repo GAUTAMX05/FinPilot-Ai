@@ -433,7 +433,9 @@ class FinancialDigitalTwin:
         score_after = round(max(10.0, min(100.0, score_before - score_penalty)), 1)
         score_delta = round(score_after - score_before, 1)
 
-        # Determine recommendation verdict
+        # Determine recommendation verdict (summaries respect the sign of the
+        # liquidity impact so savings actions are never described as tightening).
+        improves = liquidity_delta >= 0
         if score_after >= 75 and liquidity_after >= before_state["cash_position"]["safe_liquidity_threshold"]:
             verdict = "APPROVED_SAFE"
             verdict_badge = "🟢 SAFE TO EXECUTE"
@@ -441,7 +443,12 @@ class FinancialDigitalTwin:
         elif score_after >= 60:
             verdict = "REQUIRES_GOVERNANCE"
             verdict_badge = "🟡 EXECUTIVE REVIEW ADVISED"
-            verdict_summary = "Action increases burn velocity and tightens liquidity runway. Recommended to pace across quarterly milestones."
+            verdict_summary = (
+                "Action frees liquidity and eases runway pressure, but a projected budget "
+                "deficit still needs executive review before proceeding."
+                if improves else
+                "Action increases burn velocity and tightens liquidity runway. Recommended to pace across quarterly milestones."
+            )
         else:
             verdict = "REJECT_RISK"
             verdict_badge = "🔴 DEFICIT RISK DETECTED"
@@ -513,8 +520,25 @@ class FinancialDigitalTwin:
                 "description": f"{dept} spending rate continues at +12% above benchmark pace for {horizon} days",
             }
 
-        # 3. Check for headcount hiring
-        elif any(w in s_lower for w in ["hire", "headcount", "recruit", "engineers", "employee", "team"]):
+        # 3a. Check for headcount REDUCTION (fire / layoff / downsize).
+        # Must precede the hiring branch; yields a negative headcount delta
+        # (payroll saving) rather than an expense.
+        elif any(w in s_lower for w in ["fire", "lay off", "layoff", "let go", "downsize",
+                                        "retrench", "reduce headcount", "cut headcount",
+                                        "reduce team", "cut team"]):
+            count = -_parse_headcount(scenario_text)
+            salary = _parse_monthly_salary(scenario_text)
+            horizon = _parse_horizon_days(scenario_text)
+            action = {
+                "type": "HEADCOUNT_GROWTH",
+                "headcount": count,
+                "avg_salary": salary,
+                "horizon_days": horizon,
+                "description": f"Reduce {abs(count)} engineers (payroll saving ₹{abs(count) * salary:,.0f}/mo basic)",
+            }
+
+        # 3b. Check for headcount hiring
+        elif any(w in s_lower for w in ["hire", "headcount", "recruit", "engineer", "employee", "team"]):
             count = _parse_headcount(scenario_text)
             salary = _parse_monthly_salary(scenario_text)
             horizon = _parse_horizon_days(scenario_text)
