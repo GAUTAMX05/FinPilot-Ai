@@ -158,6 +158,29 @@ def test_verifier_flags_unmatched_figures():
     print("[PASSED] verifier accepts anchors, flags invented figures")
 
 
+def test_provider_rejection_hint_is_safe_and_specific(monkeypatch):
+    """A provider HTTP rejection surfaces provider+status, never bodies/keys."""
+    monkeypatch.setenv("OPENCODE_API_KEY", "test-key-1234567890")
+    monkeypatch.setenv("LLM_PROVIDER", "opencode")
+
+    class Forbidden:
+        status_code = 403
+        text = '{"error": "forbidden"}'
+        def json(self):
+            return {"error": "forbidden"}
+
+    monkeypatch.setattr(httpx, "post", lambda *a, **k: Forbidden())
+    res = client.post("/v1/agent/chat",
+                      json={"message": QUESTION, "thread_id": "t-mock-403"},
+                      headers=_cfo_headers())
+    body = res.json()
+    assert body["status"] == "llm_unavailable"
+    assert "opencode API, HTTP 403" in body["response"]
+    assert "test-key" not in body["response"]
+    assert '{"error"' not in body["response"]
+    print("[PASSED] provider rejection hint is safe + specific")
+
+
 if __name__ == "__main__":
     test_verifier_flags_unmatched_figures()
     print("mocked tests run via: pytest tests/test_grounded_copilot_regression.py -v")

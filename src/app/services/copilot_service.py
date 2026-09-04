@@ -366,6 +366,28 @@ def verify_figures(answer: str, ctx: Dict[str, Any]) -> Tuple[str, List[str]]:
     return answer.rstrip() + box + note, warnings
 
 
+def _failure_hint(exc: Exception, endpoint: Dict[str, str]) -> str:
+    """Safe one-line cause for the user message: provider + HTTP status or
+    error class only. Never echoes bodies, keys, or tracebacks."""
+    provider = (endpoint or {}).get("provider", "llm")
+    m = re.search(r"LLM HTTP (\d{3})", str(exc))
+    if m:
+        code = m.group(1)
+        hint = {"401": " (unauthorized — the API key was rejected)",
+                "403": " (forbidden — request blocked; key may lack access)",
+                "404": " (endpoint or model not found)",
+                "429": " (rate-limited — retry shortly)",
+                "500": " (provider error)", "502": " (provider error)",
+                "503": " (provider overloaded)"}.get(code, "")
+        return f"({provider} API, HTTP {code}{hint})"
+    name = type(exc).__name__
+    if "Timeout" in name:
+        return "(request timed out)"
+    if "Connect" in name or "Network" in name or "DNS" in name:
+        return "(could not reach the AI service)"
+    return f"({name})"
+
+
 def _policy_note(question: str) -> str:
     """Deterministic policy line. The model never declares policy status."""
     amounts = [float(m.replace(",", "")) for m in
@@ -483,14 +505,14 @@ class GroundedCopilot:
                 user_id="sys_copilot", user_name="Grounded Copilot", role=user_role,
                 action="AI_COPILOT_LLM_FAILED", entity="AI_COPILOT", entity_id=trace_id,
                 details=f"LLM call failed: {type(e).__name__}", risk_level="MEDIUM")
+            cause = _failure_hint(e, endpoint)
             return {"trace_id": trace_id, "intent": "CAUSAL_ANALYSIS",
                     "response": (
                         "## Analysis Couldn't Complete — Please Retry\n\n"
-                        "The AI analysis request failed before producing an answer "
-                        f"({type(e).__name__}). No partial or estimated figures are shown "
-                        "because they could be wrong.\n\n"
-                        "Please retry in a moment. If this persists, check the AI status page. "
-                        f"(Trace `{trace_id}`)"),
+                        f"The AI analysis request failed {cause} before producing an answer. "
+                        "No partial or estimated figures are shown because they could be wrong.\n\n"
+                        "Please retry in a moment. If this persists, check that a valid LLM key "
+                        f"is configured (AI status page). (Trace `{trace_id}`)"),
                     "status": "llm_unavailable", "llm_used": False,
                     "mode": "error",
                     "suggested_actions": ["Retry analysis", "Check AI status"],
