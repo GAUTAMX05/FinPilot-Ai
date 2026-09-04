@@ -239,6 +239,29 @@ def test_model_not_served_hint(monkeypatch):
     print("[PASSED] unserved-model hint names the setting, leaks nothing")
 
 
+def test_billing_error_hint(monkeypatch):
+    """A CreditsError must point at billing, never echo provider body/URLs."""
+    monkeypatch.setenv("OPENCODE_API_KEY", "test-key-1234567890")
+    monkeypatch.setenv("LLM_PROVIDER", "opencode")
+
+    class BillingErr:
+        status_code = 401
+        text = '{"type":"error","error":{"type":"CreditsError","message":"No payment method. Add one here: https://example.invalid/billing"}}'
+        def json(self):
+            return {"error": "CreditsError"}
+
+    monkeypatch.setattr(httpx, "post", lambda *a, **k: BillingErr())
+    res = client.post("/v1/agent/chat",
+                      json={"message": QUESTION, "thread_id": "t-mock-billing"},
+                      headers=_cfo_headers())
+    body = res.json()
+    assert body["status"] == "llm_unavailable"
+    assert "no payment method" in body["response"]
+    assert "test-key" not in body["response"]
+    assert "example.invalid" not in body["response"]
+    print("[PASSED] billing error hint is actionable, leaks nothing")
+
+
 if __name__ == "__main__":
     test_verifier_flags_unmatched_figures()
     print("mocked tests run via: pytest tests/test_grounded_copilot_regression.py -v")

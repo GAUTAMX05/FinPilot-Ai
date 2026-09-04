@@ -380,6 +380,9 @@ def _failure_hint(exc: Exception, endpoint: Dict[str, str]) -> str:
     msg = str(exc)
     if "not supported by provider" in msg:
         return "(model not served — check the OPENCODE_MODEL setting)"
+    if "CreditsError" in msg or "No payment method" in msg:
+        return ("(account billing — the provider reports no payment method on file; "
+                "add one in the provider billing dashboard, then retry)")
     m = re.search(r"LLM HTTP (\d{3})", msg)
     if m:
         code = m.group(1)
