@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """AI + DB readiness status (safe: no secrets)."""
+import os
 from fastapi import APIRouter
 from src.app.services.llm_provider import llm_status
 from src.app.core.database import get_db_stats
@@ -11,7 +12,9 @@ router = APIRouter()
 @router.get("/ai/status", tags=["Health & Observability"])
 def ai_status():
     """Which LLM provider is active (OpenAI/OpenCode/Groq/Anthropic/simulation)."""
-    return llm_status()
+    status = llm_status()
+    status["build"] = os.getenv("RENDER_GIT_COMMIT", "")[:7] or "local"
+    return status
 
 
 @router.get("/db/status", tags=["Health & Observability"])

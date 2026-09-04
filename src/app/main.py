@@ -78,6 +78,7 @@ def health_check():
         "status": "healthy",
         "app": "FinPilot AI — Autonomous Finance Controller for Razorpay Merchants",
         "version": settings.VERSION,
+        "build": os.getenv("RENDER_GIT_COMMIT", "")[:7] or "local",
         "environment": settings.ENVIRONMENT,
         "timestamp": datetime.utcnow().isoformat()
     }
