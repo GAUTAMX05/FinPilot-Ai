@@ -181,6 +181,64 @@ def test_provider_rejection_hint_is_safe_and_specific(monkeypatch):
     print("[PASSED] provider rejection hint is safe + specific")
 
 
+def _clean_llm_env(monkeypatch):
+    for var in ("OPENAI_API_KEY", "OPENCODE_API_KEY", "GROQ_API_KEY",
+                "ANTHROPIC_API_KEY", "LLM_API_KEY", "OPENAI_MODEL",
+                "OPENCODE_MODEL", "LLM_MODEL", "OPENAI_BASE_URL",
+                "OPENCODE_BASE_URL", "LLM_BASE_URL", "LLM_PROVIDER",
+                "SUPERVISOR_MODEL", "SUB_AGENT_MODEL"):
+        monkeypatch.delenv(var, raising=False)
+    for attr in ("OPENAI_API_KEY", "OPENCODE_API_KEY", "GROQ_API_KEY",
+                 "ANTHROPIC_API_KEY", "LLM_API_KEY", "OPENAI_MODEL",
+                 "OPENCODE_MODEL", "LLM_MODEL", "OPENAI_BASE_URL",
+                 "OPENCODE_BASE_URL", "LLM_BASE_URL", "SUPERVISOR_MODEL",
+                 "SUB_AGENT_MODEL"):
+        monkeypatch.setattr(copilot.settings, attr, "", raising=False)
+
+
+def test_opencode_default_model_is_zen_served(monkeypatch):
+    """Bare gpt-4o-mini is not in Zen's catalogue; default must be served."""
+    from src.app.services.llm_provider import get_llm_config
+    _clean_llm_env(monkeypatch)
+    monkeypatch.setenv("OPENCODE_API_KEY", "test-key-1234567890")
+    cfg = get_llm_config("supervisor")
+    assert cfg["provider"] == "opencode" and cfg["configured"] is True
+    assert cfg["model"] == "gpt-5-nano", f"got {cfg['model']}"
+    print("[PASSED] opencode default model is zen-served")
+
+
+def test_explicit_opencode_model_wins(monkeypatch):
+    """An explicit OPENCODE_MODEL must override the default."""
+    from src.app.services.llm_provider import get_llm_config
+    _clean_llm_env(monkeypatch)
+    monkeypatch.setenv("OPENCODE_API_KEY", "test-key-1234567890")
+    monkeypatch.setenv("OPENCODE_MODEL", "gpt-5.4-mini")
+    assert get_llm_config("supervisor")["model"] == "gpt-5.4-mini"
+    print("[PASSED] explicit OPENCODE_MODEL respected")
+
+
+def test_model_not_served_hint(monkeypatch):
+    """A ModelError payload must point at the model setting, not just 401."""
+    monkeypatch.setenv("OPENCODE_API_KEY", "test-key-1234567890")
+    monkeypatch.setenv("LLM_PROVIDER", "opencode")
+
+    class ModelErr:
+        status_code = 401
+        text = '{"type":"error","error":{"type":"ModelError","message":"Model x is not supported"}}'
+        def json(self):
+            return {"error": "ModelError"}
+
+    monkeypatch.setattr(httpx, "post", lambda *a, **k: ModelErr())
+    res = client.post("/v1/agent/chat",
+                      json={"message": QUESTION, "thread_id": "t-mock-model"},
+                      headers=_cfo_headers())
+    body = res.json()
+    assert body["status"] == "llm_unavailable"
+    assert "OPENCODE_MODEL" in body["response"]
+    assert "test-key" not in body["response"]
+    print("[PASSED] unserved-model hint names the setting, leaks nothing")
+
+
 if __name__ == "__main__":
     test_verifier_flags_unmatched_figures()
     print("mocked tests run via: pytest tests/test_grounded_copilot_regression.py -v")

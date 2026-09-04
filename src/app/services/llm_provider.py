@@ -51,7 +51,10 @@ def get_llm_config(purpose: str = "supervisor") -> Dict[str, Any]:
 
     opencode_key = os.getenv("OPENCODE_API_KEY", "") or settings.OPENCODE_API_KEY
     opencode_base = _clean(os.getenv("OPENCODE_BASE_URL", "")) or settings.OPENCODE_BASE_URL or "https://opencode.ai/zen/v1"
-    opencode_model = _clean(os.getenv("OPENCODE_MODEL", "")) or generic_model or openai_model or "gpt-4o-mini"
+    # Zen serves its own model catalogue (no gpt-4o-mini): default to a small
+    # served model unless explicitly overridden. Explicit config always wins.
+    opencode_model = (_clean(os.getenv("OPENCODE_MODEL", "")) or settings.OPENCODE_MODEL
+                      or generic_model or "gpt-5-nano")
 
     groq_key = os.getenv("GROQ_API_KEY", "") or settings.GROQ_API_KEY
     groq_model = _clean(os.getenv("GROQ_MODEL", "")) or "llama-3.3-70b-versatile"

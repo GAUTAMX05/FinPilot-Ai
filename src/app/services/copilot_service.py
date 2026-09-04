@@ -296,7 +296,14 @@ def call_llm(messages: List[Dict[str, str]], endpoint: Dict[str, str]) -> str:
     )
     elapsed = round(time.perf_counter() - started, 2)
     if resp.status_code != 200:
-        raise RuntimeError(f"LLM HTTP {resp.status_code}: {resp.text[:200]}")
+        body = (resp.text or "")[:300]
+        # Surface "model not served" distinctly: it means the key works but the
+        # model name isn't in the provider catalogue (check OPENCODE_MODEL).
+        if "not supported" in body.lower():
+            raise RuntimeError(
+                f"LLM HTTP {resp.status_code}: model '{endpoint['model']}' "
+                f"not supported by provider; check OPENCODE_MODEL")
+        raise RuntimeError(f"LLM HTTP {resp.status_code}: {body[:200]}")
     try:
         content = resp.json()["choices"][0]["message"]["content"]
     except (KeyError, IndexError, TypeError, ValueError) as e:
@@ -370,7 +377,10 @@ def _failure_hint(exc: Exception, endpoint: Dict[str, str]) -> str:
     """Safe one-line cause for the user message: provider + HTTP status or
     error class only. Never echoes bodies, keys, or tracebacks."""
     provider = (endpoint or {}).get("provider", "llm")
-    m = re.search(r"LLM HTTP (\d{3})", str(exc))
+    msg = str(exc)
+    if "not supported by provider" in msg:
+        return "(model not served — check the OPENCODE_MODEL setting)"
+    m = re.search(r"LLM HTTP (\d{3})", msg)
     if m:
         code = m.group(1)
         hint = {"401": " (unauthorized — the API key was rejected)",

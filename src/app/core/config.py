@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     # NOTE: API keys must come from the environment. Never commit real keys.
     OPENCODE_API_KEY: str = os.getenv("OPENCODE_API_KEY", "")
     OPENCODE_BASE_URL: str = os.getenv("OPENCODE_BASE_URL", "https://opencode.ai/zen/v1")
-    OPENCODE_MODEL: str = os.getenv("OPENCODE_MODEL", "gpt-4o-mini")
+    OPENCODE_MODEL: str = os.getenv("OPENCODE_MODEL", "")
     
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     OPENAI_BASE_URL: str = os.getenv("OPENAI_BASE_URL", "")
