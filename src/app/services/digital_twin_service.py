@@ -125,6 +125,27 @@ def _parse_delay_days(text: str, default: int = 14) -> int:
     return default
 
 
+def _parse_multiplier(text: str, default: float = 1.15) -> float:
+    t = text.lower()
+    m = re.search(r"(\d+(?:\.\d+)?)\s*x\b", t)
+    if m:
+        try:
+            val = float(m.group(1))
+            if 0.1 <= val <= 10.0:
+                return val
+        except ValueError:
+            pass
+    m = re.search(r"\+(\d+(?:\.\d+)?)\s*%", t)
+    if m:
+        try:
+            val = 1.0 + (float(m.group(1)) / 100.0)
+            if 0.1 <= val <= 10.0:
+                return val
+        except ValueError:
+            pass
+    return default
+
+
 class FinancialDigitalTwin:
     """
     Live simulate-able in-memory financial digital twin of the enterprise.
@@ -546,17 +567,18 @@ class FinancialDigitalTwin:
             }
 
         # 2. Check for spending rate / burn rate continuation
-        elif any(w in s_lower for w in ["stay", "rate", "pace", "same", "continue"]) and any(w in s_lower for w in ["engineering", "marketing", "burn"]):
+        elif any(w in s_lower for w in ["stay", "rate", "pace", "same", "continue", "multiplier", "velocity"]) and any(w in s_lower for w in ["engineering", "marketing", "burn", "spend"]):
             dept = _parse_department(scenario_text, default="Operations")
             if dept == "Operations" and "burn" in s_lower and "engineering" in s_lower:
                 dept = "Engineering"
             horizon = _parse_horizon_days(scenario_text)
+            mult = _parse_multiplier(scenario_text, default=1.12)
             action = {
                 "type": "BURN_RATE_SHIFT",
                 "department": dept,
-                "multiplier": 1.12,
+                "multiplier": mult,
                 "horizon_days": horizon,
-                "description": f"{dept} spending rate continues at +12% above benchmark pace for {horizon} days",
+                "description": f"{dept} spending rate continues at {mult:.2f}x ({'+' if mult >= 1.0 else ''}{round((mult-1)*100)}%) for {horizon} days",
             }
 
         # 3a. Check for headcount REDUCTION (fire / layoff / downsize).

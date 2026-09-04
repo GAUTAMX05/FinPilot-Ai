@@ -828,7 +828,7 @@
                   <span>Spend Velocity Multiplier</span>
                   <span id="valSpendMult" class="mono text-blue-400 font-bold">1.15x (+15%)</span>
                 </div>
-                <input type="range" id="sliderSpendMult" min="0.5" max="2.0" step="0.05" value="1.15" oninput="updateSandboxSliders()" class="w-full cursor-pointer accent-blue-500" />
+                <input type="range" id="sliderSpendMult" min="0.5" max="2.0" step="0.05" value="1.15" oninput="updateSandboxSliders('spend')" class="w-full cursor-pointer accent-blue-500" />
                 <span class="text-[10px] text-slate-500 block">Modifies department burn velocity over 90 days.</span>
               </div>
 
@@ -837,7 +837,7 @@
                   <span>Vendor Payment Delay</span>
                   <span id="valDelayDays" class="mono text-amber-400 font-bold">14 Days</span>
                 </div>
-                <input type="range" id="sliderDelayDays" min="0" max="30" step="1" value="14" oninput="updateSandboxSliders()" class="w-full cursor-pointer accent-amber-500" />
+                <input type="range" id="sliderDelayDays" min="0" max="30" step="1" value="14" oninput="updateSandboxSliders('delay')" class="w-full cursor-pointer accent-amber-500" />
                 <span class="text-[10px] text-slate-500 block">Pushes non-essential disbursements out by N days.</span>
               </div>
 
@@ -846,7 +846,7 @@
                   <span>Headcount Expansion (Hires)</span>
                   <span id="valHeadcount" class="mono text-purple-400 font-bold">+3 Engineers</span>
                 </div>
-                <input type="range" id="sliderHeadcount" min="0" max="10" step="1" value="3" oninput="updateSandboxSliders()" class="w-full cursor-pointer accent-purple-500" />
+                <input type="range" id="sliderHeadcount" min="0" max="10" step="1" value="3" oninput="updateSandboxSliders('headcount')" class="w-full cursor-pointer accent-purple-500" />
                 <span class="text-[10px] text-slate-500 block">Simulates ₹85K/mo basic + benefits per recruit.</span>
               </div>
             </div>
@@ -3601,26 +3601,67 @@
       }
     }
 
-    function updateSandboxSliders() {
-      const mult = document.getElementById("sliderSpendMult").value;
-      const delay = document.getElementById("sliderDelayDays").value;
-      const hires = document.getElementById("sliderHeadcount").value;
+    function updateSandboxSliders(source) {
+      const multEl = document.getElementById("sliderSpendMult");
+      const delayEl = document.getElementById("sliderDelayDays");
+      const hiresEl = document.getElementById("sliderHeadcount");
+      const mult = multEl ? parseFloat(multEl.value) : 1.15;
+      const delay = delayEl ? parseInt(delayEl.value, 10) : 14;
+      const hires = hiresEl ? parseInt(hiresEl.value, 10) : 3;
 
-      document.getElementById("valSpendMult").innerText = `${mult}x (${mult > 1 ? '+' : ''}${Math.round((mult-1)*100)}%)`;
-      document.getElementById("valDelayDays").innerText = `${delay} Days`;
-      document.getElementById("valHeadcount").innerText = `+${hires} Engineers`;
+      const valSpend = document.getElementById("valSpendMult");
+      const valDelay = document.getElementById("valDelayDays");
+      const valHead = document.getElementById("valHeadcount");
+
+      if (valSpend) valSpend.innerText = `${mult.toFixed(2)}x (${mult > 1 ? '+' : ''}${Math.round((mult-1)*100)}%)`;
+      if (valDelay) valDelay.innerText = `${delay} Days`;
+      if (valHead) valHead.innerText = `+${hires} Engineers`;
+
+      const input = document.getElementById("sandboxScenarioInput");
+      if (!input) return;
+
+      if (source === 'spend') {
+        input.value = `What if Engineering spending rate stays at ${mult.toFixed(2)}x for 60 more days?`;
+      } else if (source === 'delay') {
+        input.value = `What if we delay vendor payments by ${delay} days — does it fix our cash position?`;
+      } else if (source === 'headcount') {
+        input.value = `What if we hire ${hires} senior engineers in Q3?`;
+      }
     }
 
     function setWhatIfPreset(scenarioText) {
-      document.getElementById("sandboxScenarioInput").value = scenarioText;
+      const input = document.getElementById("sandboxScenarioInput");
+      if (input) input.value = scenarioText;
+
+      const lower = (scenarioText || "").toLowerCase();
+      if (lower.includes("burn") || lower.includes("rate") || lower.includes("spend")) {
+        const s = document.getElementById("sliderSpendMult");
+        if (s) s.value = 1.15;
+      } else if (lower.includes("delay") || lower.includes("vendor")) {
+        const s = document.getElementById("sliderDelayDays");
+        if (s) s.value = 14;
+      } else if (lower.includes("hire") || lower.includes("headcount")) {
+        const s = document.getElementById("sliderHeadcount");
+        if (s) s.value = 3;
+      }
+      updateSandboxSliders();
+
       handleWhatIfSandboxSubmit(new Event("submit"));
     }
 
     async function handleWhatIfSandboxSubmit(e) {
       if (e) e.preventDefault();
       const input = document.getElementById("sandboxScenarioInput");
-      const scenario = input ? input.value.trim() : "What if Engineering spending rate stays the same for 60 more days?";
-      if (!scenario) return;
+      const scenario = input && input.value.trim() ? input.value.trim() : "What if Engineering spending rate stays the same for 60 more days?";
+      
+      const form = input ? input.closest("form") : null;
+      const btn = form ? form.querySelector("button[type='submit']") : null;
+      const originalBtnHTML = btn ? btn.innerHTML : "";
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Simulating...</span>`;
+        if (window.lucide) lucide.createIcons();
+      }
 
       showToast("Running Digital Twin 90-day simulation...");
       try {
@@ -3630,47 +3671,88 @@
           body: JSON.stringify({ scenario: scenario })
         });
         const data = await res.json();
-        if (!data.success) throw new Error("Simulation failed");
+        if (!data.success || !data.simulation) throw new Error(data.detail || "Simulation failed");
 
         const sim = data.simulation;
-        const b = sim.before;
-        const a = sim.after;
-        const d = sim.deltas;
+        const b = sim.before || {};
+        const a = sim.after || {};
+        const d = sim.deltas || {};
 
         // Update Before / After Matrix
-        document.getElementById("valLiqBefore").innerText = `₹${b.liquidity_90d.toLocaleString()}`;
-        document.getElementById("valLiqAfter").innerText = `₹${a.liquidity_90d.toLocaleString()}`;
-        document.getElementById("deltaLiquidityBadge").innerText = `${d.liquidity_change >= 0 ? '+' : ''}₹${d.liquidity_change.toLocaleString()}`;
-        document.getElementById("deltaLiquidityBadge").className = `font-bold mono ${d.liquidity_change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        const valLiqB = document.getElementById("valLiqBefore");
+        const valLiqA = document.getElementById("valLiqAfter");
+        const deltaLiqBadge = document.getElementById("deltaLiquidityBadge");
+        if (valLiqB) valLiqB.innerText = `₹${(b.liquidity_90d || 0).toLocaleString('en-IN')}`;
+        if (valLiqA) valLiqA.innerText = `₹${(a.liquidity_90d || 0).toLocaleString('en-IN')}`;
+        if (deltaLiqBadge) {
+          const liqChg = d.liquidity_change || 0;
+          deltaLiqBadge.innerText = `${liqChg >= 0 ? '+' : ''}₹${liqChg.toLocaleString('en-IN')}`;
+          deltaLiqBadge.className = `font-bold mono ${liqChg >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        }
 
-        document.getElementById("valRunwayBefore").innerText = `${b.runway_days} Days`;
-        document.getElementById("valRunwayAfter").innerText = `${a.runway_days} Days`;
-        document.getElementById("deltaRunwayBadge").innerText = `${d.runway_days_change >= 0 ? '+' : ''}${d.runway_days_change} Days`;
+        const valRwyB = document.getElementById("valRunwayBefore");
+        const valRwyA = document.getElementById("valRunwayAfter");
+        const deltaRwyBadge = document.getElementById("deltaRunwayBadge");
+        if (valRwyB) valRwyB.innerText = `${b.runway_days || 0} Days`;
+        if (valRwyA) valRwyA.innerText = `${a.runway_days || 0} Days`;
+        if (deltaRwyBadge) {
+          const rwyChg = d.runway_days_change || 0;
+          deltaRwyBadge.innerText = `${rwyChg >= 0 ? '+' : ''}${rwyChg} Days`;
+          deltaRwyBadge.className = `font-bold mono ${rwyChg >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        }
 
-        document.getElementById("valUtilBefore").innerText = `${b.budget_utilization_pct}%`;
-        document.getElementById("valUtilAfter").innerText = `${a.budget_utilization_pct}%`;
+        const valUtB = document.getElementById("valUtilBefore");
+        const valUtA = document.getElementById("valUtilAfter");
+        const deltaUtBadge = document.getElementById("deltaUtilBadge");
+        if (valUtB) valUtB.innerText = `${(b.budget_utilization_pct || 0).toFixed(1)}%`;
+        if (valUtA) valUtA.innerText = `${(a.budget_utilization_pct || 0).toFixed(1)}%`;
+        if (deltaUtBadge) {
+          const utChg = d.utilization_pct_change || 0;
+          deltaUtBadge.innerText = `${utChg >= 0 ? '+' : ''}${utChg.toFixed(1)}%`;
+        }
 
-        document.getElementById("valScoreBefore").innerText = `${b.decision_score} / 100`;
-        document.getElementById("valScoreAfter").innerText = `${a.decision_score} / 100`;
+        const valScB = document.getElementById("valScoreBefore");
+        const valScA = document.getElementById("valScoreAfter");
+        const deltaScBadge = document.getElementById("deltaScoreBadge");
+        if (valScB) valScB.innerText = `${(b.decision_score || 0).toFixed(1)} / 100`;
+        if (valScA) valScA.innerText = `${(a.decision_score || 0).toFixed(1)} / 100`;
+        if (deltaScBadge) {
+          const scChg = d.decision_score_change || 0;
+          deltaScBadge.innerText = `${scChg >= 0 ? '+' : ''}${scChg.toFixed(1)}`;
+          deltaScBadge.className = `font-bold mono ${scChg >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        }
 
         const vBadge = document.getElementById("dtVerdictBadge");
         if (vBadge) {
-          vBadge.innerText = sim.verdict_badge;
+          vBadge.innerText = sim.verdict_badge || (sim.verdict === 'APPROVED_SAFE' ? '🟢 SAFE TO EXECUTE' : '🟡 REQUIRES GOVERNANCE');
           vBadge.className = `px-2.5 py-0.5 rounded-full text-xs font-bold ${sim.verdict === 'APPROVED_SAFE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : (sim.verdict === 'REQUIRES_GOVERNANCE' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20')}`;
         }
-        document.getElementById("dtVerdictText").innerText = sim.verdict_summary;
-        document.getElementById("valTraceId").innerText = data.trace_id || "TRC-SIMULATED";
+
+        const vText = document.getElementById("dtVerdictText");
+        if (vText) vText.innerText = sim.verdict_summary || "Simulation completed.";
+
+        const trc = document.getElementById("valTraceId");
+        if (trc) trc.innerText = data.trace_id || "TRC-SIMULATED";
 
         // Render Comparative Chart
-        renderDigitalTwinChart(
-          sim.trajectory_chart.labels,
-          sim.trajectory_chart.baseline_cash,
-          sim.trajectory_chart.projected_cash
-        );
+        if (sim.trajectory_chart) {
+          renderDigitalTwinChart(
+            sim.trajectory_chart.labels || ["Day 1", "Day 30", "Day 60", "Day 90"],
+            sim.trajectory_chart.baseline_cash || [],
+            sim.trajectory_chart.projected_cash || []
+          );
+        }
 
-        showToast(`Simulation complete: ${sim.verdict_badge}`);
+        showToast(`Simulation complete: ${sim.verdict_badge || 'Success'}`);
       } catch (err) {
-        showToast(err.message, true);
+        console.error("Simulation error:", err);
+        showToast(err.message || "Simulation failed", true);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalBtnHTML;
+          if (window.lucide) lucide.createIcons();
+        }
       }
     }
 
