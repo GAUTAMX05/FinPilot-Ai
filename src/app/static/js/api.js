@@ -40,8 +40,13 @@ async function apiFetch(endpoint, options = {}) {
   try {
     const res = await fetch(fullUrl, { ...options, headers, signal: controller.signal });
     if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      console.warn(`[apiFetch] ${res.status} on ${fullUrl}:`, text.slice(0, 300));
+      // Log errors from a CLONE: reading res.text() directly would consume
+      // the body stream and break the caller's res.json() with
+      // "body stream already read".
+      try {
+        const preview = await res.clone().text();
+        console.warn(`[apiFetch] ${res.status} on ${fullUrl}:`, preview.slice(0, 300));
+      } catch (logErr) { /* logging must never break the response */ }
     }
     return res;
   } catch (err) {

@@ -5884,6 +5884,9 @@
           })
         });
         const data = await res.json();
+        if (!res.ok || data.success === false) {
+          throw new Error(data.detail || data.message || `Reallocation failed (HTTP ${res.status}).`);
+        }
         showToast("Budget reallocated successfully!");
         closeReallocateModal();
         loadBudgetsData();
