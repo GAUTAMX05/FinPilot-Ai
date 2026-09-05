@@ -46,7 +46,7 @@ from src.app.services.audit_service import audit_service
 
 logger = logging.getLogger("GroundedCopilot")
 
-LLM_TIMEOUT_S = 45.0
+LLM_TIMEOUT_S = 75.0
 LLM_CONNECT_TIMEOUT_S = 10.0
 LLM_MAX_TOKENS = 900
 LLM_TEMPERATURE = 0.2
@@ -286,8 +286,12 @@ def build_grounded_messages(question: str, ctx: Dict[str, Any]) -> List[Dict[str
     return [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
 
-def call_llm(messages: List[Dict[str, str]], endpoint: Dict[str, str]) -> str:
-    """POSTs to the chat-completions endpoint. Raises on any failure."""
+def call_llm(messages: List[Dict[str, str]], endpoint: Dict[str, str]) -> Tuple[str, Dict[str, Any]]:
+    """POSTs to the chat-completions endpoint. Raises on any failure.
+
+    Returns (content, meta) where meta carries finish_reason + token usage
+    so truncation/cost is observable via audit logs and agent_steps.
+    """
     started = time.perf_counter()
     logger.info("[GroundedCopilot] LLM call provider=%s model=%s prompt_chars=%d timeout=%ss max_tokens=%d",
                 endpoint["provider"], endpoint["model"],
@@ -311,14 +315,24 @@ def call_llm(messages: List[Dict[str, str]], endpoint: Dict[str, str]) -> str:
                 f"not supported by provider; check OPENCODE_MODEL")
         raise RuntimeError(f"LLM HTTP {resp.status_code}: {body[:200]}")
     try:
-        content = resp.json()["choices"][0]["message"]["content"]
+        payload = resp.json()
+        choice = payload["choices"][0]
+        content = choice["message"]["content"]
+        usage = payload.get("usage", {}) or {}
+        meta = {
+            "finish_reason": choice.get("finish_reason", "unknown"),
+            "prompt_tokens": usage.get("prompt_tokens"),
+            "completion_tokens": usage.get("completion_tokens"),
+            "elapsed_s": elapsed,
+        }
     except (KeyError, IndexError, TypeError, ValueError) as e:
         raise RuntimeError(f"LLM bad payload: {e}")
     if not content or not str(content).strip():
         raise RuntimeError("LLM empty response")
-    logger.info("[GroundedCopilot] LLM ok provider=%s model=%s elapsed=%ss chars=%d",
-                endpoint["provider"], endpoint["model"], elapsed, len(content))
-    return str(content).strip()
+    logger.info("[GroundedCopilot] LLM ok provider=%s model=%s elapsed=%ss chars=%d finish=%s",
+                endpoint["provider"], endpoint["model"], elapsed, len(content),
+                meta["finish_reason"])
+    return str(content).strip(), meta
 
 
 def _extract_rupee_figures(text: str) -> List[float]:
@@ -528,7 +542,7 @@ class GroundedCopilot:
         rate_limiter.check_rate_limit(
             client_key=f"copilot:{user_id}", estimated_tokens=prompt_est + LLM_MAX_TOKENS)
         try:
-            answer = call_llm(messages, endpoint)
+            answer, llm_meta = call_llm(messages, endpoint)
         except Exception as e:
             logger.error("[GroundedCopilot] LLM call failed (trace %s): %s: %s",
                          trace_id, type(e).__name__, str(e)[:200])
@@ -555,10 +569,15 @@ class GroundedCopilot:
             user_id="sys_copilot", user_name="Grounded Copilot", role=user_role,
             action="AI_COPILOT_GROUNDED_ANALYSIS", entity="AI_COPILOT", entity_id=trace_id,
             details=f"Q: '{q[:80]}' provider={endpoint['provider']} model={endpoint['model']} "
+                    f"finish={llm_meta.get('finish_reason')} "
+                    f"tokens={llm_meta.get('prompt_tokens')}/{llm_meta.get('completion_tokens')} "
                     f"unverified_figures={len(unverified)}",
             risk_level="LOW")
         steps.append({"agent": "VerifierAgent",
                       "provider": endpoint["provider"], "model": endpoint["model"],
+                      "finish_reason": llm_meta.get("finish_reason"),
+                      "prompt_tokens": llm_meta.get("prompt_tokens"),
+                      "completion_tokens": llm_meta.get("completion_tokens"),
                       "unverified_figures": unverified,
                       "timestamp": datetime.utcnow().isoformat()})
         return {"trace_id": trace_id, "intent": "CAUSAL_ANALYSIS",

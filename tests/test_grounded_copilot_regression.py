@@ -84,7 +84,9 @@ def test_prompt_contains_question_and_live_data(monkeypatch):
     assert "cost" in blob.lower() or "monthly" in blob.lower()
 
     ep = {"url": "https://x.test/v1/chat/completions", "key": "k", "model": "m", "provider": "t"}
-    assert copilot.call_llm(messages, ep) == "Grounded test answer."
+    text, meta = copilot.call_llm(messages, ep)
+    assert text == "Grounded test answer."
+    assert meta["finish_reason"] == "unknown"
     assert captured["max_tokens"] == copilot.LLM_MAX_TOKENS
     assert captured["auth"] is True
     print("[PASSED] prompt carries question + live data; call bounded + authed")
