@@ -345,6 +345,73 @@ def test_completion_budget_field_per_provider():
     print("[PASSED] provider-aware completion budget")
 
 
+def test_truncated_answer_is_continued_once(monkeypatch):
+    """finish_reason=length triggers exactly one continuation, spliced in."""
+    monkeypatch.setenv("OPENCODE_API_KEY", "test-key-1234567890")
+    monkeypatch.setenv("LLM_PROVIDER", "opencode")
+    calls = {"n": 0}
+
+    class Part:
+        status_code = 200
+        text = ""
+        def __init__(self, content, finish):
+            self._p = {"choices": [{"message": {"content": content},
+                                    "finish_reason": finish}],
+                       "usage": {"prompt_tokens": 10, "completion_tokens": 5}}
+        def json(self):
+            return self._p
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return Part("Cloud spend is driven by", "length")
+        return Part("vendor run-rate.", "stop")
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    res = client.post("/v1/agent/chat",
+                      json={"message": QUESTION, "thread_id": "t-mock-cont"},
+                      headers=_cfo_headers())
+    body = res.json()
+    assert calls["n"] == 2, f"expected 1 retry, got {calls['n'] - 1}"
+    assert "Cloud spend is driven by vendor run-rate." in body["response"]
+    steps = [s for s in body.get("agent_steps", []) if s.get("agent") == "VerifierAgent"]
+    assert steps and steps[0].get("continued") is True
+    print("[PASSED] truncated answer continued once and spliced")
+
+
+def test_continuation_failure_keeps_first_part(monkeypatch):
+    """If the continuation call dies, the verified first part still returns."""
+    monkeypatch.setenv("OPENCODE_API_KEY", "test-key-1234567890")
+    monkeypatch.setenv("LLM_PROVIDER", "opencode")
+    calls = {"n": 0}
+
+    class Part:
+        status_code = 200
+        text = ""
+        def __init__(self, content, finish):
+            self._p = {"choices": [{"message": {"content": content},
+                                    "finish_reason": finish}],
+                       "usage": {"prompt_tokens": 10, "completion_tokens": 5}}
+        def json(self):
+            return self._p
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return Part("Partial but real analysis.", "length")
+        raise httpx.TimeoutException("boom")
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    res = client.post("/v1/agent/chat",
+                      json={"message": QUESTION, "thread_id": "t-mock-contfail"},
+                      headers=_cfo_headers())
+    body = res.json()
+    assert body["status"] == "completed"
+    assert "Partial but real analysis." in body["response"]
+    assert "Verified live figures" in body["response"]
+    print("[PASSED] failed continuation keeps verified first part")
+
+
 if __name__ == "__main__":
     test_verifier_flags_unmatched_figures()
     print("mocked tests run via: pytest tests/test_grounded_copilot_regression.py -v")

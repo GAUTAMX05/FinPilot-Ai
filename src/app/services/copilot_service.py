@@ -50,6 +50,8 @@ LLM_TIMEOUT_S = 75.0
 LLM_CONNECT_TIMEOUT_S = 10.0
 LLM_MAX_TOKENS = 900
 LLM_TEMPERATURE = 0.2
+# Single bounded continuation when the provider stops mid-answer.
+LLM_CONTINUE_MAX_CHARS = 1500
 
 _SCENARIO_KEYWORDS = (
     "what if", "what-if", "suppose", "assume", "simulate",
@@ -559,6 +561,33 @@ class GroundedCopilot:
             client_key=f"copilot:{user_id}", estimated_tokens=prompt_est + LLM_MAX_TOKENS)
         try:
             answer, llm_meta = call_llm(messages, endpoint)
+            if (llm_meta.get("finish_reason") == "length"
+                    and len(answer) < LLM_CONTINUE_MAX_CHARS):
+                # Provider cut the answer short: one bounded continuation that
+                # picks up exactly where the text stopped. Failure keeps the
+                # first part (still verified below) rather than failing all.
+                try:
+                    rate_limiter.check_rate_limit(
+                        client_key=f"copilot:{user_id}", estimated_tokens=LLM_MAX_TOKENS)
+                    more, meta2 = call_llm(
+                        messages + [
+                            {"role": "assistant", "content": answer},
+                            {"role": "user", "content": (
+                                "Continue exactly where you left off. Do not repeat "
+                                "anything already said and do not introduce any figures "
+                                "beyond the data given.")},
+                        ],
+                        endpoint)
+                    answer = answer.rstrip() + " " + more.strip()
+                    llm_meta["continued"] = True
+                    llm_meta["continuation_finish"] = meta2.get("finish_reason")
+                    for k in ("prompt_tokens", "completion_tokens"):
+                        if isinstance(llm_meta.get(k), int) and isinstance(meta2.get(k), int):
+                            llm_meta[k] += meta2[k]
+                except Exception as ce:
+                    logger.warning("[GroundedCopilot] continuation failed (trace %s): %s",
+                                   trace_id, type(ce).__name__)
+                    llm_meta["continued"] = False
         except Exception as e:
             logger.error("[GroundedCopilot] LLM call failed (trace %s): %s: %s",
                          trace_id, type(e).__name__, str(e)[:200])
@@ -592,6 +621,7 @@ class GroundedCopilot:
         steps.append({"agent": "VerifierAgent",
                       "provider": endpoint["provider"], "model": endpoint["model"],
                       "finish_reason": llm_meta.get("finish_reason"),
+                      "continued": llm_meta.get("continued", False),
                       "prompt_tokens": llm_meta.get("prompt_tokens"),
                       "completion_tokens": llm_meta.get("completion_tokens"),
                       "unverified_figures": unverified,
