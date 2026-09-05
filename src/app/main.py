@@ -50,6 +50,12 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+    js_dir = os.path.join(STATIC_DIR, "js")
+    if os.path.exists(js_dir):
+        app.mount("/js", StaticFiles(directory=js_dir), name="js")
+    assets_dir = os.path.join(STATIC_DIR, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
 
 @app.get("/", response_class=HTMLResponse, tags=["Dashboard UI"])

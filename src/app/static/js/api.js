@@ -8,7 +8,24 @@ function _escapeHtml(s) {
   }[c]));
 }
 
+function getApiUrl(endpoint) {
+  if (!endpoint) return endpoint;
+  if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
+    return endpoint;
+  }
+  if (typeof window !== "undefined" && window.location) {
+    const protocol = window.location.protocol;
+    const port = window.location.port;
+    if (protocol === "file:" || (port && port !== "8000")) {
+      const cleanPath = endpoint.startsWith("/") ? endpoint : "/" + endpoint;
+      return `http://127.0.0.1:8000${cleanPath}`;
+    }
+  }
+  return endpoint;
+}
+
 async function apiFetch(endpoint, options = {}) {
+  const fullUrl = getApiUrl(endpoint);
   const token = localStorage.getItem("ai_finance_token")
     || localStorage.getItem("finpilot_token")
     || (typeof authToken !== "undefined" && authToken ? authToken : null);
@@ -21,18 +38,19 @@ async function apiFetch(endpoint, options = {}) {
   const timeoutMs = options.timeoutMs ?? 30000;
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(endpoint, { ...options, headers, signal: controller.signal });
+    const res = await fetch(fullUrl, { ...options, headers, signal: controller.signal });
     if (!res.ok) {
       const text = await res.text().catch(() => "");
-      console.warn(`[apiFetch] ${res.status} on ${endpoint}:`, text.slice(0, 300));
+      console.warn(`[apiFetch] ${res.status} on ${fullUrl}:`, text.slice(0, 300));
     }
     return res;
   } catch (err) {
     if (err?.name === "AbortError") {
-      console.warn(`[apiFetch] Timeout (${timeoutMs}ms) on ${endpoint}`);
+      console.warn(`[apiFetch] Timeout (${timeoutMs}ms) on ${fullUrl}`);
       showToast("Request timed out. Please retry.", true);
     } else {
-      console.warn(`[apiFetch] Network warning on ${endpoint}:`, err);
+      console.warn(`[apiFetch] Network warning on ${fullUrl}:`, err);
+      showToast("Cannot connect to FinPilot AI backend. Please start the server on port 8000 (python run_server.py).", true);
     }
     throw err;
   } finally {
