@@ -6002,12 +6002,22 @@
 
       if (sendBtn) sendBtn.disabled = true;
 
+      // Copilot answers can take a while (LLM reasoning + possible
+      // continuation + cold starts): allow 3 minutes and reassure the user.
+      const slowTimer = setTimeout(() => {
+        const pendingEl = document.getElementById("chatThinkingIndicator");
+        const label = pendingEl ? pendingEl.querySelector("span") : null;
+        if (label) label.innerText = "Still analyzing — complex scenarios can take up to a minute. Please hold on...";
+      }, 25000);
+
       try {
         const res = await apiFetch("/v1/agent/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: query, thread_id: currentThreadId })
+          body: JSON.stringify({ message: query, thread_id: currentThreadId }),
+          timeoutMs: 180000
         });
+        clearTimeout(slowTimer);
         const data = await res.json();
 
         // Remove thinking indicator
@@ -6027,6 +6037,7 @@
         appendMessage("assistant", data.response || "Multi-agent assessment completed.");
 
       } catch (err) {
+        clearTimeout(slowTimer);
         const tEl = document.getElementById("chatThinkingIndicator");
         if (tEl) tEl.remove();
         appendMessage("assistant", `⚠️ Encountered error communicating with Copilot: ${err.message}`);
