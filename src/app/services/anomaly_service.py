@@ -16,9 +16,11 @@ class AnomalyService:
         requires_hitl = False
 
         vendor = invoice_data.get("vendor_name", "Unknown Vendor")
-        subtotal = float(invoice_data.get("subtotal", 0.0))
-        tax = float(invoice_data.get("tax_gst", 0.0))
-        total = float(invoice_data.get("total_amount", subtotal + tax))
+        # Coerce Nones (Optional API fields arrive as explicit nulls in JSON).
+        subtotal = float(invoice_data.get("subtotal") or 0.0)
+        tax = float(invoice_data.get("tax_gst") or 0.0)
+        total_raw = invoice_data.get("total_amount")
+        total = float(total_raw) if total_raw is not None else subtotal + tax
         department = invoice_data.get("department", "Operations")
 
         # 1. Tax calculation consistency check (GST in India is typically 18% standard, or 5%/12%/28%)

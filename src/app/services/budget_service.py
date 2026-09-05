@@ -220,4 +220,38 @@ class BudgetService:
                 return True
         return False
 
+    def _dept_entry(self, department: str):
+        """Case-insensitive department lookup; returns (key, entry) or (None, None)."""
+        for k, v in self._data.get("departments", {}).items():
+            if k.lower() == department.lower():
+                return k, v
+        return None, None
+
+    def commit_expense(self, department: str, amount: float, was_pending: bool = True) -> bool:
+        """Commits an approved invoice: adds to spent and releases any
+        pending reservation for it. Never lets pending_approvals go negative."""
+        key, entry = self._dept_entry(department)
+        if entry is None:
+            return False
+        entry["spent_amount"] = round(entry.get("spent_amount", 0.0) + amount, 2)
+        if was_pending:
+            pending_key = "pending_approvals" if "pending_approvals" in entry else (
+                "committed" if "committed" in entry else None)
+            if pending_key:
+                entry[pending_key] = round(max(0.0, entry.get(pending_key, 0.0) - amount), 2)
+        self._save_data()
+        return True
+
+    def release_reservation(self, department: str, amount: float) -> bool:
+        """Releases a pending reservation (e.g. rejected invoice) without spending."""
+        key, entry = self._dept_entry(department)
+        if entry is None:
+            return False
+        pending_key = "pending_approvals" if "pending_approvals" in entry else (
+            "committed" if "committed" in entry else None)
+        if pending_key:
+            entry[pending_key] = round(max(0.0, entry.get(pending_key, 0.0) - amount), 2)
+            self._save_data()
+        return True
+
 budget_service = BudgetService()

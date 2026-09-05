@@ -446,8 +446,12 @@ class EmployeeFinancialControlService:
 
         valid_dept = validate_department(data.get("department", "Engineering"))
         clean_desig = sanitize_text(data.get("designation", "Software Engineer"), field_name="Designation", max_length=100)
-        basic = validate_monetary_amount(data.get("monthly_basic", 50000.0), field_name="Monthly Basic Salary", min_amount=1000.0)
-        allow_cap = validate_monetary_amount(data.get("monthly_allowance_limit", 10000.0), field_name="Monthly Allowance Limit", min_amount=0.0, allow_zero=True)
+        def _num(key, default):
+            v = data.get(key)
+            return default if v is None else v
+
+        basic = validate_monetary_amount(_num("monthly_basic", 50000.0), field_name="Monthly Basic Salary", min_amount=1000.0)
+        allow_cap = validate_monetary_amount(_num("monthly_allowance_limit", 10000.0), field_name="Monthly Allowance Limit", min_amount=0.0, allow_zero=True)
         new_emp = {
             "employee_id": emp_id,
             "name": clean_name,
@@ -456,21 +460,21 @@ class EmployeeFinancialControlService:
             "department": valid_dept,
             "designation": clean_desig,
             "salary_band": data.get("salary_band", "₹8–12 LPA"),
-            "annual_ctc": float(data.get("annual_ctc", basic * 14)),
+            "annual_ctc": float(_num("annual_ctc", basic * 14)),
             "monthly_basic": basic,
-            "hra": float(data.get("hra", basic * 0.40)),
-            "special_allowance": float(data.get("special_allowance", 5000.0)),
-            "bonus_variable": float(data.get("bonus_variable", 0.0)),
-            "pf_deduction": float(data.get("pf_deduction", basic * 0.12)),
-            "tds_deduction": float(data.get("tds_deduction", 5000.0)),
+            "hra": float(_num("hra", basic * 0.40)),
+            "special_allowance": float(_num("special_allowance", 5000.0)),
+            "bonus_variable": float(_num("bonus_variable", 0.0)),
+            "pf_deduction": float(_num("pf_deduction", basic * 0.12)),
+            "tds_deduction": float(_num("tds_deduction", 5000.0)),
             "other_deductions": 0.0,
             "joining_date": data.get("joining_date", datetime.now().strftime("%Y-%m-%d")),
             "employment_type": data.get("employment_type", "Full-Time"),
             "status": "ACTIVE",
             "manager": data.get("manager", "Vikramaditya S."),
             "location": data.get("location", "Bangalore HQ"),
-            "monthly_allowance_limit": float(data.get("monthly_allowance_limit", 10000.0)),
-            "annual_allowance_limit": float(data.get("annual_allowance_limit", 120000.0)),
+            "monthly_allowance_limit": float(_num("monthly_allowance_limit", 10000.0)),
+            "annual_allowance_limit": float(_num("annual_allowance_limit", 120000.0)),
             "allowance_policy": data.get("allowance_policy", {
                 "travel": {"monthly_limit": 10000.0, "spent": 0.0, "annual_limit": 120000.0},
                 "food": {"monthly_limit": 4000.0, "spent": 0.0, "annual_limit": 48000.0},

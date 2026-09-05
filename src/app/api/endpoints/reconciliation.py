@@ -12,8 +12,11 @@ router = APIRouter(prefix="/reconciliation", tags=["Reconciliation & Exception C
 
 
 class ResolveExceptionRequest(BaseModel):
-    decision: str  # "MATCHED", "REJECTED", "INVESTIGATING"
+    decision: Optional[str] = None  # "MATCHED", "REJECTED", "INVESTIGATING"
     comments: str = ""
+    # UI aliases (Exception Center sends these names)
+    resolution_status: Optional[str] = None
+    reviewer: Optional[str] = None
 
 
 @router.post("/run")
@@ -39,14 +42,19 @@ def resolve_exception(
     current_user: dict = Depends(require_permission(Permission.AUDIT_INVOICE)),
 ):
     """Resolves an ambiguous transaction exception with human sign-off."""
+    decision = (req.decision or req.resolution_status or "").strip().upper()
+    if not decision:
+        raise HTTPException(
+            status_code=422, detail="Provide 'decision' (or UI alias 'resolution_status').")
+    comments = req.comments or (f"Reviewed by {req.reviewer}" if req.reviewer else "")
     try:
         res = reconciliation_service.resolve_exception(
             exception_id=exception_id,
-            decision=req.decision,
+            decision=decision,
             user_id=current_user["id"],
             user_name=current_user["name"],
             user_role=current_user["role"],
-            comments=req.comments,
+            comments=comments,
         )
         return res
     except ValueError as e:

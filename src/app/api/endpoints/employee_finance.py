@@ -188,6 +188,42 @@ def evaluate_allowance_request(
         raise HTTPException(status_code=404, detail=str(e))
 
 
+class EvaluateAllowanceQuickRequest(BaseModel):
+    category: str
+    requested_limit: Optional[float] = None
+
+
+@router.post("/{employee_id}/evaluate-allowance")
+def evaluate_allowance_quick(
+    employee_id: str,
+    payload: EvaluateAllowanceQuickRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    """UI alias for allowance evaluation: when no requested limit is given,
+    evaluates against the employee's current category limit."""
+    try:
+        requested = payload.requested_limit
+        if requested is None:
+            emp = employee_finance_service.get_employee(
+                employee_id,
+                current_user.get("role"),
+                current_user.get("department"),
+            )
+            if not emp:
+                raise HTTPException(status_code=404, detail=f"Employee '{employee_id}' not found.")
+            requested = float(
+                emp.get("allowance_policy", {}).get(payload.category.lower(), {}).get("monthly_limit", 10000.0)
+            )
+        res = employee_finance_service.evaluate_allowance_request(
+            employee_id=employee_id,
+            category=payload.category,
+            requested_limit=requested,
+        )
+        return {"success": True, "assessment": res}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
 @router.get("/anomalies/allowance")
 def get_allowance_anomalies(current_user: dict = Depends(get_current_user)):
     """Detects allowance limit breaches, duplicate claims, and policy anomalies."""
