@@ -286,6 +286,23 @@ def build_grounded_messages(question: str, ctx: Dict[str, Any]) -> List[Dict[str
     return [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
 
+def _chat_payload(endpoint: Dict[str, str], messages: List[Dict[str, str]]) -> Dict[str, Any]:
+    """Provider-aware completion-budget field.
+
+    Some OpenAI-compatible gateways (notably Gemini's) ignore `max_tokens`
+    and enforce a tiny default output cap unless `max_completion_tokens` is
+    set — observed live as finish_reason=length after ~32 tokens. OpenAI
+    proper rejects unknown pairings, so each provider gets exactly one field.
+    """
+    base: Dict[str, Any] = {"model": endpoint["model"], "messages": messages,
+                            "temperature": LLM_TEMPERATURE}
+    if (endpoint.get("provider") or "") in ("gemini", "google"):
+        base["max_completion_tokens"] = LLM_MAX_TOKENS
+    else:
+        base["max_tokens"] = LLM_MAX_TOKENS
+    return base
+
+
 def call_llm(messages: List[Dict[str, str]], endpoint: Dict[str, str]) -> Tuple[str, Dict[str, Any]]:
     """POSTs to the chat-completions endpoint. Raises on any failure.
 
@@ -298,8 +315,7 @@ def call_llm(messages: List[Dict[str, str]], endpoint: Dict[str, str]) -> Tuple[
                 sum(len(m["content"]) for m in messages), LLM_TIMEOUT_S, LLM_MAX_TOKENS)
     resp = httpx.post(
         endpoint["url"],
-        json={"model": endpoint["model"], "messages": messages,
-              "temperature": LLM_TEMPERATURE, "max_tokens": LLM_MAX_TOKENS},
+        json=_chat_payload(endpoint, messages),
         headers={"Authorization": f"Bearer {endpoint['key']}",
                  "Content-Type": "application/json"},
         timeout=httpx.Timeout(LLM_TIMEOUT_S, connect=LLM_CONNECT_TIMEOUT_S),

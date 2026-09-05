@@ -329,6 +329,22 @@ def test_html_block_named_as_egress(monkeypatch):
     print("[PASSED] edge block reported without echoing body")
 
 
+def test_completion_budget_field_per_provider():
+    """Gemini gets max_completion_tokens; others keep max_tokens (strict APIs
+    reject unknown pairings). Guards the live 32-token truncation fix."""
+    msgs = [{"role": "user", "content": "hi"}]
+    gem = copilot._chat_payload(
+        {"url": "https://x", "key": "k", "model": "m", "provider": "gemini"}, msgs)
+    assert gem.get("max_completion_tokens") == copilot.LLM_MAX_TOKENS
+    assert "max_tokens" not in gem
+    for prov in ("openai", "opencode", "openai_compatible"):
+        p = copilot._chat_payload(
+            {"url": "https://x", "key": "k", "model": "m", "provider": prov}, msgs)
+        assert p.get("max_tokens") == copilot.LLM_MAX_TOKENS
+        assert "max_completion_tokens" not in p
+    print("[PASSED] provider-aware completion budget")
+
+
 if __name__ == "__main__":
     test_verifier_flags_unmatched_figures()
     print("mocked tests run via: pytest tests/test_grounded_copilot_regression.py -v")
