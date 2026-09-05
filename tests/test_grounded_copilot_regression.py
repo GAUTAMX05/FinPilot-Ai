@@ -290,6 +290,43 @@ def test_billing_error_hint(monkeypatch):
     print("[PASSED] billing error hint is actionable, leaks nothing")
 
 
+def _chat_with_body(monkeypatch, status, text):
+    monkeypatch.setenv("OPENCODE_API_KEY", "test-key-1234567890")
+    monkeypatch.setenv("LLM_PROVIDER", "opencode")
+
+    class Resp:
+        status_code = status
+        def json(self):
+            raise ValueError("no json")
+
+    monkeypatch.setattr(httpx, "post", lambda *a, **k: Resp())
+    Resp.text = text
+    res = client.post("/v1/agent/chat",
+                      json={"message": QUESTION, "thread_id": "t-mock-etype"},
+                      headers=_cfo_headers())
+    return res.json()
+
+
+def test_auth_error_type_named(monkeypatch):
+    """A typed AuthenticationError names key rejection, not generic 401."""
+    body = _chat_with_body(
+        monkeypatch, 401,
+        '{"type":"error","error":{"type":"AuthenticationError","message":"bad key"}}')
+    assert body["status"] == "llm_unavailable"
+    assert "rejected the configured key" in body["response"]
+    assert "bad key" not in body["response"]
+    print("[PASSED] typed auth error pinpoints the key")
+
+
+def test_html_block_named_as_egress(monkeypatch):
+    """A non-JSON edge block is reported as such, body never echoed."""
+    body = _chat_with_body(
+        monkeypatch, 403, "<html><head><title>Access Denied</title></head></html>")
+    assert "blocked before reaching the AI provider" in body["response"]
+    assert "Access Denied" not in body["response"]
+    print("[PASSED] edge block reported without echoing body")
+
+
 if __name__ == "__main__":
     test_verifier_flags_unmatched_figures()
     print("mocked tests run via: pytest tests/test_grounded_copilot_regression.py -v")

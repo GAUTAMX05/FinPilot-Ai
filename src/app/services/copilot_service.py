@@ -380,8 +380,9 @@ def verify_figures(answer: str, ctx: Dict[str, Any]) -> Tuple[str, List[str]]:
 
 
 def _failure_hint(exc: Exception, endpoint: Dict[str, str]) -> str:
-    """Safe one-line cause for the user message: provider + HTTP status or
-    error class only. Never echoes bodies, keys, or tracebacks."""
+    """Safe one-line cause for the user message: provider + error class only.
+    Never echoes bodies, keys, URLs, or tracebacks. Inspects the embedded
+    provider-body snippet solely for known error-type tokens."""
     provider = (endpoint or {}).get("provider", "llm")
     msg = str(exc)
     if "not supported by provider" in msg:
@@ -389,6 +390,17 @@ def _failure_hint(exc: Exception, endpoint: Dict[str, str]) -> str:
     if "CreditsError" in msg or "No payment method" in msg:
         return ("(account billing — the provider reports no payment method on file; "
                 "add one in the provider billing dashboard, then retry)")
+    mtype = re.search(r'"type"\s*:\s*"([A-Za-z]+Error)"', msg)
+    if mtype:
+        etype = mtype.group(1)
+        if etype == "AuthenticationError":
+            return f"({provider} API rejected the configured key — replace it in deployment env, then retry)"
+        if "RateLimit" in etype:
+            return "(rate-limited — retry shortly)"
+        return f"(provider reported {etype})"
+    if re.search(r"<!DOCTYPE|<html", msg, re.IGNORECASE):
+        return ("(request blocked before reaching the AI provider — "
+                "network egress filtering on the host)")
     m = re.search(r"LLM HTTP (\d{3})", msg)
     if m:
         code = m.group(1)
