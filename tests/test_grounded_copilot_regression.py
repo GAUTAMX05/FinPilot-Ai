@@ -412,6 +412,67 @@ def test_continuation_failure_keeps_first_part(monkeypatch):
     print("[PASSED] failed continuation keeps verified first part")
 
 
+def test_retry_once_on_rate_limit_then_succeeds(monkeypatch):
+    """A transient 429 is retried once; success returns the model answer."""
+    monkeypatch.setenv("OPENCODE_API_KEY", "test-key-1234567890")
+    monkeypatch.setenv("LLM_PROVIDER", "opencode")
+    calls = {"n": 0}
+
+    class Resp:
+        def __init__(self, status, text="", content=""):
+            self.status_code = status
+            self.text = text
+            self._c = content
+        def json(self):
+            return {"choices": [{"message": {"content": self._c},
+                                 "finish_reason": "stop"}],
+                    "usage": {"prompt_tokens": 10, "completion_tokens": 5}}
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return Resp(429, '{"error": "rate limited"}')
+        return Resp(200, "", "Recovered model answer.")
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    monkeypatch.setattr(copilot.time, "sleep", lambda s: None)
+    res = client.post("/v1/agent/chat",
+                      json={"message": QUESTION, "thread_id": "t-mock-retry"},
+                      headers=_cfo_headers())
+    body = res.json()
+    assert calls["n"] == 2
+    assert body["status"] == "completed"
+    assert "Recovered model answer." in body["response"]
+    steps = [s for s in body.get("agent_steps", []) if s.get("agent") == "VerifierAgent"]
+    assert steps and steps[0].get("retried_after") == "RuntimeError"
+    print("[PASSED] transient 429 retried once, then succeeds")
+
+
+def test_no_retry_on_auth_failure(monkeypatch):
+    """401s fail immediately — retrying a dead key only burns quota."""
+    monkeypatch.setenv("OPENCODE_API_KEY", "test-key-1234567890")
+    monkeypatch.setenv("LLM_PROVIDER", "opencode")
+    calls = {"n": 0}
+
+    class Denied:
+        status_code = 401
+        text = '{"error": "unauthorized"}'
+        def json(self):
+            raise ValueError("no json")
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        calls["n"] += 1
+        return Denied()
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    res = client.post("/v1/agent/chat",
+                      json={"message": QUESTION, "thread_id": "t-mock-noretry"},
+                      headers=_cfo_headers())
+    assert res.json()["status"] == "llm_unavailable"
+    assert calls["n"] == 1, f"auth failure must not retry, got {calls['n']} calls"
+    print("[PASSED] auth failure fails fast without retry")
+
+
 if __name__ == "__main__":
     test_verifier_flags_unmatched_figures()
     print("mocked tests run via: pytest tests/test_grounded_copilot_regression.py -v")

@@ -451,6 +451,18 @@ def _failure_hint(exc: Exception, endpoint: Dict[str, str]) -> str:
     return f"({name})"
 
 
+def _is_retryable(exc: Exception) -> bool:
+    """Transient provider/network faults worth exactly one retry.
+
+    Covers timeouts, connection drops, HTTP 429 and 5xx. Auth (401/403),
+    bad-model and bad-payload errors are permanent — never retried.
+    """
+    if isinstance(exc, (httpx.TimeoutException, httpx.ConnectError)):
+        return True
+    m = re.search(r"LLM HTTP (\d{3})", str(exc))
+    return bool(m) and (m.group(1) == "429" or m.group(1).startswith("5"))
+
+
 def _policy_note(question: str) -> str:
     """Deterministic policy line. The model never declares policy status."""
     amounts = [float(m.replace(",", "")) for m in
@@ -560,7 +572,18 @@ class GroundedCopilot:
         rate_limiter.check_rate_limit(
             client_key=f"copilot:{user_id}", estimated_tokens=prompt_est + LLM_MAX_TOKENS)
         try:
-            answer, llm_meta = call_llm(messages, endpoint)
+            try:
+                answer, llm_meta = call_llm(messages, endpoint)
+            except Exception as first_err:
+                # One retry for transient faults only (throttle/5xx/timeout).
+                # Auth, bad-model and bad-payload errors fail immediately.
+                if not _is_retryable(first_err):
+                    raise
+                logger.warning("[GroundedCopilot] transient %s, one retry (trace %s)",
+                               type(first_err).__name__, trace_id)
+                time.sleep(5)
+                answer, llm_meta = call_llm(messages, endpoint)
+                llm_meta["retried_after"] = type(first_err).__name__
             if (llm_meta.get("finish_reason") == "length"
                     and len(answer) < LLM_CONTINUE_MAX_CHARS):
                 # Provider cut the answer short: one bounded continuation that
@@ -622,6 +645,7 @@ class GroundedCopilot:
                       "provider": endpoint["provider"], "model": endpoint["model"],
                       "finish_reason": llm_meta.get("finish_reason"),
                       "continued": llm_meta.get("continued", False),
+                      "retried_after": llm_meta.get("retried_after"),
                       "prompt_tokens": llm_meta.get("prompt_tokens"),
                       "completion_tokens": llm_meta.get("completion_tokens"),
                       "unverified_figures": unverified,
